@@ -1,0 +1,83 @@
+assert(not game:GetService("RunService"):IsRunning(),"Primero pulsa Stop.")
+local storage=game:GetService("ServerStorage")
+local look=game:GetService("Selection"):Get()[1]
+assert(look and look:IsA("Model") and look:IsDescendantOf(workspace),"Selecciona el modelo de chico importado en Workspace.")
+assert(look.Name~="chicaX" and look.Name~="chicaB","Selecciona el chico, no las chicas originales.")
+local shirt=look:FindFirstChildOfClass("Shirt")
+local pants=look:FindFirstChildOfClass("Pants")
+local head=look:FindFirstChild("Head")
+assert(shirt and shirt.ShirtTemplate~="" and pants and pants.PantsTemplate~="" and head,"El modelo necesita Shirt, Pants y Head.")
+local old=storage:FindFirstChild("HR_AvataresRopa")
+assert(not old or old:GetAttribute("HR_Avatares")=="ROPA_CHICOS_1","Hay un contenedor ajeno con ese nombre.")
+local function check(model)
+ local names={}
+ for _,j in ipairs(model:GetDescendants()) do
+  assert(not j:IsA("AnimationConstraint"),"La referencia contiene AnimationConstraint.")
+  if j:IsA("Motor6D") and j.Part0 and j.Part1 then names[j.Name:gsub("%s+","")]=true end
+ end
+ for _,n in ipairs({"Waist","Neck","RightShoulder","LeftShoulder","RightElbow","LeftElbow","RightWrist","LeftWrist","RightHip","LeftHip","RightKnee","LeftKnee","RightAnkle","LeftAnkle"}) do
+  assert(names[n],"Falta Motor6D: "..n.." en "..model.Name)
+ end
+end
+local references={workspace:FindFirstChild("chicaX"),workspace:FindFirstChild("chicaB")}
+assert(references[1] and references[2],"Faltan las chicas originales. Pulsa Stop.")
+check(references[1]);check(references[2])
+local staging=Instance.new("Folder")
+staging.Name="HR_AvataresRopa"
+staging:SetAttribute("HR_Avatares","ROPA_CHICOS_1")
+local ok,err=pcall(function()
+ for i,reference in ipairs(references) do
+  local clone=reference:Clone()
+  clone.Name=i==1 and "chicoX" or "chicoB"
+  clone.Parent=staging
+  local humanoid=clone:FindFirstChildOfClass("Humanoid")
+  assert(humanoid,"Falta Humanoid.")
+  humanoid.AutomaticScalingEnabled=false
+  for _,item in ipairs(clone:GetChildren()) do
+   if item:IsA("Accoutrement") or item:IsA("Shirt") or item:IsA("Pants") or item:IsA("ShirtGraphic") then item:Destroy() end
+  end
+  for _,item in ipairs(clone:GetDescendants()) do
+   if item:IsA("BaseScript") then item.Enabled=false end
+  end
+  shirt:Clone().Parent=clone
+  pants:Clone().Parent=clone
+  local face=head:FindFirstChildWhichIsA("Decal")
+  local targetHead=clone:FindFirstChild("Head")
+  local targetFace=targetHead:FindFirstChildWhichIsA("Decal")
+  if face and targetFace then targetFace.Texture=face.Texture end
+  for _,accessory in ipairs(look:GetChildren()) do
+   if accessory:IsA("Accoutrement") and not (i==1 and accessory.Name=="Nerd Glasses") then
+    local handle=accessory:FindFirstChild("Handle")
+    assert(handle,"Accesorio sin Handle: "..accessory.Name)
+    local relative=head.CFrame:ToObjectSpace(handle.CFrame)
+    local copy
+    if accessory:IsA("Accessory") then copy=accessory:Clone()
+    else
+     copy=Instance.new("Accessory");copy.Name=accessory.Name
+     for _,child in ipairs(accessory:GetChildren()) do child:Clone().Parent=copy end
+    end
+    for _,item in ipairs(copy:GetDescendants()) do
+     if item:IsA("BaseScript") then item:Destroy()
+     elseif item:IsA("JointInstance") or item:IsA("WeldConstraint") then
+      if item.Name=="AccessoryWeld" or (item.Part0 and not item.Part0:IsDescendantOf(copy)) or (item.Part1 and not item.Part1:IsDescendantOf(copy)) then item:Destroy() end
+     end
+    end
+    humanoid:AddAccessory(copy)
+    local h=copy:FindFirstChild("Handle")
+    if not h:FindFirstChild("AccessoryWeld") then
+     h.CFrame=targetHead.CFrame*relative
+     local weld=Instance.new("Weld")
+     weld.Name="AccessoryWeld";weld.Part0=targetHead;weld.Part1=h;weld.C0=relative;weld.Parent=h
+    end
+   end
+  end
+  check(clone)
+ end
+end)
+if not ok then staging:Destroy();error(err) end
+if old then old.Name="HR_BasesAnteriores_"..tostring(os.time()) end
+staging.Parent=storage
+look.Parent=storage
+print("[HR LOOK] INSTALADO. Apariencia copiada y Motor6D conservados.")
+print("[HR LOOK] El modelo importado queda guardado en ServerStorage, con sus scripts inactivos alli.")
+print("[HR LOOK] Guarda y pulsa F5. X sin gafas; B con gafas.")
