@@ -1,4 +1,4 @@
-# Historias Roblox V6
+# Historias Roblox V6 — revision de recorridos
 
 Paquete para actualizar el sistema HR_Cine ya instalado en el proyecto de Roblox Studio.
 
@@ -41,3 +41,11 @@ Asigna los objetos de perros existentes a `HR_Cine > DobbyX > Value` y `DobbyB >
 El instalador, los tres scripts y el activador se compilaron con Luau. Se comprobaron duraciones, orden de cortes y tiempo disponible para las carreras. El paquete XML se verifico para conservar completos los tres textos. **No se ejecuto Roblox Studio en el entorno de preparacion.** Hay que revisar las pisadas con IK y el ajuste de las manos en los avatares reales.
 
 Las caras no confirmadas conservan la textura original. FELIZ esta desactivada por el fallo de carga observado. El llanto es corporal; no incluye textura de llanto ni lagrimas confirmadas. Dialogos, ladridos y titulo final se anaden en CapCut. El sistema no modifica scripts ajenos; el error de `Workspace.Part.Script` necesita una revision separada.
+
+## Correccion del bloqueo de entrada
+
+Esta revision calcula el volumen de paso desde el suelo y la altura real del avatar, en lugar de usar rayos a alturas fijas. Comprueba el ancho del apoyo y busca entradas a 0, +/-30, +/-60 y +/-85 grados. Si ninguna ruta es segura, informa del objeto que bloquea, desnivel o ausencia de suelo, sin atravesar obstaculos.
+
+Para actualizar una V6 ya instalada: Stop, descargar de nuevo HR_EntregaV6.rbxmx, importarlo dentro de Workspace y ejecutar otra vez ACTIVAR_PAQUETE_V6.txt. El paquete previo que esta en ServerStorage se conserva; el activador da prioridad al nuevo paquete de Workspace.
+
+Ademas de la compilacion Luau, se ejecutaron escenarios simulados del planificador: avatar bajo sobre suelo plano, ruta libre, alternativa lateral, todas las rutas bloqueadas y ausencia de suelo. Estas comprobaciones no sustituyen la prueba de fisica y animacion dentro de Studio.

@@ -436,25 +436,40 @@ local run
 local function route(start,look,length)
 	refreshRay()
 	local initial=ground(start)
-	assert(initial,"[HR] No se detecta suelo bajo X. Revisa CanQuery del suelo.")
-	-- Comprueba ancho y altura del recorrido, no solo una linea central.
-	local side=Vector3.yAxis:Cross(look)
-	for _, offset in ipairs({-0.8,0,0.8}) do
-		for _, height in ipairs({-1,0,1.5}) do
-			local hit=workspace:Raycast(start+side*offset+Vector3.new(0,height,0),look*length,ray)
-			if hit then length=math.max(0,math.min(length,hit.Distance-1.1)) end
-		end
+	if not initial then return 0,"no se detecta suelo bajo el recorrido" end
+	local footLow=math.min(X.model.LeftFoot.Position.Y-X.model.LeftFoot.Size.Y/2,
+		X.model.RightFoot.Position.Y-X.model.RightFoot.Size.Y/2)
+	local bodyHeight=math.max(1,X.head.Position.Y+X.head.Size.Y/2-footLow)
+	local torso=X.model:FindFirstChild("UpperTorso")
+	local radius=math.max(0.25,(torso and torso.Size.X or X.root.Size.X)*0.48)
+	local clearance=math.max(0.08,bodyHeight*0.025)
+	-- El volumen comienza POR ENCIMA del suelo, incluso con avatares pequenos.
+	-- No usa las alturas fijas -1/0/1.5 que podian interceptar el suelo.
+	local boxHeight=bodyHeight*0.88
+	local boxCenter=Vector3.new(start.X,initial.Position.Y+clearance+boxHeight/2,start.Z)
+	local hit=workspace:Blockcast(CFrame.lookAt(boxCenter,boxCenter+look),
+		Vector3.new(radius*2,boxHeight,radius*1.4),look*length,ray)
+	local reason="recorrido libre"
+	if hit then
+		length=math.max(0,math.min(length,hit.Distance-0.15))
+		reason="obstaculo: "..hit.Instance:GetFullName()
 	end
 	local safe=0
-	local distance=0
-	while distance&lt;=length do
-		local floor=ground(start+look*distance)
-		if not floor or floor.Normal.Y&lt;0.85
-			or math.abs(floor.Position.Y-initial.Position.Y)&gt;0.3 then break end
+	local count=math.max(1,math.ceil(length/0.2))
+	local side=Vector3.yAxis:Cross(look)
+	for step=0,count do
+		local distance=length*step/count
+		for _,offset in ipairs({-radius*0.65,0,radius*0.65}) do
+			local floor=ground(start+look*distance+side*offset)
+			if not floor then return safe,"sin suelo a "..string.format("%.1f",distance).." studs" end
+			if floor.Normal.Y&lt;0.85 then return safe,"superficie inclinada: "..floor.Instance:GetFullName() end
+			if math.abs(floor.Position.Y-initial.Position.Y)&gt;0.3 then
+				return safe,"desnivel: "..floor.Instance:GetFullName()
+			end
+		end
 		safe=distance
-		distance+=0.2
 	end
-	return safe
+	return safe,reason
 end
 local function makeRun(start,look,length,turnFrom,turn)
 	local cf=facing(start,look)
@@ -465,21 +480,48 @@ local function makeRun(start,look,length,turnFrom,turn)
 		turnFrom=turnFrom or cf,turn=turn or 0,
 		duration=length/(C.VelocidadCarrera*(1-ramp)),ramp=ramp}
 end
+local function candidateDirections()
+	local list={}
+	for _,angle in ipairs({0,30,-30,60,-60,85,-85}) do
+		local v=CFrame.Angles(0,math.rad(angle),0):VectorToWorldSpace(direction)
+		table.insert(list,{look=v,angle=angle})
+	end
+	return list
+end
 local function planRun()
-	local length=route(X.stage.Position,-direction,C.DistanciaCarrera)
-	assert(length&gt;=3,"[HR] Falta espacio para la huida: despeja al menos 3 studs alejandose de B.")
-	return makeRun(X.stage.Position,-direction,length,X.stage,0.25)
+	local reasons={}
+	for _,candidate in ipairs(candidateDirections()) do
+		local look=-candidate.look
+		local length,why=route(X.stage.Position,look,C.DistanciaCarrera)
+		if length&gt;=3 then
+			say(string.format("Ruta de huida: %.1f studs, angulo %d.",length,candidate.angle))
+			return makeRun(X.stage.Position,look,length,X.stage,0.25)
+		end
+		table.insert(reasons,string.format("%d grados: %.1f studs (%s)",candidate.angle,length,why))
+	end
+	error("[HR RUTA] No hay salida segura. "..table.concat(reasons,"; "))
 end
 local function planArrival()
-	local length=route(X.stage.Position,-direction,C.DistanciaEntrada)
-	assert(length&gt;=3,"[HR] Falta espacio para la entrada: despeja al menos 3 studs detras de X, alejandose de B.")
-	local start=X.stage.Position-direction*length
-	local available=route(start,direction,length)
-	assert(available&gt;=length-0.3,"[HR] El recorrido de llegada esta obstruido.")
-	local result=makeRun(start,direction,length)
-	assert(result.duration+0.25&lt;scene.Entrada,
-		"[HR] La entrada es demasiado corta para esta distancia y velocidad.")
-	return result
+	local reasons={}
+	for _,candidate in ipairs(candidateDirections()) do
+		local incoming=candidate.look
+		local length,why=route(X.stage.Position,-incoming,C.DistanciaEntrada)
+		if length&gt;=3 then
+			local start=X.stage.Position-incoming*length
+			local available,forwardWhy=route(start,incoming,length)
+			if available&gt;=length-0.05 then
+				local result=makeRun(start,incoming,length)
+				assert(result.duration+0.3&lt;scene.Entrada,
+					"[HR RUTA] Aumenta Entrada para la distancia y velocidad configuradas.")
+				result.arrival=true
+				say(string.format("Ruta de llegada: %.1f studs, angulo %d. Suelo comprobado.",length,candidate.angle))
+				return result
+			end
+			why=forwardWhy
+		end
+		table.insert(reasons,string.format("%d grados: %.1f studs (%s)",candidate.angle,length,why))
+	end
+	error("[HR RUTA] No se encontro entrada segura. "..table.concat(reasons,"; "))
 end
 local function runPose(t)
 	if not run then return false end
@@ -526,6 +568,16 @@ local function runPose(t)
 			position=Vector3.new(position.X,floor.Position.Y+leg.foot.Size.Y/2+lift,position.Z)
 		end
 		leg.target.CFrame=CFrame.new(position)*cf.Rotation
+	end
+	if run.arrival and not moving then
+		local settle=math.clamp((elapsed-run.duration)/0.28,0,1)
+		place(X,(run.root+run.look*run.length):Lerp(X.stage,settle))
+		for _,leg in ipairs(X.legs) do
+			leg.control.Weight=1-settle
+			if settle&gt;=1 then leg.control.Enabled=false end
+		end
+	else
+		for _,leg in ipairs(X.legs) do leg.control.Weight=1 end
 	end
 	return moving,cycle
 end
@@ -1104,6 +1156,11 @@ RunService:BindToRenderStep("HR_CineCamara",Enum.RenderPriority.Camera.Value+1,f
 	if not active then return end
 	local ok,err=pcall(function()
 		local phase=F:GetAttribute("Fase")
+		if phase=="ERROR" then
+			warning("servererror","La toma se detuvo en el servidor; revisa el mensaje [HR RUTA] en Salida.")
+			restore()
+			return
+		end
 		local index=F:GetAttribute("Escena")
 		local scene=index and C.Escenas[index]
 		gui.Enabled=C.Modo=="PAUSAS" and phase=="PREPARACION"
