@@ -1,0 +1,49 @@
+assert(not game:GetService("RunService"):IsRunning(),"Primero pulsa Stop.")
+local RS=game:GetService("ReplicatedStorage")
+local SSS=game:GetService("ServerScriptService")
+local SPS=game:GetService("StarterPlayer").StarterPlayerScripts
+local storage=game:GetService("ServerStorage")
+local package=workspace:FindFirstChild("HR_EntregaV6") or storage:FindFirstChild("HR_EntregaV6")
+assert(package,"Importa primero HR_EntregaV6.rbxmx en Workspace o ServerStorage.")
+local id=package:FindFirstChild("Identificador")
+assert(id and id:IsA("StringValue") and id.Value=="HR_ENTREGA_V6_20261103","Paquete no reconocido.")
+local folder=RS:FindFirstChild("HR_Cine")
+assert(folder and folder:GetAttribute("HR_Owner")=="HR_Cine_V2","No se reconoce HR_Cine.")
+local entries={
+ {folder,"Configuracion","ModuleScript"},
+ {SSS,"HR_CineServidor","Script"},
+ {SPS,"HR_CineCamara","LocalScript"},
+}
+for _,entry in ipairs(entries) do
+ local target=entry[1]:FindFirstChild(entry[2])
+ local source=package:FindFirstChild(entry[2])
+ assert(target and target:IsA(entry[3]) and target:GetAttribute("HR_Owner")=="HR_Cine_V2","Destino no reconocido: "..entry[2])
+ assert(source and source:IsA(entry[3]) and #source.Source>100,"Paquete incompleto: "..entry[2])
+ entry.target=target
+ entry.text=source.Source
+end
+local backup=Instance.new("Folder")
+backup.Name="HR_Respaldo_"..game:GetService("HttpService"):GenerateGUID(false)
+for _,entry in ipairs(entries) do
+ local text=Instance.new("StringValue")
+ text.Name=entry[2]
+ text.Value=entry.target.Source
+ text.Parent=backup
+end
+backup.Parent=storage
+for _,entry in ipairs(entries) do
+ entry.target.Source=entry.text
+ if entry.target:IsA("BaseScript") then entry.target.Enabled=true end
+end
+local test=SSS:FindFirstChild("HR_PruebaBrazo")
+if test and test:IsA("BaseScript") and test:GetAttribute("HRPrueba")==true then test.Enabled=false end
+local old=SPS:FindFirstChild("HistoriasRobloxCliente")
+if old and old:IsA("BaseScript") and old:GetAttribute("HRInstaller")=="HistoriasRoblox_E1_v1" then old.Enabled=false end
+for _,name in ipairs({"chicaX","chicaB"}) do
+ local model=workspace:FindFirstChild(name)
+ if model and model:IsA("Model") then model.ModelStreamingMode=Enum.ModelStreamingMode.Persistent end
+end
+package.Parent=storage
+folder:SetAttribute("HR_Version","6.0")
+print("[HR V6] INSTALADO. Ahora guarda y pulsa F5.")
+print("[HR V6] Escenas 1 a 3 seguidas: 15,8 segundos. Deja espacio detras de X.")
