@@ -1,0 +1,52 @@
+assert(not game:GetService("RunService"):IsRunning(),"Primero pulsa Stop.")
+local RS=game:GetService("ReplicatedStorage")
+local SSS=game:GetService("ServerScriptService")
+local SPS=game:GetService("StarterPlayer").StarterPlayerScripts
+local storage=game:GetService("ServerStorage")
+local editor=game:GetService("ScriptEditorService")
+local package=workspace:FindFirstChild("HR_EntregaRopa") or storage:FindFirstChild("HR_EntregaRopa")
+assert(package,"Importa HR_EntregaRopa.rbxmx primero.")
+local id=package:FindFirstChild("Identificador")
+assert(id and id:IsA("StringValue") and id.Value=="HR_ROPA_CHICOS_1","Paquete no reconocido.")
+local folder=RS:FindFirstChild("HR_Cine")
+assert(folder and folder:GetAttribute("HR_Owner")=="HR_Cine_V2","Falta el sistema HR_Cine instalado.")
+local entries={{folder,"Configuracion","ModuleScript"},{SSS,"HR_CineServidor","Script"},{SPS,"HR_CineCamara","LocalScript"}}
+for _,entry in ipairs(entries) do
+ entry.target=entry[1]:FindFirstChild(entry[2])
+ local source=package:FindFirstChild(entry[2])
+ assert(entry.target and entry.target:IsA(entry[3]) and entry.target:GetAttribute("HR_Owner")=="HR_Cine_V2","Destino no reconocido: "..entry[2])
+ assert(source and source:IsA(entry[3]),"Paquete incompleto: "..entry[2])
+ entry.text=source.Source
+end
+local builder=package:FindFirstChild("PrepararAvatares")
+assert(builder and builder:IsA("ModuleScript"),"Falta el generador R15.")
+local backup=Instance.new("Folder")
+backup.Name="HR_Respaldo_AntesDeChicos_"..tostring(os.time())
+for _,entry in ipairs(entries) do
+ local text=Instance.new("StringValue")
+ text.Name=entry[2]
+ text.Value=editor:GetEditorSource(entry.target)
+ text.Parent=backup
+end
+backup.Parent=storage
+local prepare=require(builder)
+assert(type(prepare)=="function","Generador no valido.")
+print("[HR ROPA] Creando bases R15; espera a que Roblox termine.")
+prepare()
+for _,entry in ipairs(entries) do
+ local text=entry.text
+ editor:UpdateSourceAsync(entry.target,function() return text end)
+end
+for _,entry in ipairs(entries) do
+ assert(editor:GetEditorSource(entry.target)==entry.text,"No se sincronizo "..entry[2])
+ if entry.target:IsA("BaseScript") then entry.target.Enabled=true end
+ print("[HR ROPA] SINCRONIZADO: "..entry[2])
+end
+local test=SSS:FindFirstChild("HR_PruebaBrazo")
+if test and test:IsA("BaseScript") and test:GetAttribute("HRPrueba")==true then test.Enabled=false end
+local old=SPS:FindFirstChild("HistoriasRobloxCliente")
+if old and old:IsA("BaseScript") and old:GetAttribute("HRInstaller")=="HistoriasRoblox_E1_v1" then old.Enabled=false end
+package.Parent=storage
+folder:SetAttribute("HR_Version","ROPA_CHICOS_1")
+print("[HR ROPA] INSTALADO. Guarda, cierra las pestanas de codigo y pulsa F5.")
+print("[HR ROPA] Video de ropa: 6 escenas, 31,9 segundos, sin perros.")
