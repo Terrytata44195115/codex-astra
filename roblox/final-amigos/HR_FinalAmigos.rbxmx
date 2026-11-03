@@ -1,0 +1,195 @@
+<?xml version='1.0' encoding='utf-8'?>
+<roblox version="4">
+  <External>null</External>
+  <External>nil</External>
+  <Item class="Folder" referent="RBX0">
+    <Properties>
+      <string name="Name">HR_FinalAmigos</string>
+    </Properties>
+    <Item class="StringValue" referent="RBX1">
+      <Properties>
+        <string name="Name">Identificador</string>
+        <string name="Value">HR_FINAL_AMIGOS_1</string>
+      </Properties>
+    </Item>
+    <Item class="StringValue" referent="RBX2">
+      <Properties>
+        <string name="Name">ServidorHelper</string>
+        <string name="Value">-- HR_FINAL_HELPER_INICIO
+local function hrFinalAmigos(t)
+ local jumpStart=5.2
+ local duration=0.65
+ local u=(t-jumpStart)/duration
+ local height=(u&gt;=0 and u&lt;=1) and 1.1*4*u*(1-u) or 0
+ local crouch=t&gt;=4.95 and t&lt;5.2 or t&gt;=5.85 and t&lt;6.1
+ for _,a in ipairs({X,B}) do
+  face(a,"FELIZ")
+  place(a,a.stage+Vector3.new(0,height,0))
+  local speaking=(a==X and t&lt;1.3) or (a==B and t&gt;=1.3 and t&lt;4.8)
+  local open=speaking and 52 or 30
+  a.pose.RightShoulder=A(18,0,-open)
+  a.pose.LeftShoulder=A(18,0,open)
+  a.pose.RightElbow=A(28,0,0)
+  a.pose.LeftElbow=A(28,0,0)
+  a.pose.RightWrist=A(0,40,0)
+  a.pose.LeftWrist=A(0,-40,0)
+  a.pose.Neck=A(-3,0,a==X and -3 or 3)
+  if a.thinkIK then a.thinkIK.Enabled=false end
+  a.thinking=false
+  if crouch then
+   a.pose.Waist=A(7,0,0)
+   a.pose.RightHip=A(-8,0,0);a.pose.LeftHip=A(-8,0,0)
+   a.pose.RightKnee=A(16,0,0);a.pose.LeftKnee=A(16,0,0)
+  elseif height&gt;0 then
+   a.pose.RightShoulder=A(95,0,-25)
+   a.pose.LeftShoulder=A(95,0,25)
+   a.pose.RightElbow=A(18,0,0);a.pose.LeftElbow=A(18,0,0)
+   a.pose.RightKnee=A(22,0,0);a.pose.LeftKnee=A(22,0,0)
+  end
+ end
+end
+-- HR_FINAL_HELPER_FIN
+</string>
+      </Properties>
+    </Item>
+    <Item class="StringValue" referent="RBX3">
+      <Properties>
+        <string name="Name">ConfigFinal</string>
+        <string name="Value">-- HR_FINAL_CONFIG_INICIO
+C.FinalAmigos=true
+C.Modo="COMPLETA"
+C.Expresiones.FELIZ={Confirmada=true,Textura="rbxasset://textures/face.png"}
+table.insert(C.Escenas,{
+ Duracion=7.2,Accion="CELEBRAR",X="FELIZ",B="FELIZ",
+ Dialogo="X: ¡Pues vamos guapisimos! B, desde 1,3: ¡Pues queda decidido! Este sera nuestro conjunto de siempre. Salto conjunto desde 5,2.",
+ Cortes={{0,"X_MEDIO",44},{1.3,"B_MEDIO",44},{4.8,"AMBAS",46}},
+})
+-- HR_FINAL_CONFIG_FIN
+</string>
+      </Properties>
+    </Item>
+    <Item class="StringValue" referent="RBX4">
+      <Properties>
+        <string name="Name">CamaraFinal</string>
+        <string name="Value">-- HR_FINAL_CAMARA_INICIO
+-- Solo durante CELEBRAR: plano fijo para que el salto se vea contra el suelo.
+do
+ local RSFinal=game:GetService("ReplicatedStorage")
+ local RunFinal=game:GetService("RunService")
+ local FFinal=RSFinal:WaitForChild("HR_Cine")
+ local CFinal=require(FFinal:WaitForChild("Configuracion"))
+ local remoteFinal=FFinal:WaitForChild("Preparado")
+ task.spawn(function()
+  local ok,failed=pcall(function()
+   local failed=false
+   game:GetService("ContentProvider"):PreloadAsync({"rbxasset://textures/face.png"},function(_,status)
+    if status~=Enum.AssetFetchStatus.Success then failed=true end
+   end)
+   return failed
+  end)
+  if not ok or failed then
+   remoteFinal:FireServer("TEXTURA_FALLIDA","FELIZ")
+   warn("[HR FINAL] No se cargo la sonrisa clasica; se conserva la cara original.")
+  end
+ end)
+ local rememberedScene
+ local fixedCF
+ local fixedTarget
+ RunFinal:BindToRenderStep("HR_FinalAmigos",Enum.RenderPriority.Camera.Value+2,function()
+  local index=FFinal:GetAttribute("Escena")
+  local scene=index and CFinal.Escenas[index]
+  local cam=workspace.CurrentCamera
+  if not scene or scene.Accion~="CELEBRAR" or not cam or cam.CameraType~=Enum.CameraType.Scriptable then return end
+  local t=0
+  if FFinal:GetAttribute("Fase")=="TOMA" then
+   t=workspace:GetServerTimeNow()-(FFinal:GetAttribute("Inicio") or 0)
+  elseif FFinal:GetAttribute("Fase")=="FIN" or FFinal:GetAttribute("Fase")=="PAUSA" then t=scene.Duracion end
+  if t&lt;4.8 then return end
+  if rememberedScene~=index then
+   local center=FFinal:GetAttribute("Centro")
+   local front=FFinal:GetAttribute("Frente")
+   local separation=FFinal:GetAttribute("Separacion")
+   if not center or not front or not separation then return end
+   local aspect=math.min(cam.ViewportSize.X/math.max(1,cam.ViewportSize.Y),9/16)
+   local tangent=math.tan(math.rad(46/2))
+   local distance=math.max(8/(2*tangent),(separation+4)/(2*tangent*aspect))*1.14
+   fixedTarget=center+Vector3.new(0,0.8,0)
+   fixedCF=CFrame.lookAt(fixedTarget+front*distance,fixedTarget)
+   rememberedScene=index
+  end
+  cam.CFrame=fixedCF
+  cam.Focus=CFrame.new(fixedTarget)
+  cam.FieldOfView=46
+ end)
+end
+-- HR_FINAL_CAMARA_FIN
+</string>
+      </Properties>
+    </Item>
+    <Item class="ModuleScript" referent="RBX5">
+      <Properties>
+        <string name="Name">AplicarFinal</string>
+        <ProtectedString name="Source">return function(package)
+ assert(not game:GetService("RunService"):IsRunning(),"Primero pulsa Stop.")
+ local RS=game:GetService("ReplicatedStorage")
+ local storage=game:GetService("ServerStorage")
+ local editor=game:GetService("ScriptEditorService")
+ local folder=RS:FindFirstChild("HR_Cine")
+ assert(folder,"Falta HR_Cine.")
+ local server=game:GetService("ServerScriptService"):FindFirstChild("HR_CineServidor")
+ local client=game:GetService("StarterPlayer").StarterPlayerScripts:FindFirstChild("HR_CineCamara")
+ local config=folder:FindFirstChild("Configuracion")
+ assert(server and client and config,"Falta un controlador.")
+ for _,object in ipairs({server,client,config}) do
+  assert(object:GetAttribute("HR_Owner")=="HR_Cine_V2","No se reconoce "..object.Name)
+ end
+ local function replace(source,old,new)
+  local a,b=source:find(old,1,true)
+  assert(a,"Version de controlador distinta: "..old)
+  return source:sub(1,a-1)..new..source:sub(b+1)
+ end
+ local function remove(source,a,b)
+  local first=source:find(a,1,true)
+  if not first then return source end
+  local last=source:find(b,first,true)
+  assert(last,"Bloque anterior incompleto.")
+  return source:sub(1,first-1)..source:sub(last+#b)
+ end
+ local oldS=editor:GetEditorSource(server)
+ local oldC=editor:GetEditorSource(client)
+ local oldConfig=editor:GetEditorSource(config)
+ local s=oldS
+ if not s:find("HR_FINAL_HELPER_INICIO",1,true) then
+  s=replace(s,"local function update(t,dt,snap)",package.ServidorHelper.Value.."\nlocal function update(t,dt,snap)")
+  s=replace(s,'if action=="ACUSAR" then','if action=="CELEBRAR" then\n\t\thrFinalAmigos(t)\n\telseif action=="ACUSAR" then')
+  s=replace(s,'F:SetAttribute("Fase","FIN")',[[
+ if C.FinalAmigos and C.Modo~="ESCENA" and scene.Accion~="CELEBRAR" then take(#C.Escenas) end
+ F:SetAttribute("Fase","FIN")]])
+ end
+ local legacy='and spec.Textura:match("^rbxassetid://%d+$") then'
+ if s:find(legacy,1,true) then
+  s=replace(s,legacy,'and (spec.Textura:match("^rbxassetid://%d+$") or spec.Textura=="rbxasset://textures/face.png") then')
+ end
+ local cfg=remove(oldConfig,"-- HR_FINAL_CONFIG_INICIO","-- HR_FINAL_CONFIG_FIN")
+ cfg=replace(cfg,"return C",package.ConfigFinal.Value.."\nreturn C")
+ local c=remove(oldC,"-- HR_FINAL_CAMARA_INICIO","-- HR_FINAL_CAMARA_FIN").."\n"..package.CamaraFinal.Value
+ local backup=Instance.new("Folder")
+ backup.Name="HR_AntesDelFinal_"..tostring(os.time())
+ for _,entry in ipairs({{server,oldS,s},{client,oldC,c},{config,oldConfig,cfg}}) do
+  local value=Instance.new("StringValue");value.Name=entry[1].Name;value.Value=entry[2];value.Parent=backup
+ end
+ backup.Parent=storage
+ for _,entry in ipairs({{server,s},{client,c},{config,cfg}}) do
+  local text=entry[2]
+  editor:UpdateSourceAsync(entry[1],function() return text end)
+  assert(editor:GetEditorSource(entry[1])==text,"No se sincronizo "..entry[1].Name)
+ end
+ package.Parent=storage
+ print("[HR FINAL] INSTALADO. Se anaden 7,2 segundos al final del rango actual.")
+ print("[HR FINAL] Sonrisa, brazos abiertos y salto simultaneo. Guarda, cierra scripts y pulsa F5.")
+end
+</ProtectedString>
+      </Properties>
+    </Item>
+  </Item>
+</roblox>

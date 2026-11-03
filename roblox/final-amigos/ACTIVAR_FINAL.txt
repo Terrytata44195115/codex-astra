@@ -1,0 +1,7 @@
+assert(not game:GetService("RunService"):IsRunning(),"Primero pulsa Stop.")
+local storage=game:GetService("ServerStorage")
+local package=workspace:FindFirstChild("HR_FinalAmigos") or storage:FindFirstChild("HR_FinalAmigos")
+assert(package,"Importa primero HR_FinalAmigos.rbxmx.")
+local id=package:FindFirstChild("Identificador")
+assert(id and id:IsA("StringValue") and id.Value=="HR_FINAL_AMIGOS_1","Paquete no reconocido.")
+require(package:WaitForChild("AplicarFinal"))(package)
