@@ -1,0 +1,57 @@
+assert(not game:GetService("RunService"):IsRunning(),"Primero pulsa Stop.")
+local RS=game:GetService("ReplicatedStorage")
+local SSS=game:GetService("ServerScriptService")
+local SPS=game:GetService("StarterPlayer").StarterPlayerScripts
+local storage=game:GetService("ServerStorage")
+local editor=game:GetService("ScriptEditorService")
+local package=workspace:FindFirstChild("HR_SoloChicos") or storage:FindFirstChild("HR_SoloChicos")
+assert(package,"Importa HR_SoloChicos.rbxmx primero.")
+local id=package:FindFirstChild("Identificador")
+assert(id and id:IsA("StringValue") and id.Value=="HR_SOLO_CHICOS_1","Paquete no reconocido.")
+local folder=RS:FindFirstChild("HR_Cine")
+assert(folder and folder:GetAttribute("HR_Owner")=="HR_Cine_V2","No se reconoce HR_Cine.")
+local entries={{SSS,"HR_CineServidor","AntesServidor"},{SPS,"HR_CineCamara","AntesCamara"},{folder,"Configuracion",false}}
+for _,entry in ipairs(entries) do
+ entry.target=entry[1]:FindFirstChild(entry[2])
+ assert(entry.target and entry.target:IsA("LuaSourceContainer") and entry.target:GetAttribute("HR_Owner")=="HR_Cine_V2","Destino no reconocido: "..entry[2])
+ entry.old=editor:GetEditorSource(entry.target)
+ local source=entry.old
+ if entry[3] then
+  local first=source:find("-- HR_SOLO_CHICOS_INICIO",1,true)
+  if first then
+   local last=source:find("-- HR_SOLO_CHICOS_FIN",first,true)
+   assert(last,"Adaptador anterior incompleto.")
+   source=source:sub(1,first-1)..source:sub(last+#"-- HR_SOLO_CHICOS_FIN")
+  end
+  local prefix=package:FindFirstChild(entry[3])
+  assert(prefix and prefix:IsA("StringValue"),"Paquete incompleto.")
+  entry.text=prefix.Value.."\n"..source
+ else
+  entry.text=source:gsub("C%.CrearAvatares%s*=%s*true","C.CrearAvatares=false")
+ end
+end
+local builder=package:FindFirstChild("PrepararAvatares")
+assert(builder and builder:IsA("ModuleScript"),"Falta el generador R15.")
+local backup=Instance.new("Folder")
+backup.Name="HR_AntesDeCambiarSkin_"..tostring(os.time())
+for _,entry in ipairs(entries) do
+ local text=Instance.new("StringValue")
+ text.Name=entry[2];text.Value=entry.old;text.Parent=backup
+end
+backup.Parent=storage
+print("[HR CHICOS] Preparando dos bases R15. Espera...")
+local prepare=require(builder)
+assert(type(prepare)=="function","Generador no valido.")
+prepare()
+for _,entry in ipairs(entries) do
+ local text=entry.text
+ editor:UpdateSourceAsync(entry.target,function() return text end)
+end
+for _,entry in ipairs(entries) do
+ assert(editor:GetEditorSource(entry.target)==entry.text,"No se sincronizo "..entry[2])
+ if entry.target:IsA("BaseScript") then entry.target.Enabled=true end
+end
+folder:SetAttribute("SoloChicosListos",false)
+package.Parent=storage
+print("[HR CHICOS] INSTALADO. Guion, tiempos y camara conservados.")
+print("[HR CHICOS] Guarda, cierra las pestanas de codigo y pulsa F5.")

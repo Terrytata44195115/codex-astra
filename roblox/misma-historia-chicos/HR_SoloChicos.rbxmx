@@ -1,0 +1,243 @@
+<?xml version='1.0' encoding='utf-8'?>
+<roblox version="4">
+  <External>null</External>
+  <External>nil</External>
+  <Item class="Folder" referent="RBX0">
+    <Properties>
+      <string name="Name">HR_SoloChicos</string>
+    </Properties>
+    <Item class="StringValue" referent="RBX1">
+      <Properties>
+        <string name="Name">Identificador</string>
+        <string name="Value">HR_SOLO_CHICOS_1</string>
+      </Properties>
+    </Item>
+    <Item class="StringValue" referent="RBX2">
+      <Properties>
+        <string name="Name">AntesServidor</string>
+        <string name="Value">-- HR_SOLO_CHICOS_INICIO
+-- Adaptador visual: el guion y la coreografia originales comienzan despues de este bloque.
+do
+ local RS=game:GetService("ReplicatedStorage")
+ local storage=game:GetService("ServerStorage")
+ local folder=RS:WaitForChild("HR_Cine")
+ folder:SetAttribute("SoloChicosListos",false)
+ local C=require(folder:WaitForChild("Configuracion"))
+ local templates=storage:FindFirstChild("HR_AvataresRopa")
+ assert(templates and templates:GetAttribute("HR_Avatares")=="ROPA_CHICOS_1",
+  "[HR CHICOS] Faltan las plantillas R15. Ejecuta el activador.")
+ local roles=C.Personajes or {X="chicaX",B="chicaB"}
+ local specs={{target=roles.X,template="chicoX",fallback="chicaX"},
+  {target=roles.B,template="chicoB",fallback="chicaB"}}
+ local saved=Instance.new("Folder")
+ saved.Name="HR_OriginalesDurantePlay"
+ local function bodyHeight(model)
+  local low=math.huge
+  local high=-math.huge
+  for _,part in ipairs(model:GetChildren()) do
+   if part:IsA("BasePart") and part.Name~="HumanoidRootPart" then
+    local cf=part.CFrame
+    local half=part.Size/2
+    local extent=math.abs(cf.RightVector.Y)*half.X+math.abs(cf.UpVector.Y)*half.Y+math.abs(cf.LookVector.Y)*half.Z
+    low=math.min(low,part.Position.Y-extent)
+    high=math.max(high,part.Position.Y+extent)
+   end
+  end
+  assert(high&gt;low,"[HR CHICOS] No se puede medir el cuerpo de "..model.Name)
+  return high-low,low
+ end
+ local originals={}
+ for _,entry in ipairs(specs) do
+  assert(type(entry.target)=="string","[HR CHICOS] Nombre de actor no valido.")
+  local reference=workspace:FindFirstChild(entry.target) or workspace:FindFirstChild(entry.fallback)
+  local template=templates:FindFirstChild(entry.template)
+  assert(reference and reference:IsA("Model"),"[HR CHICOS] Falta la referencia "..entry.target)
+  assert(template and template:IsA("Model"),"[HR CHICOS] Falta la plantilla "..entry.template)
+  assert(not originals[reference],"[HR CHICOS] Los actores no pueden usar la misma referencia.")
+  originals[reference]=true
+  local referenceRoot=reference:FindFirstChild("HumanoidRootPart")
+  assert(referenceRoot,"[HR CHICOS] Falta HumanoidRootPart en "..reference.Name)
+  local clone=template:Clone()
+  clone.Name=entry.target
+  clone.ModelStreamingMode=Enum.ModelStreamingMode.Persistent
+  local humanoid=clone:FindFirstChildOfClass("Humanoid")
+  local root=clone:FindFirstChild("HumanoidRootPart")
+  assert(humanoid and root,"[HR CHICOS] Plantilla incompleta.")
+  humanoid.AutomaticScalingEnabled=false
+  local referenceHeight,referenceFloor=bodyHeight(reference)
+  local height=bodyHeight(clone)
+  clone:ScaleTo(clone:GetScale()*referenceHeight/height)
+  local _,floor=bodyHeight(clone)
+  local rootHeight=root.Position.Y-floor
+  local position=Vector3.new(referenceRoot.Position.X,referenceFloor+rootHeight,referenceRoot.Position.Z)
+  local target=CFrame.new(position)*referenceRoot.CFrame.Rotation
+  local offset=root.CFrame:ToObjectSpace(clone:GetPivot())
+  for _,part in ipairs(clone:GetDescendants()) do
+   if part:IsA("BasePart") then part.Anchored=part==root;part.CanCollide=false end
+  end
+  clone:PivotTo(target*offset)
+  clone:SetAttribute("HR_ActorChico",true)
+  entry.clone=clone
+ end
+ -- Solo durante Play: las originales se guardan completas, sin cambiar sus skins.
+ saved.Parent=storage
+ for reference in pairs(originals) do reference.Parent=saved end
+ for _,entry in ipairs(specs) do entry.clone.Parent=workspace end
+ folder:SetAttribute("SoloChicosListos",true)
+ print("[HR CHICOS] Dos chicos colocados. Se conserva la secuencia y la camara actuales.")
+end
+-- HR_SOLO_CHICOS_FIN
+</string>
+      </Properties>
+    </Item>
+    <Item class="StringValue" referent="RBX3">
+      <Properties>
+        <string name="Name">AntesCamara</string>
+        <string name="Value">-- HR_SOLO_CHICOS_INICIO
+do
+ local folder=game:GetService("ReplicatedStorage"):WaitForChild("HR_Cine")
+ local deadline=os.clock()+45
+ while folder:GetAttribute("SoloChicosListos")~=true and os.clock()&lt;deadline do task.wait(0.1) end
+ assert(folder:GetAttribute("SoloChicosListos")==true,
+  "[HR CHICOS] No termino el cambio visual. Revisa la Salida del servidor.")
+end
+-- HR_SOLO_CHICOS_FIN
+</string>
+      </Properties>
+    </Item>
+    <Item class="ModuleScript" referent="RBX4">
+      <Properties>
+        <string name="Name">PrepararAvatares</string>
+        <ProtectedString name="Source">-- Este modulo se ejecuta desde Comando al activar el paquete, en modo Edicion.
+-- Crea avatares nuevos en ServerStorage. No cambia las chicas existentes.
+return function()
+ local Players=game:GetService("Players")
+ local storage=game:GetService("ServerStorage")
+ local name="HR_AvataresRopa"
+ local old=storage:FindFirstChild(name)
+ if old then
+  assert(old:GetAttribute("HR_Avatares")=="ROPA_CHICOS_1","Existe un contenedor ajeno llamado "..name)
+  assert(old:FindFirstChild("chicoX") and old:FindFirstChild("chicoB"),"El contenedor de avatares esta incompleto.")
+  return old
+ end
+ local container=Instance.new("Folder")
+ container.Name=name
+ container:SetAttribute("HR_Avatares","ROPA_CHICOS_1")
+ local function accessory(model,name,base,elements)
+  local acc=Instance.new("Accessory")
+  acc.Name=name
+  local handle=Instance.new("Part")
+  handle.Name="Handle"
+  handle.Size=Vector3.new(0.1,0.1,0.1)
+  handle.Transparency=1
+  handle.Massless=true
+  handle.CanCollide=false
+  handle.CanTouch=false
+  handle.CFrame=base.CFrame
+  handle.Parent=acc
+  local weld=Instance.new("Weld")
+  weld.Name="AccessoryWeld"
+  weld.Part0=base
+  weld.Part1=handle
+  weld.Parent=handle
+  for _,e in ipairs(elements) do
+   local part=Instance.new(e.class or "Part")
+   part.Name=e.name or "Detalle"
+   part.Size=e.size
+   part.Color=e.color
+   part.Material=Enum.Material.SmoothPlastic
+   part.CanCollide=false
+   part.CanTouch=false
+   part.Massless=true
+   part.CFrame=base.CFrame*e.cf
+   part.Parent=acc
+   local joint=Instance.new("Weld")
+   joint.Part0=handle
+   joint.Part1=part
+   joint.C0=e.cf
+   joint.Parent=part
+  end
+  acc.Parent=model
+ end
+ local function build(name,accent,glasses)
+  local desc=Instance.new("HumanoidDescription")
+  desc.HeightScale=1
+  desc.WidthScale=1
+  desc.DepthScale=1
+  desc.HeadScale=1
+  desc.BodyTypeScale=0
+  desc.ProportionScale=0
+  local skin=Color3.fromRGB(234,184,146)
+  for _,property in ipairs({"HeadColor","TorsoColor","LeftArmColor","RightArmColor","LeftLegColor","RightLegColor"}) do desc[property]=skin end
+  local ok,model=pcall(function()
+   return Players:CreateHumanoidModelFromDescriptionAsync(desc,Enum.HumanoidRigType.R15)
+  end)
+  desc:Destroy()
+  assert(ok and typeof(model)=="Instance","Roblox no pudo crear el R15. "..tostring(model))
+  model.Name=name
+  model:SetAttribute("HR_AvatarProcedural",true)
+  model.Parent=container
+  local head=model:FindFirstChild("Head")
+  local torso=model:FindFirstChild("UpperTorso")
+  assert(head and torso and model:FindFirstChild("HumanoidRootPart"),"Roblox devolvio un rig incompleto.")
+  local dark=Color3.fromRGB(24,28,38)
+  for _,part in ipairs(model:GetChildren()) do
+   if part:IsA("BasePart") and part.Name~="Head" and part.Name~="HumanoidRootPart"
+    and part.Name~="LeftHand" and part.Name~="RightHand" then
+    part.Color=dark
+   end
+  end
+  local hair=Color3.fromRGB(18,19,24)
+  local size=head.Size
+  local elements={
+   {size=Vector3.new(size.X*1.08,size.Y*0.32,size.Z*1.06),cf=CFrame.new(0,size.Y*0.5,0),color=hair},
+   {size=Vector3.new(size.X*1.04,size.Y*0.65,size.Z*0.22),cf=CFrame.new(0,size.Y*0.08,size.Z*0.48),color=hair},
+  }
+  for i=1,5 do
+   local x=(i-3)*size.X*0.19
+   table.insert(elements,{class="WedgePart",size=Vector3.new(size.X*0.25,size.Y*0.46,size.Z*0.35),
+    cf=CFrame.new(x,size.Y*0.31,-size.Z*0.43)*CFrame.Angles(0,0,math.rad((i-3)*-8)),color=i==2 and accent or hair})
+  end
+  for i=1,4 do
+   table.insert(elements,{class="WedgePart",size=Vector3.new(size.X*0.28,size.Y*0.38,size.Z*0.65),
+    cf=CFrame.new((i-2.5)*size.X*0.2,size.Y*0.72,0)*CFrame.Angles(0,math.rad(i*25),math.rad((i-2.5)*12)),color=hair})
+  end
+  accessory(model,"HR_PeloAnime",head,elements)
+  local z=-torso.Size.Z/2-0.045
+  accessory(model,"HR_Uniforme",torso,{
+   {size=Vector3.new(torso.Size.X*0.35,torso.Size.Y*0.9,0.06),cf=CFrame.new(0,0,z),color=Color3.fromRGB(235,235,240)},
+   {size=Vector3.new(0.15,torso.Size.Y*0.55,0.08),cf=CFrame.new(0,-torso.Size.Y*0.06,z-0.05),color=Color3.fromRGB(72,119,210)},
+   {class="WedgePart",size=Vector3.new(torso.Size.X*0.19,torso.Size.Y*0.45,0.1),cf=CFrame.new(-torso.Size.X*0.21,torso.Size.Y*0.25,z-0.03)*CFrame.Angles(0,0,math.rad(-18)),color=dark},
+   {class="WedgePart",size=Vector3.new(torso.Size.X*0.19,torso.Size.Y*0.45,0.1),cf=CFrame.new(torso.Size.X*0.21,torso.Size.Y*0.25,z-0.03)*CFrame.Angles(0,0,math.rad(18)),color=dark},
+  })
+  if glasses then
+   local e={}
+   local front=-size.Z/2-0.08
+   local color=Color3.fromRGB(15,15,18)
+   for _,side in ipairs({-1,1}) do
+    local x=side*size.X*0.23
+    for _,y in ipairs({-0.08,0.14}) do
+     table.insert(e,{size=Vector3.new(size.X*0.37,0.035,0.04),cf=CFrame.new(x,y*size.Y,front),color=color})
+    end
+    for _,dx in ipairs({-0.18,0.18}) do
+     table.insert(e,{size=Vector3.new(0.035,size.Y*0.22,0.04),cf=CFrame.new(x+dx*size.X,size.Y*0.03,front),color=color})
+    end
+   end
+   table.insert(e,{size=Vector3.new(size.X*0.12,0.035,0.04),cf=CFrame.new(0,size.Y*0.05,front),color=color})
+   accessory(model,"HR_Gafas",head,e)
+  end
+ end
+ local ok,err=pcall(function()
+  build("chicoX",Color3.fromRGB(72,119,210),false)
+  build("chicoB",Color3.fromRGB(178,65,78),true)
+ end)
+ if not ok then container:Destroy(); error(err) end
+ container.Parent=storage
+ print("[HR ROPA] Dos bases R15 creadas. Pelo y uniforme geometricos, sin IDs de catalogo.")
+ return container
+end
+</ProtectedString>
+      </Properties>
+    </Item>
+  </Item>
+</roblox>
