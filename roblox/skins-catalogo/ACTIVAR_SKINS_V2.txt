@@ -1,0 +1,12 @@
+assert(not game:GetService("RunService"):IsRunning(),"Primero pulsa Stop.")
+local storage=game:GetService("ServerStorage")
+local package=workspace:FindFirstChild("HR_SkinsCatalogoV2") or storage:FindFirstChild("HR_SkinsCatalogoV2")
+assert(package,"Importa primero HR_SkinsCatalogoV2.rbxmx.")
+local id=package:FindFirstChild("Identificador")
+assert(id and id:IsA("StringValue") and id.Value=="HR_SKINS_CATALOGO_2","Paquete no reconocido.")
+local module=package:FindFirstChild("CrearSkinsCatalogoV2")
+assert(module and module:IsA("ModuleScript"),"Paquete incompleto.")
+local build=require(module)
+assert(type(build)=="function","Generador no valido.")
+build()
+package.Parent=storage
