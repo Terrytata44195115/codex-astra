@@ -1,0 +1,48 @@
+{
+  "version": "inventario-1",
+  "estado": "organizacion_previa_a_recibir_proyecto",
+  "es_motor_ejecutable": false,
+  "base": {
+    "rig_preferido": "R15 con Motor6D y conexiones comprobadas",
+    "evidencia": "Los rigs originales de chicaX y chicaB pasaron validacion y produjeron los clips grabados.",
+    "restricciones": [
+      "Conservar los originales y trabajar sobre copias.",
+      "No usar CreateHumanoidModelFromDescriptionAsync como garantia de obtener Motor6D: en el proyecto produjo AnimationConstraint.",
+      "No hacer que la asignacion del reparto dependa de nombres de catalogo.",
+      "No modificar controladores ajenos sin identificar su funcion."
+    ]
+  },
+  "personajes": [
+    {"id": "chica_original_x", "nombre_observado": "chicaX", "estado": "usada_en_clips; pendiente_inspeccion_archivo_actual"},
+    {"id": "chica_original_b", "nombre_observado": "chicaB", "estado": "usada_en_clips; pendiente_inspeccion_archivo_actual"},
+    {"id": "apariencia_chico_colorido", "nombre_observado": "easxvki", "estado": "apariencia_elegida_y_visible_en_clips", "componentes_observados": ["Shirt", "Pants", "Ultra-Fabulous Hair", "Nerd Glasses"], "nota": "Copiar apariencia sobre rig compatible; no copiar Health, Animate, SprintScript ni Sound del modelo de origen."}
+  ],
+  "expresiones": [
+    {"id": "enfadada", "textura": "rbxassetid://2065228834", "estado": "textura_confirmada_por_usuario; enfado_observado_en_clips", "requiere": "comprobar carga y Decal del proyecto nuevo"},
+    {"id": "cara_del_avatar", "textura": null, "estado": "extraer_del_modelo_real; no_adivinar"},
+    {"id": "sonrisa_clasica", "textura": "rbxasset://textures/face.png", "estado": "ruta_incluida_en_cierre_preparado; pendiente_comprobacion_explicita_en_plantilla"},
+    {"id": "feliz_recurso_anterior", "referencia": "4691186503", "estado": "fallo_de_carga_observado; no_aplicar_por_defecto"},
+    {"id": "sorprendida", "referencia_no_verificada": "1149190774", "estado": "pendiente; no_tratar_como_textura"},
+    {"id": "pensativa", "referencia_no_verificada": "1111927273", "estado": "pendiente; representar_gesto_corporal_sin_inventar_cara"},
+    {"id": "seria", "referencia_no_verificada": "8855105242", "estado": "pendiente; no_tratar_como_textura"},
+    {"id": "preocupada", "referencia_no_verificada": "12087064682", "estado": "pendiente; no_tratar_como_textura"},
+    {"id": "llorando", "textura": null, "estado": "sin_textura_confirmada; gesto_corporal_solamente"}
+  ],
+  "acciones": [
+    {"id": "senalar", "estado": "movimiento_observado_en_prueba_y_clips; extraer_y_revalidar"},
+    {"id": "negar", "estado": "preparado_en_controladores; verificar_secuencia_en_plantilla"},
+    {"id": "abrir_brazos", "estado": "visible_en_clips; extraer_y_revalidar"},
+    {"id": "pensar", "estado": "gesto_preparado; objetivo_IK_de_barbilla_requiere_validacion_en_rig_final"},
+    {"id": "cruzar_brazos", "estado": "preparado; revisar_ajuste_por_proporciones"},
+    {"id": "sollozar", "estado": "gesto_preparado; no_confundir_con_textura_de_llanto"},
+    {"id": "correr", "estado": "entrada_visible_en_clips; revisar_IK_y_recorrido_en_plantilla"},
+    {"id": "saltar_juntos", "estado": "salto_visible_en_grabacion; extraer_y_revalidar"},
+    {"id": "saludar", "estado": "pendiente_de_integrar_y_probar"},
+    {"id": "baile", "estado": "sin_animacion_de_baile_confirmada; no_equivale_a_gestos_de_dialogo"}
+  ],
+  "camaras": {
+    "objetivo": "9:16, encuadres abiertos para zoom en edicion, con gestos y reacciones visibles",
+    "disponibles_en_material": ["individual", "dos_actores", "reaccion", "seguimiento_de_entrada", "plano_fijo_de_salto"],
+    "pendientes_de_plantilla": ["tres_actores", "asignacion_por_roles", "reinicio_repetible_sin_reinstalar"]
+  }
+}

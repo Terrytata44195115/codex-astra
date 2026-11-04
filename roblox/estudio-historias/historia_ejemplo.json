@@ -1,0 +1,13 @@
+{
+  "estado": "borrador_no_ejecutable",
+  "titulo": "Mama conoce al novio",
+  "reparto": {"presentadora": "hija", "familiar": "madre", "visita": "novio"},
+  "secuencia": [
+    {"habla": "presentadora", "dialogo": "Mama, este es mi novio.", "accion": "presentar_con_la_mano", "camara": "grupo_tres_y_reaccion_visita"},
+    {"habla": "visita", "dialogo": "Encantado, senora.", "accion": "saludar", "reacciones": {"familiar": "brazos_cruzados"}, "camara": "individual_visita"},
+    {"habla": "familiar", "dialogo": "Y cuales son tus intenciones?", "accion": "preguntar", "camara": "medio_familiar_y_reaccion_visita"},
+    {"habla": "visita", "dialogo": "Para hoy? Habiamos quedado para merendar...", "accion": "abrir_brazos", "reacciones": {"presentadora": "mano_a_la_cara"}, "camara": "individual_visita_y_reaccion_presentadora"},
+    {"habla": "familiar", "dialogo": "Pues empezamos bien. Yo tambien voy.", "accion": "afirmar", "camara": "familiar_y_grupo_final"}
+  ],
+  "nota": "Los tiempos y acciones pendientes se concretan despues de recibir e inspeccionar el proyecto real."
+}
