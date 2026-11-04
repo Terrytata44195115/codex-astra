@@ -1,0 +1,161 @@
+{
+  "source_sha256": "71330ff882ab8fa26ada69c2da5a624ec8484c7e8ed334e75843b516cd0079a3",
+  "instances": 1993,
+  "classes": 119,
+  "all_scripts": 23,
+  "entrypoint_scripts": [
+    {
+      "id": 608,
+      "class": "LocalScript",
+      "path": "StarterPlayer.StarterPlayerScripts.HR_CineCamara",
+      "disabled": false,
+      "enabled": null,
+      "run_context": 0,
+      "source_file": "/workspace/base_inspection/scripts/0608_HR_CineCamara.luau",
+      "length": 13498
+    },
+    {
+      "id": 661,
+      "class": "Script",
+      "path": "ServerScriptService.HR_CineServidor",
+      "disabled": false,
+      "enabled": null,
+      "run_context": 0,
+      "source_file": "/workspace/base_inspection/scripts/0661_HR_CineServidor.luau",
+      "length": 29876
+    }
+  ],
+  "actors": [
+    {
+      "path": "Workspace.chicaX",
+      "motor6d_count": 15,
+      "connected_body_parts": 16,
+      "animation_constraints": 0,
+      "wardrobe": [
+        {
+          "name": "BlondeRoyalBraid",
+          "class": "Accessory",
+          "properties": {}
+        },
+        {
+          "name": "Decal",
+          "class": "Decal",
+          "properties": {
+            "Texture": "rbxassetid://4691186503"
+          }
+        },
+        {
+          "name": "Pants",
+          "class": "Pants",
+          "properties": {
+            "PantsTemplate": "http://www.roblox.com/asset/?id=3538741170"
+          }
+        }
+      ]
+    },
+    {
+      "path": "Workspace.chicaB",
+      "motor6d_count": 15,
+      "connected_body_parts": 16,
+      "animation_constraints": 0,
+      "wardrobe": [
+        {
+          "name": "BlondeRoyalBraid",
+          "class": "Accessory",
+          "properties": {}
+        },
+        {
+          "name": "Decal",
+          "class": "Decal",
+          "properties": {
+            "Texture": "rbxassetid://4691186503"
+          }
+        },
+        {
+          "name": "Pants",
+          "class": "Pants",
+          "properties": {
+            "PantsTemplate": "http://www.roblox.com/asset/?id=3538741170"
+          }
+        }
+      ]
+    },
+    {
+      "path": "ServerStorage.HR_AvataresRopa.chicoX",
+      "motor6d_count": 15,
+      "connected_body_parts": 16,
+      "animation_constraints": 0,
+      "wardrobe": [
+        {
+          "name": "Ultra-Fabulous Hair",
+          "class": "Accessory",
+          "properties": {}
+        },
+        {
+          "name": "Decal",
+          "class": "Decal",
+          "properties": {
+            "Texture": "rbxassetid://20418518"
+          }
+        },
+        {
+          "name": "Pants",
+          "class": "Pants",
+          "properties": {
+            "PantsTemplate": "http://www.roblox.com/asset/?id=1349860164"
+          }
+        },
+        {
+          "name": "Shirt",
+          "class": "Shirt",
+          "properties": {
+            "ShirtTemplate": "http://www.roblox.com/asset/?id=1245997418"
+          }
+        }
+      ]
+    },
+    {
+      "path": "ServerStorage.HR_AvataresRopa.chicoB",
+      "motor6d_count": 15,
+      "connected_body_parts": 16,
+      "animation_constraints": 0,
+      "wardrobe": [
+        {
+          "name": "Ultra-Fabulous Hair",
+          "class": "Accessory",
+          "properties": {}
+        },
+        {
+          "name": "Nerd Glasses",
+          "class": "Accessory",
+          "properties": {}
+        },
+        {
+          "name": "Decal",
+          "class": "Decal",
+          "properties": {
+            "Texture": "rbxassetid://20418518"
+          }
+        },
+        {
+          "name": "Pants",
+          "class": "Pants",
+          "properties": {
+            "PantsTemplate": "http://www.roblox.com/asset/?id=1349860164"
+          }
+        },
+        {
+          "name": "Shirt",
+          "class": "Shirt",
+          "properties": {
+            "ShirtTemplate": "http://www.roblox.com/asset/?id=1245997418"
+          }
+        }
+      ]
+    }
+  ],
+  "animation_objects": 81,
+  "unique_animation_assets": 38,
+  "dogs_assigned": false,
+  "studio_runtime_tested_here": false
+}

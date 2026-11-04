@@ -6,9 +6,9 @@ Este directorio organiza el trabajo futuro. **Todavia no contiene un motor nuevo
 
 Un motor fijo de actores, acciones, caras y camaras. Cada video cambia una historia de datos: reparto, dialogos, acciones y tiempos. Se amplian acciones solo cuando una historia necesita un movimiento nuevo.
 
-## Primer archivo necesario
+## Proyecto recibido
 
-Una copia del proyecto de Studio que ahora funciona, guardada con el juego detenido. Archivo > Descargar una copia. El archivo .rbxl sirve; .rbxlx tambien. No hay que construir otro escenario ni renombrar modelos antes de enviarlo.
+Ya se ha inspeccionado Base_Historias.rbxl, la version de chicos con cierre adicional. Consulta la [revision concreta](auditoria-base/REVISION.md). El archivo original permanece sin modificar. No hace falta volver a enviarlo para esta revision.
 
 ## Orden de trabajo
 
