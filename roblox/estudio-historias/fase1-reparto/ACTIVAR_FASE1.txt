@@ -1,0 +1,8 @@
+assert(not game:GetService("RunService"):IsRunning(),"Primero pulsa Stop.")
+local storage=game:GetService("ServerStorage")
+local package=workspace:FindFirstChild("HR_Fase1Reparto") or storage:FindFirstChild("HR_Fase1Reparto")
+assert(package,"Importa primero HR_Fase1Reparto.rbxmx.")
+local id=package:FindFirstChild("Identificador")
+assert(id and id:IsA("StringValue") and id.Value=="HR_FASE1_REPARTO_1","Paquete no reconocido.")
+require(package:WaitForChild("PrepararReparto"))()
+package.Parent=storage

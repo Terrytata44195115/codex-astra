@@ -1,0 +1,180 @@
+return function()
+ assert(not game:GetService("RunService"):IsRunning(),"Primero pulsa Stop.")
+ local storage=game:GetService("ServerStorage")
+ local catalog=game:GetService("AvatarEditorService")
+ local players=game:GetService("Players")
+ local OWNER="HR_ESTUDIO_REPARTO_1"
+ local name="HR_EstudioReparto"
+ local prior=storage:FindFirstChild(name)
+ if prior then
+  assert(prior:GetAttribute("HR_Owner")==OWNER,"Existe otro contenedor "..name)
+  assert(prior:FindFirstChild("Personajes") and prior:FindFirstChild("Reparto"),"Reparto anterior incompleto.")
+  print("[HR REPARTO] Ya existe: se conservan tus cambios y no se duplican actores.")
+  local preview=workspace:FindFirstChild("HR_RevisionReparto")
+  if preview then game:GetService("Selection"):Set({preview}) end
+  return
+ end
+ local refs={
+  Madre=workspace:FindFirstChild("chicaB"),
+  Hija=workspace:FindFirstChild("chicaX"),
+ }
+ local old=storage:FindFirstChild("HR_AvataresRopa")
+ assert(old and old:GetAttribute("HR_Avatares")=="ROPA_CHICOS_1","No se encuentran las bases de chicos del proyecto revisado.")
+ refs.Novio=old:FindFirstChild("chicoX")
+ local function verify(model)
+  assert(model and model:IsA("Model"),"Falta un modelo de referencia.")
+  local h=model:FindFirstChildOfClass("Humanoid")
+  assert(h and h.RigType==Enum.HumanoidRigType.R15,"Se necesita un rig R15: "..model.Name)
+  local expected={Waist={"LowerTorso","UpperTorso"},Neck={"UpperTorso","Head"},RightShoulder={"UpperTorso","RightUpperArm"},LeftShoulder={"UpperTorso","LeftUpperArm"},RightElbow={"RightUpperArm","RightLowerArm"},LeftElbow={"LeftUpperArm","LeftLowerArm"},RightWrist={"RightLowerArm","RightHand"},LeftWrist={"LeftLowerArm","LeftHand"},RightHip={"LowerTorso","RightUpperLeg"},LeftHip={"LowerTorso","LeftUpperLeg"},RightKnee={"RightUpperLeg","RightLowerLeg"},LeftKnee={"LeftUpperLeg","LeftLowerLeg"},RightAnkle={"RightLowerLeg","RightFoot"},LeftAnkle={"LeftLowerLeg","LeftFoot"}}
+  local motors={}
+  for _,item in ipairs(model:GetDescendants()) do
+   assert(not item:IsA("AnimationConstraint"),"Rig incompatible: "..model.Name)
+   if item:IsA("Motor6D") then
+    local key=item.Name:gsub("%s+","")
+    assert(not motors[key],"Motor duplicado: "..key)
+    motors[key]=item
+   end
+  end
+  for joint,parts in pairs(expected) do
+   local m=motors[joint]
+   assert(m and m.Part0 and m.Part1 and m.Part0.Name==parts[1] and m.Part1.Name==parts[2],"Motor incompatible: "..model.Name.."."..joint)
+  end
+  assert(model:FindFirstChild("HumanoidRootPart"),"Falta HumanoidRootPart")
+ end
+ for _,model in pairs(refs) do verify(model) end
+ local existingPreview=workspace:FindFirstChild("HR_RevisionReparto")
+ assert(not existingPreview,"Ya existe HR_RevisionReparto. No se sustituye sin revisar.")
+ local project=Instance.new("Folder")
+ project.Name=name
+ project:SetAttribute("HR_Owner",OWNER)
+ project:SetAttribute("Estado","FASE_1_REVISAR_APARIENCIAS")
+ local characters=Instance.new("Folder");characters.Name="Personajes";characters.Parent=project
+ local roles=Instance.new("Folder");roles.Name="Reparto";roles.Parent=project
+ local preview=Instance.new("Model");preview.Name="HR_RevisionReparto";preview:SetAttribute("HR_Owner",OWNER)
+ local cast={}
+ for _,role in ipairs({"Madre","Hija","Novio"}) do
+  local model=refs[role]:Clone()
+  model.Name=role
+  model:SetAttribute("HR_Rol",role)
+  model:SetAttribute("HR_Owner",OWNER)
+  model.Parent=characters
+  for _,item in ipairs(model:GetDescendants()) do
+   if item:IsA("BaseScript") then item.Enabled=false end
+  end
+  local h=model:FindFirstChildOfClass("Humanoid")
+  h.AutomaticScalingEnabled=false
+  h.DisplayName=role
+  model.ModelStreamingMode=Enum.ModelStreamingMode.Persistent
+  local root=model.HumanoidRootPart
+  for _,part in ipairs(model:GetDescendants()) do
+   if part:IsA("BasePart") then part.Anchored=part==root;part.CanCollide=false end
+  end
+  local value=Instance.new("ObjectValue");value.Name=role;value.Value=model;value.Parent=roles
+  cast[role]=model
+ end
+ local function addCopy(model,sourceAccessory)
+  local copy=sourceAccessory:Clone()
+  for _,item in ipairs(copy:GetDescendants()) do
+   if item:IsA("BaseScript") then item:Destroy()
+   elseif item:IsA("JointInstance") or item:IsA("WeldConstraint") then
+    if item.Name=="AccessoryWeld" or (item.Part0 and not item.Part0:IsDescendantOf(copy)) or (item.Part1 and not item.Part1:IsDescendantOf(copy)) then item:Destroy() end
+   end
+  end
+  local h=model:FindFirstChildOfClass("Humanoid")
+  h:AddAccessory(copy)
+  local handle=copy:FindFirstChild("Handle")
+  if not handle or not handle:FindFirstChild("AccessoryWeld") then copy:Destroy();return false end
+  return true
+ end
+ -- Diseno inicial usando apariencias ya presentes en el proyecto.
+ local glasses=(old:FindFirstChild("chicoB") and old.chicoB:FindFirstChild("Nerd Glasses"))
+ if glasses then addCopy(cast.Madre,glasses) end
+ for _,item in ipairs(cast.Madre:GetDescendants()) do
+  if item:IsA("SpecialMesh") and item.Parent and item.Parent.Parent and item.Parent.Parent.Name=="BlondeRoyalBraid" then
+   item.VertexColor=Vector3.new(0.48,0.30,0.16)
+  elseif item:IsA("MeshPart") and item.Parent and item.Parent.Name=="BlondeRoyalBraid" then
+   item.Color=Color3.fromRGB(112,72,38)
+  end
+ end
+ cast.Madre:ScaleTo(cast.Madre:GetScale()*1.05)
+ local boy=cast.Novio
+ local boyGlasses=boy:FindFirstChild("Nerd Glasses");if boyGlasses then boyGlasses:Destroy() end
+ local function accessory(kind,keyword,field)
+  print("[HR REPARTO] Buscando accesorio real: "..keyword)
+  local ok,result=pcall(function()
+   local query=CatalogSearchParams.new()
+   query.SearchKeyword=keyword;query.AssetTypes={kind};query.IncludeOffSale=false;query.Limit=10
+   query.SortType=Enum.CatalogSortType.Relevance
+   local pages=catalog:SearchCatalogAsync(query)
+   local attempted=0
+   for _,row in ipairs(pages:GetCurrentPage()) do
+    if row.ItemType=="Asset" and tonumber(row.Id) then
+     attempted+=1
+     local desc=Instance.new("HumanoidDescription");desc[field]=tostring(row.Id)
+     local temp
+     local success,acc=pcall(function()
+      temp=players:CreateHumanoidModelFromDescriptionAsync(desc,Enum.HumanoidRigType.R15)
+      local found=temp:FindFirstChildOfClass("Accessory")
+      assert(found,"No se devolvio el accesorio")
+      return found:Clone()
+     end)
+     desc:Destroy();if temp then temp:Destroy() end
+     if success then
+      local attached=addCopy(boy,acc);acc:Destroy()
+      if attached then
+       boy:SetAttribute(field.."Id",tonumber(row.Id))
+       boy:SetAttribute(field.."Nombre",tostring(row.Name))
+       print("[HR REPARTO] Accesorio asignado, PENDIENTE de revision visual: "..tostring(row.Name))
+       return true
+      end
+     end
+     if attempted>=2 then break end
+    end
+   end
+   return false
+  end)
+  if not ok then warn("[HR REPARTO] Accesorio pendiente: "..keyword..". "..tostring(result));return false end
+  return result
+ end
+ -- Si Roblox no resuelve estos accesorios, se conserva el actor y se informa.
+ local cap=accessory(Enum.AvatarAssetType.Hat,"black street cap","HatAccessory")
+ local mask=accessory(Enum.AvatarAssetType.FaceAccessory,"black balaclava mask","FaceAccessory")
+ if cap then
+  local hair=boy:FindFirstChild("Ultra-Fabulous Hair");if hair then hair:Destroy() end
+ end
+ boy:SetAttribute("GorraPendiente",not cap);boy:SetAttribute("MascaraPendiente",not mask)
+ boy:SetAttribute("PantalonTiroBajoPendiente",true)
+ local camera=workspace.CurrentCamera
+ local front=camera and -camera.CFrame.LookVector or Vector3.new(0,0,1)
+ front=Vector3.new(front.X,0,front.Z)
+ if front.Magnitude<0.01 then front=Vector3.new(0,0,1) else front=front.Unit end
+ local right=front:Cross(Vector3.yAxis).Unit
+ local originalRoot=refs.Hija.HumanoidRootPart
+ local center=originalRoot.Position+front*10
+ local sourceFoot=refs.Hija:FindFirstChild("LeftFoot")
+ local floorY=sourceFoot and sourceFoot.Position.Y-sourceFoot.Size.Y/2 or originalRoot.Position.Y-3
+ for i,role in ipairs({"Madre","Hija","Novio"}) do
+  verify(cast[role])
+  local model=cast[role]:Clone()
+  local root=model.HumanoidRootPart
+  local foot=model:FindFirstChild("LeftFoot")
+  assert(foot,"Falta pie de "..role)
+  local rootHeight=root.Position.Y-(foot.Position.Y-foot.Size.Y/2)
+  local position=center+right*((i-2)*5)
+  position=Vector3.new(position.X,floorY+rootHeight,position.Z)
+  local cf=CFrame.lookAt(position,position+front)
+  model:PivotTo(cf*root.CFrame:ToObjectSpace(model:GetPivot()))
+  local label=Instance.new("BillboardGui")
+  label.Name="HR_EtiquetaRevision";label.Size=UDim2.fromOffset(180,40);label.StudsOffset=Vector3.new(0,2.5,0);label.AlwaysOnTop=true
+  local text=Instance.new("TextLabel");text.Size=UDim2.fromScale(1,1);text.BackgroundTransparency=1;text.Text=role;text.TextColor3=Color3.new(1,1,1);text.TextStrokeTransparency=0;text.Font=Enum.Font.GothamBold;text.TextSize=22;text.Parent=label
+  label.Parent=model.Head
+  model.Parent=preview
+ end
+ project.Parent=storage
+ preview.Parent=workspace
+ game:GetService("Selection"):Set({preview})
+ print("[HR REPARTO] FASE 1 LISTA: tres rigs Motor6D asignados por referencia.")
+ print("[HR REPARTO] Pulsa F (solo F) para encuadrar la previsualizacion. Todavia NO pulses Play.")
+ print("[HR REPARTO] Madre e hija provisionales; confirmar estilos. Gorra="..tostring(cap)..", mascara="..tostring(mask).."; revisar ajuste. Tiro bajo pendiente.")
+ print("[HR REPARTO] La historia anterior, sus scripts y sus camaras no se han modificado.")
+end

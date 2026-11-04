@@ -1,0 +1,24 @@
+{
+ "titulo":"Mama conoce al novio",
+ "duracion_segundos":24,
+ "estado":"guion_propuesto; no_reproductor_instalado",
+ "reparto":{"Madre":"madre","Hija":"hija","Novio":"novio"},
+ "escenas":[
+  {"inicio":0,"fin":3,"habla":"Hija","texto":"Mama, te presento a mi novio.","acciones":{"Hija":"presentar_con_la_mano","Madre":"girar_mirada"},"camara":"medio_madre_hija"},
+  {"inicio":3,"fin":5,"habla":null,"texto":"","acciones":{"Novio":"entrada_caminando"},"camara":"entero_novio_y_sobre_hombro_madre"},
+  {"inicio":5,"fin":8,"habla":"Madre","texto":"¡Hija! ¿Pero que me has traido?","acciones":{"Madre":"susto_manos_hacia_cabeza_y_retroceso"},"camara":"reaccion_madre"},
+  {"inicio":8,"fin":10,"habla":"Hija","texto":"Mama… no empieces.","acciones":{"Hija":"vergüenza_y_palidez"},"camara":"reaccion_hija"},
+  {"inicio":10,"fin":13,"habla":"Novio","texto":"Buenas tardes. Encantado de conocerla.","acciones":{"Novio":"saludar_nervioso"},"camara":"medio_novio"},
+  {"inicio":13,"fin":17,"habla":"Madre","texto":"Pues quitate eso… ¡y subete los pantalones!","acciones":{"Madre":"senalar_mascara_y_pantalon","Hija":"mano_a_la_cara"},"camara":"medio_madre_y_reaccion_hija"},
+  {"inicio":17,"fin":20,"habla":"Novio","texto":"¡Si, señora! Mi madre dice lo mismo.","acciones":{"Novio":"manos_abiertas_resignado"},"camara":"medio_novio"},
+  {"inicio":20,"fin":22,"habla":"Hija","texto":"¡Tierra, tragame!","acciones":{"Hija":"cubrir_cara"},"camara":"reaccion_hija"},
+  {"inicio":22,"fin":24,"habla":"Madre","texto":"¡Y la gorra!","acciones":{"Madre":"senalar_gorra","Novio":"mano_hacia_gorra"},"camara":"madre_y_reaccion_final_novio"}
+ ],
+ "animaciones_candidatas_existentes":[
+  {"accion":"caminar","asset_id":"616146177","estado":"encontrada_en_proyecto; pendiente_carga_y_prueba_Studio"},
+  {"accion":"saludar","asset_id":"507770239","estado":"encontrada_en_proyecto; pendiente_carga_y_prueba_Studio"},
+  {"accion":"correr_para_biblioteca","asset_id":"616140816","estado":"encontrada_en_proyecto; no_necesaria_en_este_guion; pendiente_carga_Studio"}
+ ],
+ "pendientes":["apariencias_finales","ajuste_gorra_mascara","pantalon_de_tiro_bajo","textura_facial_desesperacion","gestos_nuevos","tomas_de_tres_actores","reproduccion_y_validacion_en_Studio"],
+ "audio":"voces, musica y efectos se preparan despues de validar los clips"
+}
