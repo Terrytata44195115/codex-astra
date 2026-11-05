@@ -1,0 +1,13 @@
+MADRE, HIJA Y MARCOS — MONTAJE VISUAL
+
+Dos versiones de 24 segundos, 1080x1920, MP4 H.264 a 30 FPS.
+
+El video principal lleva el texto del guion con palabras destacadas, entrada/salida animada y dos emojis. El ZIP contiene una version limpia para doblar o cambiar los subtitulos.
+
+Los dos archivos de origen se han unido, recortado y reencuadrado. Se retira la interfaz de Studio y el avatar del fondo queda fuera de los encuadres. La toma sobre el hombro que tapaba a Marcos se sustituye por dos encuadres de su llegada con camara lenta breve.
+
+AUDIO PENDIENTE: no se incluyen voces, musica ni efectos de sonido. Se ha retirado el audio de fondo grabado porque no correspondia al dialogo. Los textos y el SRT son el guion previsto, no una alineacion con voces ya grabadas.
+
+Para terminar el doblaje hacen falta los audios de madre, hija y Marcos. guion_voces.txt indica las frases, intencion y tiempos. La mezcla de voces y musica se hace despues.
+
+Comprobado: 24 segundos, 720 fotogramas, 1080x1920, 30 FPS, sin pistas del audio original y decodificacion completa sin errores. Cada MP4 pesa menos de 32 MiB.

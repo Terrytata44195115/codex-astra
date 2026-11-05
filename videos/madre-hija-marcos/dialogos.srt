@@ -1,0 +1,39 @@
+1
+00:00:00,000 --> 00:00:02,000
+¡Mamá, hoy conoces a Marcos!
+
+2
+00:00:02,000 --> 00:00:03,500
+¡Por fin! ¿Dónde está?
+
+3
+00:00:05,500 --> 00:00:07,500
+Mamá, este es Marcos.
+
+4
+00:00:07,500 --> 00:00:10,000
+Buenas tardes, señora.
+
+5
+00:00:10,000 --> 00:00:14,000
+¿Dónde me he metido? ¿Qué me ha traído mi hija?
+
+6
+00:00:14,000 --> 00:00:16,000
+Mamá… no empieces.
+
+7
+00:00:16,000 --> 00:00:19,000
+Quítate eso… ¡y súbete los pantalones!
+
+8
+00:00:19,000 --> 00:00:21,500
+¡Sí, señora! Mi madre dice lo mismo.
+
+9
+00:00:21,500 --> 00:00:22,500
+¡Tierra, trágame!
+
+10
+00:00:22,500 --> 00:00:24,000
+¡Y la gorra!

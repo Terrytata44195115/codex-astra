@@ -1,0 +1,20 @@
+{
+  "duration": 24,
+  "width": 1080,
+  "height": 1920,
+  "fps": 30,
+  "frames": 720,
+  "audio": false,
+  "source_audio_removed": true,
+  "voiceover": "not supplied",
+  "files": {
+    "short_subtitulado_1080x1920.mp4": {
+      "size": 18303723,
+      "sha256": "c29e9e64c43bc7ddeae903e7a184ff3ca4360c35d87f3117c597522c9b21db83"
+    },
+    "material_edicion.zip": {
+      "size": 18834939,
+      "sha256": "a146c9563bdb7db73a40921d445161762b48c487f90a65e0d0f70d91eca7c8d8"
+    }
+  }
+}
