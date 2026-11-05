@@ -1,0 +1,27 @@
+MADRE, HIJA Y MARCOS — VOCES ORGANIZADAS
+Version doblada: 24,3 segundos, 1080x1920, 30 FPS.
+
+Jess interpreta a la madre. Cristina interpreta a la hija. Marcelo interpreta a Marcos.
+Las voces son los audios de ElevenLabs recibidos del usuario. Se conservan tono y velocidad originales.
+Los planos y los subtitulos se han reajustado a las frases completas; se han equilibrado niveles y suavizado los limites de los recortes.
+No se mezcla el sonido de fondo de la grabacion de escritorio. Esta version contiene dialogo, sin musica anadida.
+
+ARCHIVOS
+MARCOS_CON_VOCES_SIN_SUBTITULOS.mp4: mismo montaje y voces, sin texto ni emojis quemados.
+madre.wav, hija.wav y marcos.wav: pistas mono de 24,3 segundos con silencios en sus posiciones correspondientes.
+doblaje_completo.mp3: mezcla de las tres voces para escuchar.
+dialogos.srt: subtitulos completos con los nuevos tiempos.
+Para editar las voces por separado, silencia el audio del MP4 y coloca los tres WAV desde 0:00.
+Estas pistas corresponden al montaje doblado de 24,3 segundos.
+
+INTERVENCIONES
+0.035-2.205 s | Hija: ¡Mamá, hoy conoces a Marcos!
+2.310-4.390 s | Madre: ¡Por fin! ¿Dónde está?
+6.130-8.070 s | Hija: Mamá, este es Marcos.
+8.120-9.550 s | Marcos: Buenas tardes, señora.
+9.620-13.080 s | Madre: ¿Dónde me he metido? ¿Qué me ha traído mi hija?
+13.110-15.280 s | Hija: Mamá… no empieces.
+15.330-18.060 s | Madre: Quítate eso… ¡y súbete los pantalones!
+18.125-21.025 s | Marcos: ¡Sí, señora! Mi madre dice lo mismo.
+21.130-22.930 s | Hija: ¡Tierra, trágame!
+23.025-23.985 s | Madre: ¡Y la gorra!

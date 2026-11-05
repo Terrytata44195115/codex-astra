@@ -1,0 +1,122 @@
+{
+  "duration": 24.3,
+  "voice_speed_changed": false,
+  "voice_pitch_changed": false,
+  "speakers": {
+    "Madre": "Jess — Mexican Spanish Female",
+    "Hija": "Cristina — Premium Spanish Female",
+    "Marcos": "Marcelo — Spanish"
+  },
+  "interventions": [
+    {
+      "id": "hija_1",
+      "role": "Hija",
+      "voice": "Cristina",
+      "text": "¡Mamá, hoy conoces a Marcos!",
+      "raw_start": 0,
+      "raw_end": 2.17,
+      "start": 0.035,
+      "end": 2.205,
+      "duration": 2.17
+    },
+    {
+      "id": "madre_1",
+      "role": "Madre",
+      "voice": "Jess",
+      "text": "¡Por fin! ¿Dónde está?",
+      "raw_start": 0,
+      "raw_end": 2.08,
+      "start": 2.31,
+      "end": 4.390000000000001,
+      "duration": 2.08
+    },
+    {
+      "id": "hija_2",
+      "role": "Hija",
+      "voice": "Cristina",
+      "text": "Mamá, este es Marcos.",
+      "raw_start": 2.2,
+      "raw_end": 4.14,
+      "start": 6.13,
+      "end": 8.07,
+      "duration": 1.94
+    },
+    {
+      "id": "marcos_1",
+      "role": "Marcos",
+      "voice": "Marcelo",
+      "text": "Buenas tardes, señora.",
+      "raw_start": 0,
+      "raw_end": 1.43,
+      "start": 8.12,
+      "end": 9.549999999999999,
+      "duration": 1.43
+    },
+    {
+      "id": "madre_2",
+      "role": "Madre",
+      "voice": "Jess",
+      "text": "¿Dónde me he metido? ¿Qué me ha traído mi hija?",
+      "raw_start": 2.12,
+      "raw_end": 5.58,
+      "start": 9.62,
+      "end": 13.079999999999998,
+      "duration": 3.46
+    },
+    {
+      "id": "hija_3",
+      "role": "Hija",
+      "voice": "Cristina",
+      "text": "Mamá… no empieces.",
+      "raw_start": 4.2,
+      "raw_end": 6.37,
+      "start": 13.11,
+      "end": 15.28,
+      "duration": 2.17
+    },
+    {
+      "id": "madre_3",
+      "role": "Madre",
+      "voice": "Jess",
+      "text": "Quítate eso… ¡y súbete los pantalones!",
+      "raw_start": 5.6,
+      "raw_end": 8.33,
+      "start": 15.33,
+      "end": 18.06,
+      "duration": 2.73
+    },
+    {
+      "id": "marcos_2",
+      "role": "Marcos",
+      "voice": "Marcelo",
+      "text": "¡Sí, señora! Mi madre dice lo mismo.",
+      "raw_start": 1.43,
+      "raw_end": 4.33,
+      "start": 18.125,
+      "end": 21.025,
+      "duration": 2.9
+    },
+    {
+      "id": "hija_4",
+      "role": "Hija",
+      "voice": "Cristina",
+      "text": "¡Tierra, trágame!",
+      "raw_start": 6.4,
+      "raw_end": 8.2,
+      "start": 21.13,
+      "end": 22.93,
+      "duration": 1.8
+    },
+    {
+      "id": "madre_4",
+      "role": "Madre",
+      "voice": "Jess",
+      "text": "¡Y la gorra!",
+      "raw_start": 8.34,
+      "raw_end": 9.3,
+      "start": 23.025,
+      "end": 23.985,
+      "duration": 0.96
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "duration": 24.3,
+  "fps": 30,
+  "width": 1080,
+  "height": 1920,
+  "frames": 729,
+  "audio": {
+    "input_i": "-15.56",
+    "input_tp": "-1.45",
+    "input_lra": "7.30",
+    "input_thresh": "-26.64",
+    "output_i": "-15.38",
+    "output_tp": "-1.50",
+    "output_lra": "6.80",
+    "output_thresh": "-26.40",
+    "normalization_type": "dynamic",
+    "target_offset": "-0.62"
+  },
+  "decoding": "complete audiovisual decode without errors",
+  "voice_speed_changed": false,
+  "voice_pitch_changed": false,
+  "files": {
+    "short_con_voces_1080x1920.mp4": {
+      "size": 19964832,
+      "sha256": "70e7e7ddf6d683ae618063ed36a86784bf4295ad8e3e9b78b8a5dcf7ec1635cf"
+    },
+    "material_doblaje.zip": {
+      "size": 24121295,
+      "sha256": "19d5802f99412f33bea02d89edd324d0841f090c3cd72f82277af6ee04451ba7"
+    }
+  }
+}
