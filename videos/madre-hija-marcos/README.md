@@ -1,5 +1,15 @@
 # Madre, hija y Marcos: montaje vertical
 
+## Revision dinamica con musica
+
+[Descargar el short dinamico con voces y musica](short_dinamico_con_musica_1080x1920.mp4).
+
+La nueva revision dura **21,47 segundos**, frente a los 24,3 de la version anterior. Mantiene las diez intervenciones de madre, hija y Marcos, reduce la llegada a 0,8 segundos y reparte la historia en **29 planos**, con acercamientos mas marcados y cortes en las reacciones. El tono de las voces se conserva; su velocidad aumenta un 6 % para Marcos y un 9 % para madre e hija.
+
+Los subtitulos aparecen en fragmentos mas cortos en la zona inferior. La entrada de Marcos lleva un rotulo animado, lineas de velocidad y efectos breves. Se conservan dos emojis en momentos concretos. El fondo musical procede del segundo video de referencia aportado por el usuario: se separa su instrumental, se monta en bucle y se reduce bajo las voces. No se mezcla la pista de dialogos del ejemplo. Los acentos sonoros adicionales se sintetizan para este montaje.
+
+Formato **1080x1920, 9:16, 30 FPS**, H.264 y AAC estereo a 48 kHz. [Subtitulos SRT de esta revision](dialogos_dinamicos.srt), [plan de edicion](plan_dinamico.json) y [comprobaciones del archivo final](validacion_dinamica.json). La version anterior se conserva abajo.
+
 ## Version con las voces recibidas de ElevenLabs
 
 - [Video con voces y subtitulos](short_con_voces_1080x1920.mp4).

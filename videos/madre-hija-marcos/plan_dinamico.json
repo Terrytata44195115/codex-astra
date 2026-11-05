@@ -1,0 +1,860 @@
+{
+  "duration": 21.466666666666665,
+  "frames": 644,
+  "fps": 30,
+  "original_duration": 24.3,
+  "old_scene_bounds": [
+    0,
+    2.3,
+    4.4,
+    6.1,
+    8.1,
+    9.6,
+    13.1,
+    15.3,
+    18.1,
+    21.1,
+    23,
+    24.3
+  ],
+  "new_scene_bounds": [
+    0,
+    2.033333333333333,
+    3.966666666666667,
+    4.766666666666667,
+    6.6,
+    7.966666666666667,
+    11.2,
+    13.233333333333333,
+    15.8,
+    18.6,
+    20.3,
+    21.466666666666665
+  ],
+  "shots": [
+    {
+      "index": 1,
+      "original_shot": 1,
+      "start": 0.0,
+      "end": 0.4666666666666667,
+      "frames": 14,
+      "source_start_frame": 0,
+      "source_end_frame": 30,
+      "source_start": 0.0,
+      "source_end": 0.5,
+      "crop": [
+        752,
+        248,
+        414,
+        736
+      ],
+      "zoom_start": 1.0,
+      "zoom_end": 1.075,
+      "personajes": [
+        "Madre",
+        "Hija"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "index": 2,
+      "original_shot": 1,
+      "start": 0.4666666666666667,
+      "end": 0.9666666666666667,
+      "frames": 15,
+      "source_start_frame": 30,
+      "source_end_frame": 63,
+      "source_start": 0.5,
+      "source_end": 1.05,
+      "crop": [
+        752,
+        248,
+        414,
+        736
+      ],
+      "zoom_start": 1.105,
+      "zoom_end": 1.18,
+      "personajes": [
+        "Madre",
+        "Hija"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "index": 3,
+      "original_shot": 2,
+      "start": 0.9666666666666667,
+      "end": 2.033333333333333,
+      "frames": 32,
+      "source_start_frame": 63,
+      "source_end_frame": 117,
+      "source_start": 1.05,
+      "source_end": 1.95,
+      "crop": [
+        708,
+        128,
+        504,
+        896
+      ],
+      "zoom_start": 1.0,
+      "zoom_end": 1.075,
+      "personajes": [
+        "Hija"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "index": 4,
+      "original_shot": 3,
+      "start": 2.033333333333333,
+      "end": 2.933333333333333,
+      "frames": 27,
+      "source_start_frame": 117,
+      "source_end_frame": 159,
+      "source_start": 1.95,
+      "source_end": 2.65,
+      "crop": [
+        708,
+        128,
+        504,
+        896
+      ],
+      "zoom_start": 1.0,
+      "zoom_end": 1.075,
+      "personajes": [
+        "Madre"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "index": 5,
+      "original_shot": 3,
+      "start": 2.933333333333333,
+      "end": 3.966666666666667,
+      "frames": 31,
+      "source_start_frame": 159,
+      "source_end_frame": 207,
+      "source_start": 2.65,
+      "source_end": 3.45,
+      "crop": [
+        708,
+        128,
+        504,
+        896
+      ],
+      "zoom_start": 1.105,
+      "zoom_end": 1.18,
+      "personajes": [
+        "Madre"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "index": 6,
+      "original_shot": 4,
+      "start": 3.966666666666667,
+      "end": 4.433333333333334,
+      "frames": 14,
+      "source_start_frame": 207,
+      "source_end_frame": 250,
+      "source_start": 3.45,
+      "source_end": 4.166666666666667,
+      "crop": [
+        680,
+        76,
+        558,
+        992
+      ],
+      "zoom_start": 1.0,
+      "zoom_end": 1.045,
+      "personajes": [
+        "Marcos"
+      ],
+      "plano": "ENTERO"
+    },
+    {
+      "index": 7,
+      "original_shot": 5,
+      "start": 4.433333333333334,
+      "end": 4.766666666666667,
+      "frames": 10,
+      "source_start_frame": 250,
+      "source_end_frame": 279,
+      "source_start": 4.166666666666667,
+      "source_end": 4.65,
+      "crop": [
+        784,
+        100,
+        396,
+        704
+      ],
+      "zoom_start": 1.06,
+      "zoom_end": 1.1,
+      "personajes": [
+        "Marcos"
+      ],
+      "plano": "HOMBRO"
+    },
+    {
+      "index": 8,
+      "original_shot": 6,
+      "start": 4.766666666666667,
+      "end": 5.6,
+      "frames": 25,
+      "source_start_frame": 327,
+      "source_end_frame": 381,
+      "source_start": 5.45,
+      "source_end": 6.35,
+      "crop": [
+        748,
+        220,
+        450,
+        800
+      ],
+      "zoom_start": 1.0,
+      "zoom_end": 1.045,
+      "personajes": [
+        "Madre",
+        "Hija",
+        "Marcos"
+      ],
+      "plano": "ENTERO"
+    },
+    {
+      "index": 9,
+      "original_shot": 7,
+      "start": 5.6,
+      "end": 6.1,
+      "frames": 15,
+      "source_start_frame": 381,
+      "source_end_frame": 415,
+      "source_start": 6.35,
+      "source_end": 6.916666666666667,
+      "crop": [
+        708,
+        128,
+        504,
+        896
+      ],
+      "zoom_start": 1.0,
+      "zoom_end": 1.075,
+      "personajes": [
+        "Hija"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "index": 10,
+      "original_shot": 7,
+      "start": 6.1,
+      "end": 6.6,
+      "frames": 15,
+      "source_start_frame": 415,
+      "source_end_frame": 447,
+      "source_start": 6.916666666666667,
+      "source_end": 7.45,
+      "crop": [
+        708,
+        128,
+        504,
+        896
+      ],
+      "zoom_start": 1.105,
+      "zoom_end": 1.18,
+      "personajes": [
+        "Hija"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "index": 11,
+      "original_shot": 8,
+      "start": 6.6,
+      "end": 7.7,
+      "frames": 33,
+      "source_start_frame": 447,
+      "source_end_frame": 549,
+      "source_start": 7.45,
+      "source_end": 9.15,
+      "crop": [
+        708,
+        128,
+        504,
+        896
+      ],
+      "zoom_start": 1.0,
+      "zoom_end": 1.075,
+      "personajes": [
+        "Marcos"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "index": 12,
+      "original_shot": 9,
+      "start": 7.7,
+      "end": 7.966666666666667,
+      "frames": 8,
+      "source_start_frame": 549,
+      "source_end_frame": 597,
+      "source_start": 9.15,
+      "source_end": 9.95,
+      "crop": [
+        698,
+        104,
+        522,
+        928
+      ],
+      "zoom_start": 1.115,
+      "zoom_end": 1.16,
+      "personajes": [
+        "Madre"
+      ],
+      "plano": "CARA"
+    },
+    {
+      "index": 13,
+      "original_shot": 10,
+      "start": 7.966666666666667,
+      "end": 8.8,
+      "frames": 25,
+      "source_start_frame": 597,
+      "source_end_frame": 662,
+      "source_start": 9.95,
+      "source_end": 11.033333333333333,
+      "crop": [
+        680,
+        76,
+        558,
+        992
+      ],
+      "zoom_start": 1.0,
+      "zoom_end": 1.075,
+      "personajes": [
+        "Madre"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "index": 14,
+      "original_shot": 10,
+      "start": 8.8,
+      "end": 9.366666666666667,
+      "frames": 17,
+      "source_start_frame": 662,
+      "source_end_frame": 705,
+      "source_start": 11.033333333333333,
+      "source_end": 11.75,
+      "crop": [
+        680,
+        76,
+        558,
+        992
+      ],
+      "zoom_start": 1.105,
+      "zoom_end": 1.18,
+      "personajes": [
+        "Madre"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "index": 15,
+      "original_shot": 11,
+      "start": 9.366666666666667,
+      "end": 10.3,
+      "frames": 28,
+      "source_start_frame": 705,
+      "source_end_frame": 773,
+      "source_start": 11.75,
+      "source_end": 12.883333333333333,
+      "crop": [
+        698,
+        104,
+        522,
+        928
+      ],
+      "zoom_start": 1.0,
+      "zoom_end": 1.075,
+      "personajes": [
+        "Madre"
+      ],
+      "plano": "CARA"
+    },
+    {
+      "index": 16,
+      "original_shot": 11,
+      "start": 10.3,
+      "end": 11.2,
+      "frames": 27,
+      "source_start_frame": 773,
+      "source_end_frame": 837,
+      "source_start": 12.883333333333333,
+      "source_end": 13.95,
+      "crop": [
+        698,
+        104,
+        522,
+        928
+      ],
+      "zoom_start": 1.105,
+      "zoom_end": 1.18,
+      "personajes": [
+        "Madre"
+      ],
+      "plano": "CARA"
+    },
+    {
+      "index": 17,
+      "original_shot": 12,
+      "start": 11.2,
+      "end": 12.3,
+      "frames": 33,
+      "source_start_frame": 837,
+      "source_end_frame": 902,
+      "source_start": 13.95,
+      "source_end": 15.033333333333333,
+      "crop": [
+        698,
+        104,
+        522,
+        928
+      ],
+      "zoom_start": 1.0,
+      "zoom_end": 1.075,
+      "personajes": [
+        "Hija"
+      ],
+      "plano": "CARA"
+    },
+    {
+      "index": 18,
+      "original_shot": 12,
+      "start": 12.3,
+      "end": 13.233333333333333,
+      "frames": 28,
+      "source_start_frame": 902,
+      "source_end_frame": 957,
+      "source_start": 15.033333333333333,
+      "source_end": 15.95,
+      "crop": [
+        698,
+        104,
+        522,
+        928
+      ],
+      "zoom_start": 1.105,
+      "zoom_end": 1.18,
+      "personajes": [
+        "Hija"
+      ],
+      "plano": "CARA"
+    },
+    {
+      "index": 19,
+      "original_shot": 13,
+      "start": 13.233333333333333,
+      "end": 13.733333333333333,
+      "frames": 15,
+      "source_start_frame": 957,
+      "source_end_frame": 999,
+      "source_start": 15.95,
+      "source_end": 16.65,
+      "crop": [
+        736,
+        220,
+        450,
+        800
+      ],
+      "zoom_start": 1.0,
+      "zoom_end": 1.075,
+      "personajes": [
+        "Madre"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "index": 20,
+      "original_shot": 13,
+      "start": 13.733333333333333,
+      "end": 14.233333333333333,
+      "frames": 15,
+      "source_start_frame": 999,
+      "source_end_frame": 1041,
+      "source_start": 16.65,
+      "source_end": 17.35,
+      "crop": [
+        736,
+        220,
+        450,
+        800
+      ],
+      "zoom_start": 1.105,
+      "zoom_end": 1.18,
+      "personajes": [
+        "Madre"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "index": 21,
+      "original_shot": 14,
+      "start": 14.233333333333333,
+      "end": 15.433333333333334,
+      "frames": 36,
+      "source_start_frame": 1041,
+      "source_end_frame": 1089,
+      "source_start": 17.35,
+      "source_end": 18.15,
+      "crop": [
+        680,
+        76,
+        558,
+        992
+      ],
+      "zoom_start": 1.0,
+      "zoom_end": 1.045,
+      "personajes": [
+        "Marcos"
+      ],
+      "plano": "PANTALON"
+    },
+    {
+      "index": 22,
+      "original_shot": 15,
+      "start": 15.433333333333334,
+      "end": 15.8,
+      "frames": 11,
+      "source_start_frame": 1089,
+      "source_end_frame": 1137,
+      "source_start": 18.15,
+      "source_end": 18.95,
+      "crop": [
+        698,
+        104,
+        522,
+        928
+      ],
+      "zoom_start": 1.115,
+      "zoom_end": 1.16,
+      "personajes": [
+        "Hija"
+      ],
+      "plano": "CARA"
+    },
+    {
+      "index": 23,
+      "original_shot": 16,
+      "start": 15.8,
+      "end": 17.066666666666666,
+      "frames": 38,
+      "source_start_frame": 1137,
+      "source_end_frame": 1204,
+      "source_start": 18.95,
+      "source_end": 20.066666666666666,
+      "crop": [
+        742,
+        252,
+        432,
+        768
+      ],
+      "zoom_start": 1.0,
+      "zoom_end": 1.075,
+      "personajes": [
+        "Marcos"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "index": 24,
+      "original_shot": 16,
+      "start": 17.066666666666666,
+      "end": 17.8,
+      "frames": 22,
+      "source_start_frame": 1204,
+      "source_end_frame": 1244,
+      "source_start": 20.066666666666666,
+      "source_end": 20.733333333333334,
+      "crop": [
+        742,
+        252,
+        432,
+        768
+      ],
+      "zoom_start": 1.105,
+      "zoom_end": 1.18,
+      "personajes": [
+        "Marcos"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "index": 25,
+      "original_shot": 16,
+      "start": 17.8,
+      "end": 18.6,
+      "frames": 24,
+      "source_start_frame": 1244,
+      "source_end_frame": 1287,
+      "source_start": 20.733333333333334,
+      "source_end": 21.45,
+      "crop": [
+        742,
+        252,
+        432,
+        768
+      ],
+      "zoom_start": 1.0,
+      "zoom_end": 1.075,
+      "personajes": [
+        "Marcos"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "index": 26,
+      "original_shot": 17,
+      "start": 18.6,
+      "end": 19.4,
+      "frames": 24,
+      "source_start_frame": 1287,
+      "source_end_frame": 1315,
+      "source_start": 21.45,
+      "source_end": 21.916666666666668,
+      "crop": [
+        698,
+        104,
+        522,
+        928
+      ],
+      "zoom_start": 1.0,
+      "zoom_end": 1.075,
+      "personajes": [
+        "Hija"
+      ],
+      "plano": "CARA"
+    },
+    {
+      "index": 27,
+      "original_shot": 17,
+      "start": 19.4,
+      "end": 20.3,
+      "frames": 27,
+      "source_start_frame": 1315,
+      "source_end_frame": 1347,
+      "source_start": 21.916666666666668,
+      "source_end": 22.45,
+      "crop": [
+        698,
+        104,
+        522,
+        928
+      ],
+      "zoom_start": 1.105,
+      "zoom_end": 1.18,
+      "personajes": [
+        "Hija"
+      ],
+      "plano": "CARA"
+    },
+    {
+      "index": 28,
+      "original_shot": 18,
+      "start": 20.3,
+      "end": 20.833333333333332,
+      "frames": 16,
+      "source_start_frame": 1347,
+      "source_end_frame": 1389,
+      "source_start": 22.45,
+      "source_end": 23.15,
+      "crop": [
+        698,
+        104,
+        522,
+        928
+      ],
+      "zoom_start": 1.115,
+      "zoom_end": 1.16,
+      "personajes": [
+        "Madre"
+      ],
+      "plano": "CARA"
+    },
+    {
+      "index": 29,
+      "original_shot": 19,
+      "start": 20.833333333333332,
+      "end": 21.466666666666665,
+      "frames": 19,
+      "source_start_frame": 1389,
+      "source_end_frame": 1437,
+      "source_start": 23.15,
+      "source_end": 23.95,
+      "crop": [
+        722,
+        188,
+        468,
+        832
+      ],
+      "zoom_start": 1.0,
+      "zoom_end": 1.075,
+      "personajes": [
+        "Marcos"
+      ],
+      "plano": "MEDIO"
+    }
+  ],
+  "interventions": [
+    {
+      "id": "hija_1",
+      "role": "Hija",
+      "voice": "Cristina",
+      "raw_start": 0,
+      "raw_end": 2.17,
+      "start": 0.01,
+      "scene_start": 0.0,
+      "scene_end": 2.033333333333333,
+      "text": "¡Mamá, hoy conoces a Marcos!",
+      "duration": 1.9908256880733943,
+      "end": 2.000825688073394,
+      "gain_db": 1.8000000000000007,
+      "tempo": 1.09
+    },
+    {
+      "id": "madre_1",
+      "role": "Madre",
+      "voice": "Jess",
+      "raw_start": 0,
+      "raw_end": 2.08,
+      "start": 2.043333333333333,
+      "scene_start": 2.033333333333333,
+      "scene_end": 3.966666666666667,
+      "text": "¡Por fin! ¿Dónde está?",
+      "duration": 1.9082568807339448,
+      "end": 3.951590214067278,
+      "gain_db": 0.9499999999999993,
+      "tempo": 1.09
+    },
+    {
+      "id": "hija_2",
+      "role": "Hija",
+      "voice": "Cristina",
+      "raw_start": 2.2,
+      "raw_end": 4.14,
+      "start": 4.776666666666666,
+      "scene_start": 4.766666666666667,
+      "scene_end": 6.6,
+      "text": "Mamá, este es Marcos.",
+      "duration": 1.7798165137614672,
+      "end": 6.556483180428134,
+      "gain_db": 1.8000000000000007,
+      "tempo": 1.09
+    },
+    {
+      "id": "marcos_1",
+      "role": "Marcos",
+      "voice": "Marcelo",
+      "raw_start": 0,
+      "raw_end": 1.43,
+      "start": 6.609999999999999,
+      "scene_start": 6.6,
+      "scene_end": 7.966666666666667,
+      "text": "Buenas tardes, señora.",
+      "duration": 1.3490566037735847,
+      "end": 7.959056603773584,
+      "gain_db": 6.129999999999999,
+      "tempo": 1.06
+    },
+    {
+      "id": "madre_2",
+      "role": "Madre",
+      "voice": "Jess",
+      "raw_start": 2.12,
+      "raw_end": 5.58,
+      "start": 7.976666666666667,
+      "scene_start": 7.966666666666667,
+      "scene_end": 11.2,
+      "text": "¿Dónde me he metido? ¿Qué me ha traído mi hija?",
+      "thought": true,
+      "duration": 3.174311926605504,
+      "end": 11.150978593272171,
+      "gain_db": 0.9499999999999993,
+      "tempo": 1.09
+    },
+    {
+      "id": "hija_3",
+      "role": "Hija",
+      "voice": "Cristina",
+      "raw_start": 4.2,
+      "raw_end": 6.37,
+      "start": 11.209999999999999,
+      "scene_start": 11.2,
+      "scene_end": 13.233333333333333,
+      "text": "Mamá… no empieces.",
+      "duration": 1.9908256880733943,
+      "end": 13.200825688073394,
+      "gain_db": 1.8000000000000007,
+      "tempo": 1.09
+    },
+    {
+      "id": "madre_3",
+      "role": "Madre",
+      "voice": "Jess",
+      "raw_start": 5.6,
+      "raw_end": 8.33,
+      "start": 13.243333333333332,
+      "scene_start": 13.233333333333333,
+      "scene_end": 15.8,
+      "text": "Quítate eso… ¡y súbete los pantalones!",
+      "duration": 2.504587155963303,
+      "end": 15.747920489296636,
+      "gain_db": 0.9499999999999993,
+      "tempo": 1.09
+    },
+    {
+      "id": "marcos_2",
+      "role": "Marcos",
+      "voice": "Marcelo",
+      "raw_start": 1.43,
+      "raw_end": 4.33,
+      "start": 15.81,
+      "scene_start": 15.8,
+      "scene_end": 18.6,
+      "text": "¡Sí, señora! Mi madre dice lo mismo.",
+      "duration": 2.7358490566037736,
+      "end": 18.545849056603775,
+      "gain_db": 6.129999999999999,
+      "tempo": 1.06
+    },
+    {
+      "id": "hija_4",
+      "role": "Hija",
+      "voice": "Cristina",
+      "raw_start": 6.4,
+      "raw_end": 8.2,
+      "start": 18.610000000000003,
+      "scene_start": 18.6,
+      "scene_end": 20.3,
+      "text": "¡Tierra, trágame!",
+      "duration": 1.6513761467889898,
+      "end": 20.261376146788994,
+      "gain_db": 1.8000000000000007,
+      "tempo": 1.09
+    },
+    {
+      "id": "madre_4",
+      "role": "Madre",
+      "voice": "Jess",
+      "raw_start": 8.34,
+      "raw_end": 9.3,
+      "start": 20.310000000000002,
+      "scene_start": 20.3,
+      "scene_end": 21.466666666666665,
+      "text": "¡Y la gorra!",
+      "duration": 0.8807339449541292,
+      "end": 21.190733944954133,
+      "gain_db": 0.9499999999999993,
+      "tempo": 1.09
+    }
+  ]
+}

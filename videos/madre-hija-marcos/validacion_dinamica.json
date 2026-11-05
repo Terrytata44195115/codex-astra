@@ -1,0 +1,43 @@
+{
+  "file": "short_dinamico_con_musica_1080x1920.mp4",
+  "sha256": "02dc8437a0dc043d2776426bcbdb47703b3ba763f33da1ec37d241087fd63c75",
+  "metadata": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1080,
+        "height": 1920,
+        "r_frame_rate": "30/1",
+        "duration": "21.466667",
+        "nb_frames": "644"
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 2,
+        "r_frame_rate": "0/0",
+        "duration": "21.466000",
+        "nb_frames": "1008"
+      }
+    ],
+    "format": {
+      "duration": "21.466667",
+      "size": "18775960"
+    }
+  },
+  "shots": 29,
+  "dialogue_interventions": 10,
+  "previous_duration": 24.3,
+  "new_duration": 21.466666666666665,
+  "full_av_decode": "passed",
+  "dialogue_overlap": "none",
+  "encoded_audio_lufs": -15.78,
+  "encoded_audio_true_peak_dbtp": -1.45,
+  "captions": "Retimed to the supplied voice clips; short animated chunks",
+  "visual_review": "Faces, captions, entrance graphics and reaction frames checked; cap headroom adjusted",
+  "music": "Instrumental separated from the user-provided reference; dialogue track from that reference excluded"
+}
