@@ -4,12 +4,20 @@
 
 ## Instalar esta fase
 
-1. Stop en Studio.
-2. Descarga y extrae DESCARGAR_FASE1_REPARTO.zip.
-3. Workspace > Insertar > Importar modelo Roblox > HR_Fase1Reparto.rbxmx.
-4. Copia ACTIVAR_FASE1.txt en Comando y pulsa Ejecutar. Espera las consultas opcionales de accesorios.
-5. Debe aparecer [HR REPARTO] FASE 1 LISTA.
-6. La previsualizacion queda seleccionada. Pulsa **F, solo F**, para encuadrarla. **No F5 ni Play en esta fase.** Envia una captura de los tres actores y las ultimas lineas [HR REPARTO].
+### Opcion directa: copiar y pegar, sin importar el modelo
+
+1. Abre la copia del proyecto Base_Historias revisado y pulsa Stop en Studio.
+2. Abre PEGAR_SIN_IMPORTAR.txt como texto. Ctrl+A y Ctrl+C para copiarlo completo.
+3. En Studio, pestana Script > Comando. Haz clic dentro de la barra de Comando, Ctrl+A y Ctrl+V. Pulsa Ejecutar.
+4. En Salida aparecera [HR REPARTO] Iniciando preparacion del reparto... Espera la busqueda de accesorios opcionales.
+5. Debe terminar con [HR REPARTO] FASE 1 LISTA. La previsualizacion queda seleccionada; pulsa **F, solo F** para encuadrarla.
+6. **No F5 ni Play en esta fase.** Envia una captura de los tres actores y las ultimas lineas [HR REPARTO].
+
+Este archivo contiene el mismo preparador que el modelo; no necesita cargar archivos locales desde Comando ni modificar ajustes de seguridad. Necesita las referencias del proyecto original revisado. Si el proyecto esta vacio o falta una referencia, se detiene con un mensaje; no crea sustitutos incompatibles.
+
+### Opcion mediante modelo
+
+El ZIP tambien incluye HR_Fase1Reparto.rbxmx y ACTIVAR_FASE1.txt. Si tu version de Studio ofrece importar un modelo desde archivo, importa el modelo en Workspace con Stop y luego ejecuta ACTIVAR_FASE1.txt en Comando. Usa una sola de las dos opciones.
 
 ## Que hace
 
