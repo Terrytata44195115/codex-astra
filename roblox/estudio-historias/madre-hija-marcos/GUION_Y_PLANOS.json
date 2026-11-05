@@ -1,0 +1,252 @@
+{
+  "titulo": "Mamá conoce a Marcos",
+  "duracion": 24,
+  "audio": "Guia de montaje; no se incluyen voces ni musica sintetizadas.",
+  "escenas": [
+    {
+      "inicio": 0.0,
+      "fin": 2.0,
+      "rol": "Hija",
+      "voz": "Hija",
+      "texto": "¡Mamá, hoy conoces a Marcos!",
+      "voz_interior": false
+    },
+    {
+      "inicio": 2.0,
+      "fin": 3.5,
+      "rol": "Madre",
+      "voz": "Madre",
+      "texto": "¡Por fin! ¿Dónde está?",
+      "voz_interior": false
+    },
+    {
+      "inicio": 3.5,
+      "fin": 5.5,
+      "rol": null,
+      "voz": null,
+      "texto": "",
+      "voz_interior": false
+    },
+    {
+      "inicio": 5.5,
+      "fin": 7.5,
+      "rol": "Hija",
+      "voz": "Hija",
+      "texto": "Mamá, este es Marcos.",
+      "voz_interior": false
+    },
+    {
+      "inicio": 7.5,
+      "fin": 10.0,
+      "rol": "Novio",
+      "voz": "Marcos",
+      "texto": "Buenas tardes, señora.",
+      "voz_interior": false
+    },
+    {
+      "inicio": 10.0,
+      "fin": 14.0,
+      "rol": "Madre",
+      "voz": "Madre",
+      "texto": "¿Dónde me he metido? ¿Qué me ha traído mi hija?",
+      "voz_interior": true
+    },
+    {
+      "inicio": 14.0,
+      "fin": 16.0,
+      "rol": "Hija",
+      "voz": "Hija",
+      "texto": "Mamá… no empieces.",
+      "voz_interior": false
+    },
+    {
+      "inicio": 16.0,
+      "fin": 19.0,
+      "rol": "Madre",
+      "voz": "Madre",
+      "texto": "Quítate eso… ¡y súbete los pantalones!",
+      "voz_interior": false
+    },
+    {
+      "inicio": 19.0,
+      "fin": 21.5,
+      "rol": "Novio",
+      "voz": "Marcos",
+      "texto": "¡Sí, señora! Mi madre dice lo mismo.",
+      "voz_interior": false
+    },
+    {
+      "inicio": 21.5,
+      "fin": 22.5,
+      "rol": "Hija",
+      "voz": "Hija",
+      "texto": "¡Tierra, trágame!",
+      "voz_interior": false
+    },
+    {
+      "inicio": 22.5,
+      "fin": 24.0,
+      "rol": "Madre",
+      "voz": "Madre",
+      "texto": "¡Y la gorra!",
+      "voz_interior": false
+    }
+  ],
+  "planos": [
+    {
+      "inicio": 0.0,
+      "fin": 1.1,
+      "personajes": [
+        "Madre",
+        "Hija"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "inicio": 1.1,
+      "fin": 2.0,
+      "personajes": [
+        "Hija"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "inicio": 2.0,
+      "fin": 3.5,
+      "personajes": [
+        "Madre"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "inicio": 3.5,
+      "fin": 4.7,
+      "personajes": [
+        "Marcos"
+      ],
+      "plano": "ENTERO"
+    },
+    {
+      "inicio": 4.7,
+      "fin": 5.5,
+      "personajes": [
+        "Marcos"
+      ],
+      "plano": "HOMBRO"
+    },
+    {
+      "inicio": 5.5,
+      "fin": 6.4,
+      "personajes": [
+        "Madre",
+        "Hija",
+        "Marcos"
+      ],
+      "plano": "ENTERO"
+    },
+    {
+      "inicio": 6.4,
+      "fin": 7.5,
+      "personajes": [
+        "Hija"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "inicio": 7.5,
+      "fin": 9.2,
+      "personajes": [
+        "Marcos"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "inicio": 9.2,
+      "fin": 10.0,
+      "personajes": [
+        "Madre"
+      ],
+      "plano": "CARA"
+    },
+    {
+      "inicio": 10.0,
+      "fin": 11.8,
+      "personajes": [
+        "Madre"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "inicio": 11.8,
+      "fin": 14.0,
+      "personajes": [
+        "Madre"
+      ],
+      "plano": "CARA"
+    },
+    {
+      "inicio": 14.0,
+      "fin": 16.0,
+      "personajes": [
+        "Hija"
+      ],
+      "plano": "CARA"
+    },
+    {
+      "inicio": 16.0,
+      "fin": 17.4,
+      "personajes": [
+        "Madre"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "inicio": 17.4,
+      "fin": 18.2,
+      "personajes": [
+        "Marcos"
+      ],
+      "plano": "PANTALON"
+    },
+    {
+      "inicio": 18.2,
+      "fin": 19.0,
+      "personajes": [
+        "Hija"
+      ],
+      "plano": "CARA"
+    },
+    {
+      "inicio": 19.0,
+      "fin": 21.5,
+      "personajes": [
+        "Marcos"
+      ],
+      "plano": "MEDIO"
+    },
+    {
+      "inicio": 21.5,
+      "fin": 22.5,
+      "personajes": [
+        "Hija"
+      ],
+      "plano": "CARA"
+    },
+    {
+      "inicio": 22.5,
+      "fin": 23.2,
+      "personajes": [
+        "Madre"
+      ],
+      "plano": "CARA"
+    },
+    {
+      "inicio": 23.2,
+      "fin": 24.0,
+      "personajes": [
+        "Marcos"
+      ],
+      "plano": "MEDIO"
+    }
+  ]
+}

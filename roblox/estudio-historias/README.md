@@ -1,6 +1,6 @@
 # Base organizada para historias Roblox
 
-Este directorio conserva el inventario del proyecto revisado y prepara la nueva base por fases. Incluye un preparador de reparto y una prueba corta de tres actores, pendiente de validacion en Studio. **Todavia no contiene la historia nueva completa ni un panel terminado.** Los archivos originales y los paquetes anteriores se conservan.
+Este directorio conserva el inventario del proyecto revisado y prepara la nueva base por fases. Incluye un preparador de reparto, una prueba corta de tres actores y la version narrativa de Marcos de 24 segundos, pendiente de validacion visual en Studio. **Todavia no contiene un panel terminado.** Los archivos originales y los paquetes anteriores se conservan.
 
 ## Objetivo
 
@@ -14,6 +14,8 @@ Ya se ha inspeccionado Base_Historias.rbxl, la version de chicos con cierre adic
 
 - [Fase 1: reparto](fase1-reparto/README.md): tres apariencias provisionales sobre los rigs Motor6D del proyecto; el usuario ya ha mostrado la galeria de los tres actores. Gorra, mascara, tiro bajo y disenos definitivos siguen pendientes.
 - [Fase 2: prueba corta](fase2-prueba/README.md): entrada, saludo y cuatro encuadres con centro protegido para recorte 9:16. Incluye instalador directo y restaurador del video anterior. Codigo e instalacion comprobados fuera de Studio; reproduccion visual y carga efectiva de las pistas pendientes.
+
+- [Mama conoce a Marcos: 24 segundos](madre-hija-marcos/README.md): nueva apertura ilusionada, entrada corriendo, presentacion y reaccion palida de la madre. Diecinueve planos y gestos por frase. Caras dibujadas y complementos provisionales; conserva la ropa actual y el tiro bajo sigue pendiente. Actualiza los mismos controladores propios de fase 2. Incluye guion y SRT para editar las voces; no incluye audio sintetizado.
 
 ## Orden de trabajo
 

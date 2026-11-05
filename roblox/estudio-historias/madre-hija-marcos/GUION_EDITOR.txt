@@ -1,0 +1,50 @@
+MAMA CONOCE A MARCOS — GUIA PARA EL EDITOR
+Duracion: 24 segundos desde que termina la cuenta atras.
+Formato de entrega final: 1080x1920. El video de Studio puede grabarse horizontal: recortar el centro a 9:16.
+No incluir la cuenta atras. Las voces y la musica se montan despues; estos archivos no contienen audio.
+
+VOCES
+Hija: ilusionada al principio, luego avergonzada. Madre: alegre al principio, asustada en el pensamiento y tajante al final. Marcos: educado, algo nervioso.
+10-14 s: la frase de la madre es pensamiento en voz en off; puede llevar un eco muy sutil.
+
+DIALOGOS
+0-2 s | Hija: ¡Mamá, hoy conoces a Marcos!
+2-3.5 s | Madre: ¡Por fin! ¿Dónde está?
+3.5-5.5 s | Sin dialogo: Marcos entra corriendo.
+5.5-7.5 s | Hija: Mamá, este es Marcos.
+7.5-10 s | Marcos: Buenas tardes, señora.
+10-14 s | Madre (pensamiento): ¿Dónde me he metido? ¿Qué me ha traído mi hija?
+14-16 s | Hija: Mamá… no empieces.
+16-19 s | Madre: Quítate eso… ¡y súbete los pantalones!
+19-21.5 s | Marcos: ¡Sí, señora! Mi madre dice lo mismo.
+21.5-22.5 s | Hija: ¡Tierra, trágame!
+22.5-24 s | Madre: ¡Y la gorra!
+
+MONTAJE
+Los cortes de camara ya estan en la captura: conservar su orden. Priorizar cortes directos y los pequenos acercamientos existentes.
+Musica alegre y suave durante la presentacion. Interrumpirla al aparecer Marcos (3,5 s); puede entrar un golpe comico breve.
+10 s: silencio corto o bajada de la base para destacar la palidez y el pensamiento de la madre.
+23,2 s: acento comico discreto cuando Marcos se lleva la mano a la gorra. Terminar en 24 s.
+Subtitulos: DIALOGOS_MARCOS.srt es una referencia temporal. Si se usan palabras destacadas, dejarlas bajo las caras y sin tapar las manos.
+Ajustar las voces a sus intervalos con pausas naturales. No dar por sincronizado el audio hasta revisar el montaje.
+
+PLANOS INCLUIDOS
+0-1.1 s | MEDIO | Madre, Hija
+1.1-2 s | MEDIO | Hija
+2-3.5 s | MEDIO | Madre
+3.5-4.7 s | ENTERO | Marcos
+4.7-5.5 s | HOMBRO | Marcos
+5.5-6.4 s | ENTERO | Madre, Hija, Marcos
+6.4-7.5 s | MEDIO | Hija
+7.5-9.2 s | MEDIO | Marcos
+9.2-10 s | CARA | Madre
+10-11.8 s | MEDIO | Madre
+11.8-14 s | CARA | Madre
+14-16 s | CARA | Hija
+16-17.4 s | MEDIO | Madre
+17.4-18.2 s | PANTALON | Marcos
+18.2-19 s | CARA | Hija
+19-21.5 s | MEDIO | Marcos
+21.5-22.5 s | CARA | Hija
+22.5-23.2 s | CARA | Madre
+23.2-24 s | MEDIO | Marcos
