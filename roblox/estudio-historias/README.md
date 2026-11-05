@@ -1,6 +1,6 @@
 # Base organizada para historias Roblox
 
-Este directorio organiza el trabajo futuro. **Todavia no contiene un motor nuevo instalado ni un panel terminado.** Conserva decisiones y recursos para no repetir los experimentos del chat. Los proyectos actuales y los paquetes anteriores no se modifican.
+Este directorio conserva el inventario del proyecto revisado y prepara la nueva base por fases. Incluye un preparador de reparto y una prueba corta de tres actores, pendiente de validacion en Studio. **Todavia no contiene la historia nueva completa ni un panel terminado.** Los archivos originales y los paquetes anteriores se conservan.
 
 ## Objetivo
 
@@ -9,6 +9,11 @@ Un motor fijo de actores, acciones, caras y camaras. Cada video cambia una histo
 ## Proyecto recibido
 
 Ya se ha inspeccionado Base_Historias.rbxl, la version de chicos con cierre adicional. Consulta la [revision concreta](auditoria-base/REVISION.md). El archivo original permanece sin modificar. No hace falta volver a enviarlo para esta revision.
+
+## Entregas por fases
+
+- [Fase 1: reparto](fase1-reparto/README.md): tres apariencias provisionales sobre los rigs Motor6D del proyecto; el usuario ya ha mostrado la galeria de los tres actores. Gorra, mascara, tiro bajo y disenos definitivos siguen pendientes.
+- [Fase 2: prueba corta](fase2-prueba/README.md): entrada, saludo y cuatro encuadres con centro protegido para recorte 9:16. Incluye instalador directo y restaurador del video anterior. Codigo e instalacion comprobados fuera de Studio; reproduccion visual y carga efectiva de las pistas pendientes.
 
 ## Orden de trabajo
 

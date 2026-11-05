@@ -1,0 +1,25 @@
+assert(not game:GetService("RunService"):IsRunning(),"Primero pulsa Stop.")
+local RS=game:GetService("ReplicatedStorage")
+local root=RS:FindFirstChild("HR_PruebaReparto")
+assert(root and root:GetAttribute("HR_Owner")=="HR_PRUEBA_REPARTO_1","No se reconoce la prueba.")
+local gallery=root:FindFirstChild("Galeria")
+assert(gallery and gallery:IsA("ObjectValue") and gallery.Value and gallery.Value:GetAttribute("HR_Owner")=="HR_ESTUDIO_REPARTO_1","Galeria no reconocida.")
+local storage=game:GetService("ServerStorage")
+local other=storage:FindFirstChild("HR_RevisionReparto")
+assert(not other or other==gallery.Value,"Existe otra galeria guardada.")
+local previous={}
+for _,name in ipairs({"ServidorAnterior","CamaraAnterior"}) do
+ local link=root:FindFirstChild(name)
+ assert(link and link:IsA("ObjectValue") and link.Value and link.Value:IsA("BaseScript") and link.Value:GetAttribute("HR_Owner")=="HR_Cine_V2" and type(link:GetAttribute("EstabaActivo"))=="boolean","Respaldo no reconocido: "..name)
+ table.insert(previous,link)
+end
+local scripts={
+ game:GetService("ServerScriptService"):FindFirstChild("HR_PruebaRepartoServidor"),
+ game:GetService("StarterPlayer").StarterPlayerScripts:FindFirstChild("HR_PruebaRepartoCamara"),
+}
+assert(#scripts==2,"Faltan los controladores de prueba.")
+for _,script in ipairs(scripts) do assert(script:IsA("BaseScript") and script:GetAttribute("HR_Owner")=="HR_PRUEBA_REPARTO_1","Controlador de prueba no reconocido.") end
+for _,script in ipairs(scripts) do script.Enabled=false end
+gallery.Value.Parent=storage
+for _,link in ipairs(previous) do link.Value.Enabled=link:GetAttribute("EstabaActivo") end
+print("[HR PRUEBA] Controladores anteriores restaurados. Guarda y pulsa F5 para la historia anterior.")
