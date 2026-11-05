@@ -3,7 +3,7 @@ const {LuauState}=await import(process.env.LUAU_WEB_ENTRY || 'luau-web');
 
 const root=new URL('../',import.meta.url);
 const state=await LuauState.createAsync();
-for (const name of ['Configuracion.luau','Interpretacion.luau','Servidor.luau','Camara.luau','PEGAR_HISTORIA_MARCOS.txt','VOLVER_HISTORIA_ANTERIOR.txt']) {
+for (const name of ['Configuracion.luau','Interpretacion.luau','CarasCliente.luau','Servidor.luau','Camara.luau','PEGAR_HISTORIA_MARCOS.txt','VOLVER_HISTORIA_ANTERIOR.txt']) {
   state.loadstring(fs.readFileSync(new URL(name,root),'utf8'),name,true);
   console.log('Compilation PASS:',name);
 }

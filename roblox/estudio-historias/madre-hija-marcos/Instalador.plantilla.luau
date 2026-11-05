@@ -30,12 +30,14 @@ local texts={
  Interpretacion=__ACTING_SOURCE__,
  Servidor=__SERVER_SOURCE__,
  Camara=__CAMERA_SOURCE__,
+ CarasCliente=__FACE_CLIENT_SOURCE__,
 }
 local definitions={
  {parent=root,name="Configuracion",class="ModuleScript",text=texts.Configuracion},
  {parent=root,name="Interpretacion",class="ModuleScript",text=texts.Interpretacion},
  {parent=SSS,name="HR_PruebaRepartoServidor",class="Script",text=texts.Servidor},
  {parent=SPS,name="HR_PruebaRepartoCamara",class="LocalScript",text=texts.Camara},
+ {parent=SPS,name="HR_CarasMarcos",class="LocalScript",text=texts.CarasCliente},
 }
 for _,entry in ipairs(definitions) do
  entry.object=entry.parent and entry.parent:FindFirstChild(entry.name)

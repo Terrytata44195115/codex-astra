@@ -1,5 +1,5 @@
--- Caras dibujadas sobre SurfaceGui: no dependen de IDs de texturas externas.
--- Las poses reutilizan los Motor6D presentes; no se reconstruye el rig.
+-- Expresiones de cara como Decal: las imagenes se crean en el cliente de Studio.
+-- No cambia las poses, la palidez, los Motor6D ni los tiempos de la historia.
 local B={}
 local function a(x,y,z) return CFrame.Angles(math.rad(x or 0),math.rad(y or 0),math.rad(z or 0)) end
 function B.Pose(key,t)
@@ -34,20 +34,6 @@ function B.Pose(key,t)
  end
  return p
 end
-local function oval(parent,x,y,w,h,color)
- local f=Instance.new("Frame")
- f.AnchorPoint=Vector2.new(0.5,0.5);f.Position=UDim2.fromScale(x,y);f.Size=UDim2.fromScale(w,h)
- f.BackgroundColor3=color;f.BorderSizePixel=0;f.Parent=parent
- local r=Instance.new("UICorner");r.CornerRadius=UDim.new(1,0);r.Parent=f
- return f
-end
-local function line(parent,x1,y1,x2,y2,width,color)
- local f=Instance.new("Frame")
- f.AnchorPoint=Vector2.new(0.5,0.5);f.Position=UDim2.fromScale((x1+x2)/2,(y1+y2)/2)
- f.Size=UDim2.fromScale(math.sqrt((x2-x1)^2+(y2-y1)^2),width)
- f.Rotation=math.deg(math.atan2(y2-y1,x2-x1));f.BorderSizePixel=0;f.BackgroundColor3=color;f.Parent=parent
- return f
-end
 function B.Preparar(actor)
  local head=actor.model.Head
  actor.skin={}
@@ -55,85 +41,133 @@ function B.Preparar(actor)
   local part=actor.model:FindFirstChild(name)
   if part then table.insert(actor.skin,{part=part,color=part.Color}) end
  end
- for _,item in ipairs(head:GetChildren()) do
-  if item:IsA("Decal") and item.Face==Enum.NormalId.Front then item.Transparency=1 end
- end
- local gui=Instance.new("SurfaceGui")
- gui.Name="HR_CaraDibujada";gui.Adornee=head;gui.Face=Enum.NormalId.Front
- gui.SizingMode=Enum.SurfaceGuiSizingMode.FixedSize;gui.CanvasSize=Vector2.new(512,512)
- gui.AlwaysOnTop=false;gui.LightInfluence=0;gui.Parent=head
- actor.faceGui=gui
+ -- Ya no se oculta la cara original antes de disponer de una textura nueva.
+ local legacy=head:FindFirstChild("HR_CaraDibujada")
+ if legacy and legacy:IsA("SurfaceGui") then legacy:Destroy() end
 end
 function B.Cara(actor,key)
  if actor.faceKey==key then return end
  actor.faceKey=key
- actor.faceGui:ClearAllChildren()
- local container=Instance.new("Frame")
- container.Size=UDim2.fromScale(1,1);container.BackgroundTransparency=1;container.Parent=actor.faceGui
- local ink=Color3.fromRGB(27,21,26)
- local white=Color3.fromRGB(255,255,250)
- local alarm=key=="ALARMA"
- local happy=key=="ALEGRE"
- local worried=key=="INQUIETA" or key=="VERGUENZA"
- for _,x in ipairs({0.33,0.67}) do
-  if happy then
-   line(container,x-0.07,0.43,x,0.39,0.022,ink)
-   line(container,x,0.39,x+0.07,0.43,0.022,ink)
-  else
-   local eye=oval(container,x,0.42,alarm and 0.19 or 0.14,alarm and 0.25 or 0.17,ink)
-   oval(eye,0.5,0.5,0.78,0.82,white)
-   local pupil=oval(eye,0.5,0.53,alarm and 0.27 or 0.43,alarm and 0.40 or 0.60,ink)
-   oval(pupil,0.28,0.23,0.3,0.2,white)
-  end
- end
- local leftTilt=key=="ENFADADA" and 0.05 or worried and -0.045 or 0
- line(container,0.23,0.27-leftTilt,0.41,0.27+leftTilt,0.026,ink)
- line(container,0.59,0.27+leftTilt,0.77,0.27-leftTilt,0.026,ink)
- if alarm then
-  local mouth=oval(container,0.5,0.72,0.19,0.22,ink)
-  oval(mouth,0.5,0.80,0.60,0.20,Color3.fromRGB(237,133,150))
- elseif happy then
-  line(container,0.38,0.66,0.45,0.72,0.025,ink)
-  line(container,0.45,0.72,0.55,0.72,0.025,ink)
-  line(container,0.55,0.72,0.62,0.66,0.025,ink)
- else
-  line(container,0.40,0.70,0.5,0.68,0.025,ink)
-  line(container,0.5,0.68,0.60,0.70,0.025,ink)
- end
- if worried or happy then
-  local l=oval(container,0.22,0.61,0.12,0.07,Color3.fromRGB(245,129,147));l.BackgroundTransparency=0.35
-  local r=oval(container,0.78,0.61,0.12,0.07,Color3.fromRGB(245,129,147));r.BackgroundTransparency=0.35
- end
- if alarm or key=="INQUIETA" then
-  local sweat=oval(container,0.84,0.34,0.055,0.12,Color3.fromRGB(112,204,255));sweat.Rotation=-20
- end
+ actor.model.Head:SetAttribute("HR_Expresion",key)
 end
 function B.Palidez(actor,amount)
  for _,entry in ipairs(actor.skin) do entry.part.Color=entry.color:Lerp(Color3.fromRGB(253,249,240),math.clamp(amount,0,1)*0.8) end
 end
--- Complementos estilizados de previsualizacion; no necesitan cargar recursos ajenos.
--- Conservan el cuerpo, la ropa y el esqueleto del avatar elegido.
 function B.Complementos(actor)
  local head=actor.model.Head
  local old=actor.model:FindFirstChild("Ultra-Fabulous Hair")
  if old then old:Destroy() end
  local folder=Instance.new("Folder");folder.Name="HR_GorraMascaraProvisional";folder.Parent=actor.model
- local size=head.Size
- local function part(name,dimensions,offset,shape)
-  local p=Instance.new("Part");p.Name=name;p.Size=dimensions;p.Color=Color3.fromRGB(24,25,32)
-  p.Material=Enum.Material.Fabric;p.Anchored=false;p.CanCollide=false;p.Massless=true;p.CastShadow=false
-  p.TopSurface=Enum.SurfaceType.Smooth;p.BottomSurface=Enum.SurfaceType.Smooth
-  p.Shape=shape or Enum.PartType.Block;p.CFrame=head.CFrame*offset
-  p:SetAttribute("HR_Complemento",true);p.Parent=folder
-  local w=Instance.new("Weld");w.Part0=head;w.Part1=p;w.C0=offset;w.C1=CFrame.identity;w.Parent=p
-  return p
+ -- HatAttachment y FaceFrontAttachment son referencias de la superficie visual.
+ -- Head.Size es la caja fisica y no describe el ancho real de MeshType.Head.
+ local hat=head:FindFirstChild("HatAttachment")
+ local face=head:FindFirstChild("FaceFrontAttachment")
+ local top=hat and hat.Position.Y or head.Size.Y*0.6
+ local radius=face and math.abs(face.Position.Z) or head.Size.Z*0.6
+ local diameter=math.max(radius*2,top*2,0.5)
+ local function dome(name,size,offset)
+  local part=Instance.new("Part")
+  part.Name=name;part.Size=size;part.Transparency=0;part.Color=Color3.fromRGB(22,24,31)
+  part.Material=Enum.Material.SmoothPlastic;part.CanCollide=false;part.CanTouch=false;part.CanQuery=false
+  part.Massless=true;part.CastShadow=false;part.Anchored=false;part.CFrame=head.CFrame*offset
+  part:SetAttribute("HR_Complemento",true);part.Parent=folder
+  local mesh=Instance.new("SpecialMesh");mesh.MeshType=Enum.MeshType.Sphere;mesh.Scale=Vector3.new(1,1,1);mesh.Parent=part
+  local weld=Instance.new("Weld");weld.Part0=head;weld.Part1=part;weld.C0=offset;weld.C1=CFrame.identity;weld.Parent=part
  end
- part("Gorra",Vector3.new(size.X*1.10,size.Y*0.48,size.Z*1.12),CFrame.new(0,size.Y*0.48,0),Enum.PartType.Ball)
- part("Visera",Vector3.new(size.Y*0.07,size.X*0.95,size.Z*0.95),CFrame.new(0,size.Y*0.30,-size.Z*0.65)*a(0,0,90),Enum.PartType.Cylinder)
- part("MascaraBaja",Vector3.new(size.X*1.035,size.Y*0.47,size.Z*1.035),CFrame.new(0,-size.Y*0.27,0))
- for _,sign in ipairs({-1,1}) do
-  part("LateralMascara",Vector3.new(size.X*0.07,size.Y*0.75,size.Z*1.03),CFrame.new(sign*size.X*0.49,-size.Y*0.07,0))
+ dome("Gorra",Vector3.new(diameter*1.06,diameter*0.28,diameter*1.03),CFrame.new(0,top+diameter*0.015,0))
+ dome("Visera",Vector3.new(diameter*0.90,diameter*0.055,diameter*0.70),CFrame.new(0,top-diameter*0.10,-radius*0.90))
+ -- La mascara se pinta sobre la textura de cara; no hay bloques delante de ojos y nariz.
+ head:SetAttribute("HR_MascaraTextura",true)
+end
+
+B.EstadosCara={"NEUTRA","ALEGRE","INQUIETA","VERGUENZA","ENFADADA","ALARMA"}
+B.ResolucionCara=256
+function B.PixelesCara(key,masked)
+ local n=B.ResolucionCara
+ local pixels=buffer.create(n*n*4)
+ local function blend(x,y,color,alpha)
+  if x<0 or y<0 or x>=n or y>=n or alpha<=0 then return end
+  local i=(y*n+x)*4
+  local old=buffer.readu8(pixels,i+3)/255
+  local out=alpha+old*(1-alpha)
+  if out<=0 then return end
+  for c=0,2 do
+   local v=(color[c+1]*alpha+buffer.readu8(pixels,i+c)*old*(1-alpha))/out
+   buffer.writeu8(pixels,i+c,math.floor(math.clamp(v,0,255)+0.5))
+  end
+  buffer.writeu8(pixels,i+3,math.floor(math.clamp(out,0,1)*255+0.5))
  end
- part("ParteTraseraMascara",Vector3.new(size.X*1.03,size.Y*0.8,size.Z*0.08),CFrame.new(0,0,size.Z*0.48))
+ local function ellipse(cx,cy,rx,ry,color,opacity)
+  cx*=n;cy*=n;rx*=n;ry*=n
+  for y=math.max(0,math.floor(cy-ry-1)),math.min(n-1,math.ceil(cy+ry+1)) do
+   for x=math.max(0,math.floor(cx-rx-1)),math.min(n-1,math.ceil(cx+rx+1)) do
+    local distance=math.sqrt(((x+0.5-cx)/rx)^2+((y+0.5-cy)/ry)^2)
+    local coverage=math.clamp((1-distance)*math.min(rx,ry)+0.5,0,1)
+    blend(x,y,color,coverage*(opacity or 1))
+   end
+  end
+ end
+ local function stroke(x1,y1,x2,y2,width,color)
+  x1*=n;y1*=n;x2*=n;y2*=n;width*=n
+  local dx,dy=x2-x1,y2-y1
+  local length=dx*dx+dy*dy
+  for y=math.max(0,math.floor(math.min(y1,y2)-width-1)),math.min(n-1,math.ceil(math.max(y1,y2)+width+1)) do
+   for x=math.max(0,math.floor(math.min(x1,x2)-width-1)),math.min(n-1,math.ceil(math.max(x1,x2)+width+1)) do
+    local t=length>0 and math.clamp(((x+0.5-x1)*dx+(y+0.5-y1)*dy)/length,0,1) or 0
+    local distance=math.sqrt((x+0.5-x1-t*dx)^2+(y+0.5-y1-t*dy)^2)
+    blend(x,y,color,math.clamp(width/2+0.5-distance,0,1))
+   end
+  end
+ end
+ local ink={26,22,28};local white={255,254,250}
+ local alarm=key=="ALARMA"
+ local happy=key=="ALEGRE"
+ local shy=key=="VERGUENZA"
+ local worried=key=="INQUIETA" or shy
+ local angry=key=="ENFADADA"
+ if masked then
+  ellipse(0.5,0.82,0.43,0.26,{23,26,34})
+  stroke(0.22,0.66,0.78,0.66,0.012,{62,65,75})
+ end
+ for _,x in ipairs({0.34,0.66}) do
+  if happy or shy then
+   local sign=happy and -1 or 1
+   stroke(x-0.065,0.425,x,0.425+sign*0.04,0.021,ink)
+   stroke(x,0.425+sign*0.04,x+0.065,0.425,0.021,ink)
+  elseif alarm then
+   ellipse(x,0.42,0.076,0.103,ink)
+   ellipse(x,0.42,0.062,0.088,white)
+   ellipse(x,0.43,0.024,0.037,ink)
+  else
+   ellipse(x,0.42,0.034,0.055,ink)
+   ellipse(x-0.009,0.40,0.010,0.013,white)
+  end
+ end
+ local tilt=angry and 0.04 or worried and -0.035 or 0
+ local eyebrowY=alarm and 0.245 or 0.285
+ stroke(0.25,eyebrowY-tilt,0.41,eyebrowY+tilt,0.018,ink)
+ stroke(0.59,eyebrowY+tilt,0.75,eyebrowY-tilt,0.018,ink)
+ if not masked then
+  if alarm then
+   ellipse(0.5,0.71,0.072,0.104,ink)
+   ellipse(0.5,0.775,0.040,0.021,{223,111,133})
+  elseif happy then
+   stroke(0.39,0.665,0.45,0.715,0.019,ink)
+   stroke(0.45,0.715,0.55,0.715,0.019,ink)
+   stroke(0.55,0.715,0.61,0.665,0.019,ink)
+  elseif worried or angry then
+   stroke(0.42,0.725,0.50,0.69,0.019,ink)
+   stroke(0.50,0.69,0.58,0.725,0.019,ink)
+  else
+   stroke(0.43,0.69,0.50,0.71,0.018,ink)
+   stroke(0.50,0.71,0.57,0.69,0.018,ink)
+  end
+ end
+ if (happy or shy) and not masked then
+  ellipse(0.235,0.59,0.053,0.027,{246,137,153},0.45)
+  ellipse(0.765,0.59,0.053,0.027,{246,137,153},0.45)
+ end
+ if alarm or key=="INQUIETA" then ellipse(0.82,0.34,0.019,0.043,{112,198,237},0.95) end
+ return pixels
 end
 return B

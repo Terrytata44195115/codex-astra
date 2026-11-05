@@ -2,6 +2,8 @@
 
 Actualiza la prueba de tres actores en la copia `Madre_Hija_Novio.rbxl`. Requiere el reparto de fase 1. **El codigo y el instalador se han comprobado fuera de Studio; la ejecucion visual de esta version esta pendiente.** No es una grabacion ni un archivo de audio ya editado.
 
+El usuario ha confirmado el montaje y los movimientos de esta historia. Las caras originales de esta entrega quedaron parcialmente ocultas por la malla; para una historia ya instalada aplica [solo la correccion de caras](correccion-caras/README.md). El instalador completo tambien incorpora ahora esa correccion. La nueva representacion facial queda pendiente de revision en Studio.
+
 ## Instalar en la misma copia
 
 1. Stop en Studio y Ctrl+S para guardar el estado actual.
@@ -40,11 +42,11 @@ En planos individuales se ocultan localmente los actores ajenos a ese plano para
 
 ## Apariencias y expresiones
 
-Las caras se dibujan con elementos de SurfaceGui sobre la cabeza: alegre, neutra, inquieta, alarma, vergüenza y enfado. No dependen de los IDs de caras que fallaban en paquetes anteriores. La expresion original solo se oculta en las copias de Play. El aspecto y la colocacion de estos dibujos necesitan revision visual en los cuerpos concretos del proyecto.
+Las caras se generan como imagenes RGBA y se proyectan con Decal sobre la cabeza: alegre, neutra, inquieta, alarma, vergüenza y enfado. Un cliente facial crea las EditableImage dentro de Studio. La cara original solo se oculta cuando se puede asignar la nueva textura; si la API no esta disponible se conserva la original y se informa en Salida. No dependen de IDs de caras del catalogo. El mapeado real necesita revision visual. Esta representacion sustituye el SurfaceGui de la primera version, que quedaba dentro de la malla.
 
 La palidez cambia progresivamente el color de cabeza y manos de la madre desde el segundo 10; la hija tiene un cambio mas suave desde el 14. No se cambian las texturas de ropa ni se aclara el pelo.
 
-Marcos conserva el cuerpo y la ropa de colores elegidos antes. Se anaden una gorra y una cobertura facial **provisionales, construidas con piezas simples**, para poder revisar el gag sin otra descarga del catalogo. Se retira el pelo solo de la copia de Play para que no atraviese la gorra. Son complementos de revision, no una skin final de catalogo. Se pueden sustituir desactivando `AccesoriosProvisionales` y preparando accesorios definitivos en su plantilla.
+Marcos conserva el cuerpo y la ropa de colores elegidos antes. La gorra y visera **provisionales** se ajustan mediante los attachments de la cabeza. La mascara se pinta en la parte inferior de su textura facial; los bloques de la version inicial se han retirado. Se retira el pelo solo de la copia de Play para que no atraviese la gorra. Son complementos de revision, no una skin final de catalogo. Se pueden sustituir desactivando `AccesoriosProvisionales` y preparando accesorios definitivos en su plantilla.
 
 **El pantalon de tiro bajo no esta resuelto:** se conserva el pantalon actual. El detalle de camara y el gesto de senalarlo estan preparados, pero aun debe elegirse o confeccionarse la apariencia que corresponda. Las apariencias de madre e hija tambien siguen siendo las provisionales revisadas en la galeria.
 
@@ -74,9 +76,9 @@ Durante Play se usan copias y se aparcan temporalmente la galeria y las dos orig
 
 ## Comprobaciones realizadas
 
-- Compilacion Luau de los cuatro componentes, instalador y restaurador.
+- Compilacion Luau de los componentes, cliente facial, instalador y restaurador.
 - Pruebas de instalacion, repeticion sin duplicados, restauracion y reactivacion sobre un arbol de servicios simulado.
-- Fallos inyectados en cada una de las cuatro escrituras, tanto al instalar como al actualizar: se restituyen las fuentes y estados anteriores en el modelo de prueba.
+- Fallos inyectados en cada una de las cinco escrituras, tanto al instalar como al actualizar: se restituyen las fuentes y estados anteriores en el modelo de prueba.
 - Rechazo de destinos con propietario ajeno.
 - Lineas de tiempo de escenas y planos sin huecos ni solapamientos, cierre a los 24 segundos y presencia de los cambios solicitados de Marcos y la madre.
 - Exportacion de guion, SRT y lista de planos a partir de la configuracion entregada.

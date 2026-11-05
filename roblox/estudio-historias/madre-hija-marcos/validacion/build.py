@@ -7,6 +7,7 @@ for token, filename in [
     ('__ACTING_SOURCE__', 'Interpretacion.luau'),
     ('__SERVER_SOURCE__', 'Servidor.luau'),
     ('__CAMERA_SOURCE__', 'Camara.luau'),
+    ('__FACE_CLIENT_SOURCE__', 'CarasCliente.luau'),
 ]:
     source = (base / filename).read_text()
     assert ']====]' not in source

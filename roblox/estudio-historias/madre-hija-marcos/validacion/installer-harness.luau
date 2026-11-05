@@ -96,7 +96,7 @@ do
  restore()
  assert(server.Enabled and not camera.Enabled)
 end
-for failAt=1,4 do
+for failAt=1,5 do
  local svc,sps,server,camera,cast,preview=setup(failAt)
  assert(not pcall(install))
  assert(server.Enabled and not camera.Enabled)
@@ -113,11 +113,11 @@ do
  assert(server.Enabled and not camera.Enabled and foreign.Source=="do not touch")
  assert(not svc.ReplicatedStorage.HR_PruebaReparto)
 end
-for failAt=1,4 do
- local svc,sps,server,camera,cast,preview=setup(4+failAt)
+for failAt=1,5 do
+ local svc,sps,server,camera,cast,preview=setup(5+failAt)
  install()
  local root=svc.ReplicatedStorage.HR_PruebaReparto
- local nodes={root.Configuracion,root.Interpretacion,svc.ServerScriptService.HR_PruebaRepartoServidor,sps.HR_PruebaRepartoCamara}
+ local nodes={root.Configuracion,root.Interpretacion,svc.ServerScriptService.HR_PruebaRepartoServidor,sps.HR_PruebaRepartoCamara,sps.HR_CarasMarcos}
  local before={}
  for i,node in ipairs(nodes) do node.Source="prior source "..i;before[i]=node.Source end
  nodes[4].Enabled=false
@@ -129,4 +129,4 @@ for failAt=1,4 do
  assert(root.CamaraAnterior:GetAttribute("EstabaActivo")==false)
  assert(preview.Parent==workspace and cast.Parent==svc.ServerStorage)
 end
-return "PASS: install, repeat, restore, reactivate; initial and existing-source rollback at all 4 writes; foreign destination rejected. Runtime in Studio still pending."
+return "PASS: install, repeat, restore, reactivate; initial and existing-source rollback at all 5 writes; foreign destination rejected. Runtime in Studio still pending."
