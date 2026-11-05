@@ -57,6 +57,6 @@ if not ok then
  end
  error("[HR CARAS] Correccion detenida: "..tostring(err))
 end
-print("[HR CARAS] CORRECCION INSTALADA. Caras como texturas y gorra ajustada.")
+print("[HR CARAS] CORRECCION INSTALADA. Biblioteca facial y cliente preparados; revisar rostro en Studio.")
 print("[HR CARAS] Se conservan los controladores de camara, secuencia y configuracion.")
 print("[HR CARAS] Guarda, cierra pestanas de codigo y pulsa F5. R repite la toma.")

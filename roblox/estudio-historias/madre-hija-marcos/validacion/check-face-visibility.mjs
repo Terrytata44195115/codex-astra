@@ -1,0 +1,17 @@
+import fs from 'node:fs';
+const {LuauState}=await import(process.env.LUAU_WEB_ENTRY || 'luau-web');
+const root=new URL('../',import.meta.url);
+const read=n=>fs.readFileSync(new URL(n,root),'utf8');
+const state=await LuauState.createAsync();
+const client=read('CarasCliente.luau');
+const patch=read('correccion-caras/PEGAR_CORREGIR_VISIBILIDAD.txt');
+state.loadstring(client,'native_face_client',true);
+state.loadstring(patch,'visibility_installer',true);
+let harness=read('validacion/installer-harness.luau');
+harness=harness.slice(0,harness.indexOf('\ndo\n local svc'));
+harness=harness.replace('return self.ClassName==class or class=="BaseScript"','return self.ClassName==class or (class=="LuaSourceContainer" and (self.ClassName=="ModuleScript" or self.ClassName=="Script" or self.ClassName=="LocalScript")) or class=="BaseScript"');
+harness=harness.replace('__RUN_INSTALLER__',read('PEGAR_HISTORIA_MARCOS.txt')).replace('__RUN_RESTORE__',read('VOLVER_HISTORIA_ANTERIOR.txt'));
+const checks=read('validacion/face-visibility-checks.luau');
+const script=harness+'\nlocal function patchFaces()\n'+patch+'\nend\nlocal function launchFaces()\n'+client+'\nend\n'+checks;
+console.log(await state.loadstring(script,'native_face_follow_and_visibility',true)());
+state.destroy();

@@ -196,85 +196,159 @@ end
 return B
 ]====]
 local clientText=[====[
--- Solo representa caras; no controla movimientos, camara, dialogos ni tiempos.
+-- Representacion facial local: no usa texturas dinamicas ni controla la camara.
 local RS=game:GetService("ReplicatedStorage")
 local Run=game:GetService("RunService")
-local Asset=game:GetService("AssetService")
 local root=RS:WaitForChild("HR_PruebaReparto",15)
 if not root or root:GetAttribute("HR_Owner")~="HR_PRUEBA_REPARTO_1" then return end
 local stage=workspace:WaitForChild("HR_PruebaActores",25)
 if not stage or stage:GetAttribute("HR_Owner")~="HR_PRUEBA_REPARTO_1" then return end
-local B=require(root:WaitForChild("Interpretacion",10))
-if type(B.PixelesCara)~="function" then warn("[HR CARAS] Falta el modulo corregido.");return end
-local pool={}
-local images={}
-local function imageKey(state,masked) return state..(masked and "_MASCARA" or "") end
-local available,message=pcall(function()
- for _,state in ipairs(B.EstadosCara) do
-  for _,masked in ipairs({false,true}) do
-   local image=Asset:CreateEditableImage({Size=Vector2.new(B.ResolucionCara,B.ResolucionCara)})
-   assert(image,"No hay memoria disponible para EditableImage.")
-   table.insert(images,image)
-   image:WritePixelsBuffer(Vector2.zero,Vector2.new(B.ResolucionCara,B.ResolucionCara),B.PixelesCara(state,masked))
-   pool[imageKey(state,masked)]=image
+local folder=Instance.new("Folder")
+folder.Name="HR_SoportesCaraLocales";folder.Parent=workspace
+local bindings={}
+local connections={}
+local bindingName="HR_CarasMarcos_Visual"
+local function oval(parent,x,y,w,h,color)
+ local f=Instance.new("Frame")
+ f.AnchorPoint=Vector2.new(0.5,0.5);f.Position=UDim2.fromScale(x,y);f.Size=UDim2.fromScale(w,h)
+ f.BackgroundColor3=color;f.BorderSizePixel=0;f.Parent=parent
+ local r=Instance.new("UICorner");r.CornerRadius=UDim.new(1,0);r.Parent=f
+ return f
+end
+local function line(parent,x1,y1,x2,y2,width,color)
+ local f=Instance.new("Frame")
+ f.AnchorPoint=Vector2.new(0.5,0.5);f.Position=UDim2.fromScale((x1+x2)/2,(y1+y2)/2)
+ f.Size=UDim2.fromScale(math.sqrt((x2-x1)^2+(y2-y1)^2),width)
+ f.Rotation=math.deg(math.atan2(y2-y1,x2-x1));f.BorderSizePixel=0;f.BackgroundColor3=color;f.Parent=parent
+ return f
+end
+local function draw(gui,key,masked)
+ gui:ClearAllChildren()
+ local container=Instance.new("Frame")
+ container.Size=UDim2.fromScale(1,1);container.BackgroundTransparency=1;container.ClipsDescendants=true;container.Parent=gui
+ local ink=Color3.fromRGB(27,21,26)
+ local white=Color3.fromRGB(255,255,250)
+ if masked then
+  oval(container,0.5,0.82,0.86,0.52,Color3.fromRGB(23,26,34))
+  line(container,0.22,0.66,0.78,0.66,0.012,Color3.fromRGB(62,65,75))
+ end
+ local alarm=key=="ALARMA"
+ local happy=key=="ALEGRE"
+ local shy=key=="VERGUENZA"
+ local worried=key=="INQUIETA" or key=="VERGUENZA"
+ for _,x in ipairs({0.33,0.67}) do
+  if happy or shy then
+   local y=happy and 0.39 or 0.47
+   line(container,x-0.065,0.43,x,y,0.021,ink)
+   line(container,x,y,x+0.065,0.43,0.021,ink)
+  elseif alarm then
+   local eye=oval(container,x,0.42,0.152,0.206,ink)
+   oval(eye,0.5,0.5,0.816,0.854,white)
+   oval(eye,0.5,0.55,0.316,0.36,ink)
+  else
+   local eye=oval(container,x,0.42,0.068,0.11,ink)
+   oval(eye,0.37,0.32,0.29,0.24,white)
   end
  end
-end)
-if not available then
- for _,image in ipairs(images) do image:Destroy() end
- warn("[HR CARAS] No se pudieron generar texturas. Se conservan las caras originales: "..tostring(message))
+ local leftTilt=key=="ENFADADA" and 0.05 or worried and -0.045 or 0
+ line(container,0.23,0.27-leftTilt,0.41,0.27+leftTilt,0.026,ink)
+ line(container,0.59,0.27+leftTilt,0.77,0.27-leftTilt,0.026,ink)
+ if not masked then
+ if alarm then
+  local mouth=oval(container,0.5,0.72,0.19,0.22,ink)
+  oval(mouth,0.5,0.80,0.60,0.20,Color3.fromRGB(237,133,150))
+ elseif happy then
+  line(container,0.38,0.66,0.45,0.72,0.025,ink)
+  line(container,0.45,0.72,0.55,0.72,0.025,ink)
+  line(container,0.55,0.72,0.62,0.66,0.025,ink)
+ else
+  line(container,0.40,0.70,0.5,0.68,0.025,ink)
+  line(container,0.5,0.68,0.60,0.70,0.025,ink)
+ end
+ end
+ if (worried or happy) and not masked then
+  local l=oval(container,0.22,0.61,0.12,0.07,Color3.fromRGB(245,129,147));l.BackgroundTransparency=0.35
+  local r=oval(container,0.78,0.61,0.12,0.07,Color3.fromRGB(245,129,147));r.BackgroundTransparency=0.35
+ end
+ if alarm or key=="INQUIETA" then
+  local sweat=oval(container,0.84,0.34,0.055,0.12,Color3.fromRGB(112,204,255));sweat.Rotation=-20
+ end
 end
-local bindings={}
 for _,role in ipairs({"Madre","Hija","Novio"}) do
  local model=stage:WaitForChild(role,15)
  local head=model and model:WaitForChild("Head",10)
  if head then
-  local original={}
+  local originals={}
   for _,item in ipairs(head:GetChildren()) do
-   if item:IsA("Decal") and item.Face==Enum.NormalId.Front then table.insert(original,{item=item,opacity=item.Transparency}) end
+   if item:IsA("Decal") and item.Face==Enum.NormalId.Front then
+    table.insert(originals,{item=item,opacity=item.Transparency,localOpacity=item.LocalTransparencyModifier})
+   end
   end
-  local decal
-  local failed=false
+  local attachment=head:FindFirstChild("FaceFrontAttachment")
+  local hat=head:FindFirstChild("HatAttachment")
+  local mesh=head:FindFirstChildOfClass("SpecialMesh")
+  local radius=attachment and math.abs(attachment.Position.Z) or head.Size.Z*0.6
+  local top=hat and math.abs(hat.Position.Y) or radius
+  local width=math.max(0.5,math.min(head.Size.X,2*radius))
+  local height=math.max(0.5,2*top)
+  local depth=math.max(radius,head.Size.Z/2*(mesh and math.max(1,mesh.Scale.Z) or 1))
+  local offset=CFrame.new(attachment and attachment.Position.X or 0,attachment and attachment.Position.Y or 0,-depth-width*0.04)
+  local part=Instance.new("Part")
+  part.Name="HR_Cara_"..role;part.Size=Vector3.new(width,height,0.01)
+  part.Transparency=1;part.Anchored=true;part.CanCollide=false;part.CanTouch=false;part.CanQuery=false;part.CastShadow=false
+  part.CFrame=head.CFrame*offset;part.Parent=folder
+  -- Fuera del modelo del actor: no altera los limites usados para encuadrar.
+  local gui=Instance.new("SurfaceGui")
+  gui.Name="HR_ExpresionVisible";gui.Adornee=part;gui.Face=Enum.NormalId.Front
+  gui.SizingMode=Enum.SurfaceGuiSizingMode.FixedSize;gui.CanvasSize=Vector2.new(512,512)
+  gui.AlwaysOnTop=false;gui.LightInfluence=0;gui.MaxDistance=1000;gui.Parent=part
+  local valid=false
   local function update()
-   if not available or failed then return end
-   local state=head:GetAttribute("HR_Expresion") or "NEUTRA"
-   local masked=head:GetAttribute("HR_MascaraTextura")==true
-   local image=pool[imageKey(state,masked)] or pool[imageKey("NEUTRA",masked)]
-   local ok,err=pcall(function()
-    if not decal then
-     decal=Instance.new("Decal");decal.Name="HR_ExpresionLocal";decal.Face=Enum.NormalId.Front
-     decal.Color3=Color3.new(1,1,1);decal.Transparency=0;decal.Parent=head
-    end
-    local content=Content.fromObject(image)
-    local assigned=pcall(function() decal.ColorMapContent=content end)
-    if not assigned then decal.TextureContent=content end
-    for _,entry in ipairs(original) do entry.item.Transparency=1 end
-   end)
-   if not ok then
-    failed=true
-    if decal then decal:Destroy();decal=nil end
-    for _,entry in ipairs(original) do entry.item.Transparency=entry.opacity end
-    warn("[HR CARAS] "..role..": se conserva la cara original. "..tostring(err))
+   local key=head:GetAttribute("HR_Expresion") or "NEUTRA"
+   local ok,err=pcall(draw,gui,key,head:GetAttribute("HR_MascaraTextura")==true)
+   valid=ok
+   if ok then
+    for _,entry in ipairs(originals) do entry.item.Transparency=1 end
+    print("[HR CARAS V2] "..role.." / "..key.." / soporte preparado; revisar en pantalla.")
+   else
+    gui.Enabled=false
+    for _,entry in ipairs(originals) do entry.item.Transparency=entry.opacity end
+    warn("[HR CARAS V2] No se pudo dibujar "..role..": "..tostring(err))
    end
   end
   update()
-  head:GetAttributeChangedSignal("HR_Expresion"):Connect(update)
-  head:GetAttributeChangedSignal("HR_MascaraTextura"):Connect(update)
-  table.insert(bindings,{head=head,original=original,decal=function() return decal end})
+  table.insert(connections,head:GetAttributeChangedSignal("HR_Expresion"):Connect(update))
+  table.insert(connections,head:GetAttributeChangedSignal("HR_MascaraTextura"):Connect(update))
+  table.insert(bindings,{head=head,part=part,gui=gui,offset=offset,originals=originals,valid=function() return valid end})
  end
 end
-Run.RenderStepped:Connect(function()
- -- Sigue la ocultacion local que ya hace la camara en cada plano.
+local active=true
+local function cleanup()
+ if not active then return end
+ active=false
+ Run:UnbindFromRenderStep(bindingName)
+ for _,connection in ipairs(connections) do connection:Disconnect() end
  for _,binding in ipairs(bindings) do
-  if binding.head.Parent then
-   local value=binding.head.LocalTransparencyModifier
-   local decal=binding.decal()
-   if decal then decal.LocalTransparencyModifier=value end
-   for _,entry in ipairs(binding.original) do if entry.item.Parent then entry.item.LocalTransparencyModifier=value end end
+  for _,entry in ipairs(binding.originals) do
+   if entry.item.Parent then entry.item.Transparency=entry.opacity;entry.item.LocalTransparencyModifier=entry.localOpacity end
   end
  end
+ folder:Destroy()
+end
+Run:BindToRenderStep(bindingName,Enum.RenderPriority.Camera.Value+11,function()
+ if not stage:IsDescendantOf(workspace) then cleanup();return end
+ for _,binding in ipairs(bindings) do
+  if binding.head.Parent then
+   binding.part.CFrame=binding.head.CFrame*binding.offset
+   binding.gui.Enabled=binding.valid() and binding.head.LocalTransparencyModifier<0.99
+   for _,entry in ipairs(binding.originals) do
+    if entry.item.Parent then entry.item.LocalTransparencyModifier=binding.head.LocalTransparencyModifier end
+   end
+  else binding.gui.Enabled=false end
+ end
 end)
-if available then print("[HR CARAS] Texturas listas sobre la cabeza; camara y secuencia conservadas.") end
+script.Destroying:Connect(cleanup)
+print("[HR CARAS V2] Soportes faciales preparados. Pendiente comprobar su aspecto en Studio.")
 ]====]
 -- Conserva literalmente los gestos y la palidez de la version instalada.
 local poseStart=previousModule:find("local function a(",1,true)
@@ -311,6 +385,6 @@ if not ok then
  end
  error("[HR CARAS] Correccion detenida: "..tostring(err))
 end
-print("[HR CARAS] CORRECCION INSTALADA. Caras como texturas y gorra ajustada.")
+print("[HR CARAS] CORRECCION INSTALADA. Biblioteca facial y cliente preparados; revisar rostro en Studio.")
 print("[HR CARAS] Se conservan los controladores de camara, secuencia y configuracion.")
 print("[HR CARAS] Guarda, cierra pestanas de codigo y pulsa F5. R repite la toma.")
