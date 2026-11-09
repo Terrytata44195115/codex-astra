@@ -1,0 +1,71 @@
+{
+  "duracion": 23,
+  "escenas": [
+    {
+      "inicio": 0.0,
+      "fin": 3.0,
+      "voz": "Madre",
+      "texto": "Uno de estos dónuts tiene una sorpresa."
+    },
+    {
+      "inicio": 3.0,
+      "fin": 4.6,
+      "voz": "Hija",
+      "texto": "¡Empiezo yo!"
+    },
+    {
+      "inicio": 4.6,
+      "fin": 6.35,
+      "voz": null,
+      "texto": ""
+    },
+    {
+      "inicio": 6.35,
+      "fin": 8.1,
+      "voz": "Hija",
+      "texto": "Mmm… ¡buenísimo!"
+    },
+    {
+      "inicio": 8.1,
+      "fin": 10.4,
+      "voz": "Madre",
+      "texto": "Ahora me toca a mí."
+    },
+    {
+      "inicio": 10.4,
+      "fin": 13.5,
+      "voz": "Madre",
+      "texto": "A ver… este."
+    },
+    {
+      "inicio": 13.5,
+      "fin": 15.0,
+      "voz": "Hija",
+      "texto": "Ese no…"
+    },
+    {
+      "inicio": 15.0,
+      "fin": 17.0,
+      "voz": "Madre",
+      "texto": "¡¿Pero qué es esto?!"
+    },
+    {
+      "inicio": 17.0,
+      "fin": 20.0,
+      "voz": "Hija",
+      "texto": "¡Ese era el de la sorpresa!"
+    },
+    {
+      "inicio": 20.0,
+      "fin": 22.0,
+      "voz": "Madre",
+      "texto": "Ahora eliges tú dos."
+    },
+    {
+      "inicio": 22.0,
+      "fin": 23.0,
+      "voz": "Hija",
+      "texto": "¿¡Dos!?"
+    }
+  ]
+}

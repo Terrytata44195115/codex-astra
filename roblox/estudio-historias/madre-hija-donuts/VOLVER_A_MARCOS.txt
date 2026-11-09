@@ -1,0 +1,40 @@
+-- Con Stop. Restaura las fuentes y estados guardados antes del montaje de donuts.
+assert(not game:GetService("RunService"):IsRunning(),"Primero pulsa Stop.")
+local storage=game:GetService("ServerStorage")
+local root=game:GetService("ReplicatedStorage"):FindFirstChild("HR_PruebaReparto")
+local backup=storage:FindFirstChild("HR_DonutsAntesHistoria")
+assert(backup and backup:GetAttribute("HR_Owner")=="HR_DONUTS_HISTORIA_1" and root,"No se encuentra el respaldo de la historia anterior.")
+local SSS=game:GetService("ServerScriptService")
+local SPS=game:GetService("StarterPlayer").StarterPlayerScripts
+local editor=game:GetService("ScriptEditorService")
+local entries={
+ {object=root:FindFirstChild("Configuracion"),saved=backup:FindFirstChild("Configuracion")},
+ {object=SSS:FindFirstChild("HR_PruebaRepartoServidor"),saved=backup:FindFirstChild("Servidor")},
+ {object=SPS:FindFirstChild("HR_PruebaRepartoCamara"),saved=backup:FindFirstChild("Camara")},
+ {object=SPS:FindFirstChild("HR_CarasMarcos"),saved=backup:FindFirstChild("Caras")},
+}
+for _,e in ipairs(entries) do
+ assert(e.object and e.saved and e.saved:IsA("StringValue") and e.object:GetAttribute("HR_Owner")=="HR_PRUEBA_REPARTO_1","Respaldo o destino no reconocido.")
+ e.before=editor:GetEditorSource(e.object)
+ if e.object:IsA("BaseScript") then e.enabled=e.object.Enabled end
+end
+local ok,err=pcall(function()
+ for _,e in ipairs(entries) do
+  if e.object:IsA("BaseScript") then e.object.Enabled=false end
+  local source=e.saved.Value
+  editor:UpdateSourceAsync(e.object,function() return source end)
+  assert(editor:GetEditorSource(e.object)==source,"No se restauro una fuente.")
+  if e.object:IsA("BaseScript") then e.object.Enabled=e.saved:GetAttribute("EstabaActivo") end
+ end
+end)
+if not ok then
+ for _,e in ipairs(entries) do
+  pcall(function() editor:UpdateSourceAsync(e.object,function() return e.before end) end)
+  if e.object:IsA("BaseScript") then e.object.Enabled=e.enabled end
+ end
+ error("Restauracion detenida: "..tostring(err))
+end
+for _,link in ipairs(backup:GetChildren()) do
+ if link:IsA("ObjectValue") and link.Value and link.Value:IsA("BaseScript") then link.Value.Enabled=link:GetAttribute("EstabaActivo") end
+end
+print("[HR DONUTS] Historia anterior restaurada con sus caras originales. El decorado de donuts se conserva al lado.")
