@@ -1,0 +1,20 @@
+01_OFICIANTE | 0.0–1.6 s
+Puede besar la novia.
+
+02_NOVIA_PREGUNTA | 1.6–3.0 s
+¿Estás listo, Monkey?
+
+03_NOVIO_LISTO | 3.0–4.0 s
+Listo…
+
+04_INVITADA_OBJECION | 5.2–6.5 s
+¡Ey! ¡Yo me opongo!
+
+05_NOVIA_SUSTO | 6.5–7.2 s
+¡Aaah!
+
+06_NOVIA_DESPERTAR | 8.0–10.6 s
+¡Qué bueno que era solo un sue…!
+
+07_NOVIA_NO | 12.2–14.0 s
+¡Nooooo!

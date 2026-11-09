@@ -10,6 +10,8 @@ Los planos pasan de la novia al novio y al general lejano, con cortes directos e
 
 ## Insertar en Studio
 
+Las [voces y los guiones están disponibles por separado](../../../videos/boda/doblaje/README.md), con frases sueltas y cuatro pistas sincronizadas para la escena de 14 segundos. Son voces nuevas: el vídeo de referencia recibido no contiene sonido. La escena de Studio mantiene el texto de guía; estos audios se añaden en el editor de vídeo.
+
 1. Abre el proyecto que tiene madre, hija y novio y las caras que ya funcionan. Pulsa **Stop** si está ejecutándose.
 2. **Archivo → Guardar en archivo como…** y guarda una copia llamada `Boda_Historia.rbxl`.
 3. Abre [01_PREPARAR_BODA.txt](01_PREPARAR_BODA.txt), copia todo y pégalo en **Script → Comando**, dentro de la barra de comandos. Pulsa **Ejecutar**. No lo pegues en Salida ni en un Script normal.

@@ -1,0 +1,13 @@
+DOBLAJE DE BODA
+
+Voces nuevas en español a partir de los subtítulos visibles. El MP4 recibido no tiene pista de audio: no se puede garantizar que estos timbres, acentos o interpretaciones coincidan con las voces originales ni confirmar palabras que no aparezcan escritas.
+
+PARA MONTAR LA ESCENA DE ROBLOX DE 14 SEGUNDOS:
+Importa los cuatro WAV de PISTAS_SINCRONIZADAS_14S y colócalos todos en 00:00:00. Ya incluyen los silencios y las entradas de cada personaje. El segundo cero es el primer fotograma de la historia, después de la cuenta atrás de Roblox. Alternativa: usa MEZCLA_GUIA_14s.wav, que contiene las cuatro voces juntas.
+
+PARA EDITAR A TU RITMO:
+FRASES_SEPARADAS contiene las siete intervenciones numeradas, cada una en WAV y MP3. POR_PERSONAJE contiene todas las frases de cada personaje seguidas y su guion.
+
+El texto «Monkey» se sintetiza fonéticamente como «Monqui». La frase del despertar se corta en «sue…», siguiendo los subtítulos. No hay música ni efectos de fondo.
+
+Formato WAV: mono, PCM de 16 bits a 48 kHz; síntesis original a 24 kHz. MP3: mono, 192 kbps.

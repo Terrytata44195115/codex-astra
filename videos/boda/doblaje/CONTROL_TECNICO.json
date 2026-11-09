@@ -1,0 +1,101 @@
+{
+  "control": "Archivos decodificables; WAV mono de 48 kHz, pistas sincronizadas de 14 s y picos sin saturacion. No comprueba semejanza con el original sin audio.",
+  "audios": [
+    {
+      "archivo": "FRASES_SEPARADAS/01_OFICIANTE.wav",
+      "duracion_s": 1.365,
+      "pico_dbfs": -2.0,
+      "frecuencia": 48000
+    },
+    {
+      "archivo": "FRASES_SEPARADAS/02_NOVIA_PREGUNTA.wav",
+      "duracion_s": 1.3,
+      "pico_dbfs": -2.0,
+      "frecuencia": 48000
+    },
+    {
+      "archivo": "FRASES_SEPARADAS/03_NOVIO_LISTO.wav",
+      "duracion_s": 0.64,
+      "pico_dbfs": -2.0,
+      "frecuencia": 48000
+    },
+    {
+      "archivo": "FRASES_SEPARADAS/04_INVITADA_OBJECION.wav",
+      "duracion_s": 1.275,
+      "pico_dbfs": -2.0,
+      "frecuencia": 48000
+    },
+    {
+      "archivo": "FRASES_SEPARADAS/05_NOVIA_SUSTO.wav",
+      "duracion_s": 0.449,
+      "pico_dbfs": -2.0,
+      "frecuencia": 48000
+    },
+    {
+      "archivo": "FRASES_SEPARADAS/06_NOVIA_DESPERTAR.wav",
+      "duracion_s": 2.34,
+      "pico_dbfs": -2.0,
+      "frecuencia": 48000
+    },
+    {
+      "archivo": "FRASES_SEPARADAS/07_NOVIA_NO.wav",
+      "duracion_s": 1.14,
+      "pico_dbfs": -2.0,
+      "frecuencia": 48000
+    },
+    {
+      "archivo": "MEZCLA_GUIA_14s.wav",
+      "duracion_s": 14.0,
+      "pico_dbfs": -2.0,
+      "frecuencia": 48000
+    },
+    {
+      "archivo": "PISTAS_SINCRONIZADAS_14S/INVITADA_14s.wav",
+      "duracion_s": 14.0,
+      "pico_dbfs": -2.0,
+      "frecuencia": 48000
+    },
+    {
+      "archivo": "PISTAS_SINCRONIZADAS_14S/NOVIA_14s.wav",
+      "duracion_s": 14.0,
+      "pico_dbfs": -2.0,
+      "frecuencia": 48000
+    },
+    {
+      "archivo": "PISTAS_SINCRONIZADAS_14S/NOVIO_14s.wav",
+      "duracion_s": 14.0,
+      "pico_dbfs": -2.0,
+      "frecuencia": 48000
+    },
+    {
+      "archivo": "PISTAS_SINCRONIZADAS_14S/OFICIANTE_14s.wav",
+      "duracion_s": 14.0,
+      "pico_dbfs": -2.0,
+      "frecuencia": 48000
+    },
+    {
+      "archivo": "POR_PERSONAJE/INVITADA.wav",
+      "duracion_s": 1.275,
+      "pico_dbfs": -2.0,
+      "frecuencia": 48000
+    },
+    {
+      "archivo": "POR_PERSONAJE/NOVIA.wav",
+      "duracion_s": 6.579,
+      "pico_dbfs": -2.0,
+      "frecuencia": 48000
+    },
+    {
+      "archivo": "POR_PERSONAJE/NOVIO.wav",
+      "duracion_s": 0.64,
+      "pico_dbfs": -2.0,
+      "frecuencia": 48000
+    },
+    {
+      "archivo": "POR_PERSONAJE/OFICIANTE.wav",
+      "duracion_s": 1.365,
+      "pico_dbfs": -2.0,
+      "frecuencia": 48000
+    }
+  ]
+}

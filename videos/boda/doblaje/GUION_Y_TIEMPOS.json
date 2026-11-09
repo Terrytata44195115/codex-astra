@@ -1,0 +1,121 @@
+{
+  "duracion_escena": 14,
+  "idioma": "es",
+  "modelo": "Kokoro multilingual v1.0 int8 / sherpa-onnx 1.12.40",
+  "tipo": "Voces sinteticas nuevas; no clonadas ni comparadas con el original, que no contiene audio.",
+  "fuente_texto": "Subtitulos visibles del video videoplayback (22).mp4. No se puede confirmar dialogo audible ausente.",
+  "adaptaciones_pronunciacion": {
+    "Monkey": "Monqui"
+  },
+  "perfiles": {
+    "NOVIA": {
+      "sid": 28,
+      "voz": "ef_dora",
+      "pitch_semitonos": 2.0,
+      "speed": 1.06,
+      "registro": "Agudo, juvenil; ilusión, susto, alivio y protesta."
+    },
+    "NOVIO": {
+      "sid": 29,
+      "voz": "em_alex",
+      "pitch_semitonos": -0.5,
+      "speed": 0.98,
+      "registro": "Masculino joven, respuesta breve y algo insegura."
+    },
+    "OFICIANTE": {
+      "sid": 53,
+      "voz": "em_santa",
+      "pitch_semitonos": -1.0,
+      "speed": 1.0,
+      "registro": "Masculino adulto y grave, presentación solemne."
+    },
+    "INVITADA": {
+      "sid": 35,
+      "voz": "if_sara",
+      "pitch_semitonos": 0.6,
+      "speed": 1.0,
+      "registro": "Femenino enérgico, interrupción decidida."
+    }
+  },
+  "frases": [
+    {
+      "id": "01_OFICIANTE",
+      "rol": "OFICIANTE",
+      "texto": "Puede besar la novia.",
+      "inicio": 0.0,
+      "fin": 1.6,
+      "duracion_audio": 1.365,
+      "ajuste_tempo": 1,
+      "archivo": "FRASES_SEPARADAS/01_OFICIANTE.wav"
+    },
+    {
+      "id": "02_NOVIA_PREGUNTA",
+      "rol": "NOVIA",
+      "texto": "¿Estás listo, Monkey?",
+      "sintesis": "¿Estás listo, Monqui?",
+      "inicio": 1.6,
+      "fin": 3.0,
+      "duracion_audio": 1.3,
+      "ajuste_tempo": 1,
+      "archivo": "FRASES_SEPARADAS/02_NOVIA_PREGUNTA.wav"
+    },
+    {
+      "id": "03_NOVIO_LISTO",
+      "rol": "NOVIO",
+      "texto": "Listo…",
+      "inicio": 3.0,
+      "fin": 4.0,
+      "duracion_audio": 0.64,
+      "ajuste_tempo": 1,
+      "archivo": "FRASES_SEPARADAS/03_NOVIO_LISTO.wav"
+    },
+    {
+      "id": "04_INVITADA_OBJECION",
+      "rol": "INVITADA",
+      "texto": "¡Ey! ¡Yo me opongo!",
+      "sintesis": "¡Ey, yo me opongo!",
+      "inicio": 5.2,
+      "fin": 6.5,
+      "duracion_audio": 1.275,
+      "ajuste_tempo": 1,
+      "archivo": "FRASES_SEPARADAS/04_INVITADA_OBJECION.wav"
+    },
+    {
+      "id": "05_NOVIA_SUSTO",
+      "rol": "NOVIA",
+      "texto": "¡Aaah!",
+      "sintesis": "¡Ah, qué susto!",
+      "extraer_fin": 0.34,
+      "velocidad_sintesis": 1.0,
+      "inicio": 6.5,
+      "fin": 7.2,
+      "reaccion": true,
+      "duracion_audio": 0.449,
+      "ajuste_tempo": 0.4111,
+      "archivo": "FRASES_SEPARADAS/05_NOVIA_SUSTO.wav"
+    },
+    {
+      "id": "06_NOVIA_DESPERTAR",
+      "rol": "NOVIA",
+      "texto": "¡Qué bueno que era solo un sue…!",
+      "sintesis": "¡Qué bueno que era solo un sue...!",
+      "inicio": 8.0,
+      "fin": 10.6,
+      "duracion_audio": 2.34,
+      "ajuste_tempo": 0.6574,
+      "archivo": "FRASES_SEPARADAS/06_NOVIA_DESPERTAR.wav"
+    },
+    {
+      "id": "07_NOVIA_NO",
+      "rol": "NOVIA",
+      "texto": "¡Nooooo!",
+      "sintesis": "¡No!",
+      "inicio": 12.2,
+      "fin": 14.0,
+      "reaccion": true,
+      "duracion_audio": 1.14,
+      "ajuste_tempo": 0.425,
+      "archivo": "FRASES_SEPARADAS/07_NOVIA_NO.wav"
+    }
+  ]
+}
