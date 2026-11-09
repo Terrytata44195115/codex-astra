@@ -1,0 +1,95 @@
+-- Ejecutar con Stop, en Script > Comando de Madre_Hija_Donuts.
+local function ajustarSalaDonuts()
+    assert(not game:GetService("RunService"):IsRunning(), "Primero pulsa Stop.")
+    local root = workspace:FindFirstChild("HR_RetoDonuts")
+    assert(root and root:GetAttribute("HR_Owner") == "HR_DONUTS_DECORADO_1", "Falta el decorado de donuts de la fase anterior.")
+    local sala = root:FindFirstChild("Sala")
+    local mesa = root:FindFirstChild("Mesa")
+    local floor = sala and sala:FindFirstChild("Suelo")
+    local ceiling = sala and sala:FindFirstChild("Techo")
+    assert(floor and ceiling and mesa, "Faltan Suelo, Techo o Mesa. No se ha cambiado nada.")
+
+    -- Busca el suelo real debajo de esta sala, excluyendo el propio decorado y avatares.
+    local excluded = {root}
+    for _, item in ipairs(workspace:GetDescendants()) do
+        if item:IsA("Humanoid") and item.Parent then
+            table.insert(excluded, item.Parent)
+        end
+    end
+    local params = RaycastParams.new()
+    params.FilterType = Enum.RaycastFilterType.Exclude
+    params.FilterDescendantsInstances = excluded
+    params.IgnoreWater = true
+    local top = floor.Position.Y + floor.Size.Y / 2
+    local target = top
+    for _, x in ipairs({-12, 0, 12}) do
+        for _, z in ipairs({-9, 0, 9}) do
+            local sample = floor.CFrame:PointToWorldSpace(Vector3.new(x, 0, z))
+            local hit = workspace:Raycast(Vector3.new(sample.X, top + 40, sample.Z), Vector3.new(0, -100, 0), params)
+            if hit and hit.Normal.Y > 0.8 then
+                target = math.max(target, hit.Position.Y + 0.18)
+            end
+        end
+    end
+    local lift = math.max(0, target - top)
+    if lift > 0.001 then
+        local translation = CFrame.new(0, lift, 0)
+        root:PivotTo(translation * root:GetPivot())
+        local previousOrigin = root:GetAttribute("HR_Origen")
+        if typeof(previousOrigin) == "CFrame" then
+            root:SetAttribute("HR_Origen", translation * previousOrigin)
+        end
+    end
+
+    -- Luz solo para esta sala: la iluminacion global y los actores no se modifican.
+    local overhead = ceiling:FindFirstChild("HR_LuzTecho")
+    if overhead then
+        assert(overhead:IsA("SurfaceLight"), "HR_LuzTecho existe pero no es una luz compatible.")
+    else
+        overhead = Instance.new("SurfaceLight")
+        overhead.Name = "HR_LuzTecho"
+        overhead.Parent = ceiling
+    end
+    overhead.Face = Enum.NormalId.Bottom
+    overhead.Brightness = 2.2
+    overhead.Range = 24
+    overhead.Angle = 140
+    overhead.Color = Color3.fromRGB(255, 249, 235)
+    overhead.Shadows = false
+    overhead.Enabled = true
+
+    local fill = sala:FindFirstChild("HR_RellenoFrontal")
+    if fill then
+        assert(fill:IsA("BasePart"), "HR_RellenoFrontal existe pero no es una pieza compatible.")
+    else
+        fill = Instance.new("Part")
+        fill.Name = "HR_RellenoFrontal"
+        fill.Size = Vector3.new(0.1, 0.1, 0.1)
+        fill.Parent = sala
+    end
+    fill.Anchored = true
+    fill.Transparency = 1
+    fill.CanCollide = false
+    fill.CanTouch = false
+    fill.CanQuery = false
+    fill.CastShadow = false
+    fill.CFrame = floor.CFrame * CFrame.new(0, 7.15, 6)
+    local light = fill:FindFirstChild("HR_LuzFrontal")
+    if light then
+        assert(light:IsA("PointLight"), "HR_LuzFrontal existe pero no es una luz compatible.")
+    else
+        light = Instance.new("PointLight")
+        light.Name = "HR_LuzFrontal"
+        light.Parent = fill
+    end
+    light.Brightness = 1.4
+    light.Range = 28
+    light.Color = Color3.fromRGB(247, 251, 255)
+    light.Shadows = false
+    light.Enabled = true
+    root:SetAttribute("HR_SueloLuzAjustados", true)
+    game:GetService("Selection"):Set({mesa})
+    print(string.format("[HR DONUTS] AJUSTE LISTO. Sala elevada %.2f studs; luces de techo y frontal preparadas.", lift))
+    print("[HR DONUTS] Selecciona Mesa y pulsa F para revisar. Guarda con Ctrl+S.")
+end
+ajustarSalaDonuts()
