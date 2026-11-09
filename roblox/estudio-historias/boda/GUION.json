@@ -1,0 +1,61 @@
+{
+  "duracion": 14,
+  "planos": 11,
+  "fuente": "Subtitulos visibles del MP4 sin audio; no es una transcripcion de voz.",
+  "escenas": [
+    {
+      "inicio": 0.0,
+      "fin": 1.6,
+      "voz": "Madre",
+      "texto": "Puede besar a la novia."
+    },
+    {
+      "inicio": 1.6,
+      "fin": 3.0,
+      "voz": "Hija",
+      "texto": "¿Estás listo, Monkey?"
+    },
+    {
+      "inicio": 3.0,
+      "fin": 4.0,
+      "voz": "Novio",
+      "texto": "Listo…"
+    },
+    {
+      "inicio": 4.0,
+      "fin": 5.2,
+      "voz": null,
+      "texto": ""
+    },
+    {
+      "inicio": 5.2,
+      "fin": 6.5,
+      "voz": "Invitada",
+      "texto": "¡Ey! ¡Yo me opongo!"
+    },
+    {
+      "inicio": 6.5,
+      "fin": 7.2,
+      "voz": "Hija",
+      "texto": "¡Aaah!"
+    },
+    {
+      "inicio": 7.2,
+      "fin": 10.6,
+      "voz": "Hija",
+      "texto": "¡Qué bueno que era solo un sue…!"
+    },
+    {
+      "inicio": 10.6,
+      "fin": 12.2,
+      "voz": null,
+      "texto": ""
+    },
+    {
+      "inicio": 12.2,
+      "fin": 14.0,
+      "voz": "Hija",
+      "texto": "¡Noooo!"
+    }
+  ]
+}

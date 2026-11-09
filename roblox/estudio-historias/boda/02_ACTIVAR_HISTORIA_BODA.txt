@@ -1,0 +1,658 @@
+-- PASO 2. Ejecutar completo con Stop, tras revisar el decorado del paso 1.
+assert(not game:GetService("RunService"):IsRunning(),"Primero pulsa Stop.")
+local Storage=game:GetService("ServerStorage")
+local RS=game:GetService("ReplicatedStorage")
+local SSS=game:GetService("ServerScriptService")
+local SPS=game:GetService("StarterPlayer").StarterPlayerScripts
+local editor=game:GetService("ScriptEditorService")
+local OWNER="HR_BODA_1"
+local decor=workspace:FindFirstChild("HR_Boda")
+assert(decor and decor:GetAttribute("HR_Owner")==OWNER and decor:FindFirstChild("Reparto"),"Ejecuta primero 01_PREPARAR_BODA.")
+local oldRoot=RS:FindFirstChild("HR_PruebaReparto")
+assert(oldRoot and oldRoot:GetAttribute("HR_Owner")=="HR_PRUEBA_REPARTO_1" and oldRoot:FindFirstChild("Interpretacion"),"Falta la biblioteca de poses que ya funcionaba.")
+local face=SPS:FindFirstChild("HR_CarasMarcos")
+assert(face and face:IsA("LocalScript") and face:GetAttribute("HR_Owner")=="HR_PRUEBA_REPARTO_1","No se reconoce el cliente facial de la historia anterior.")
+local oldFace=editor:GetEditorSource(face)
+assert(oldFace:find('HR_ExpresionVisible',1,true) and oldFace:find('HR_SoportesCaraLocales',1,true),"La version facial es distinta. Se conserva: comparte su codigo antes de activar la boda.")
+local newFace,n=oldFace:gsub('ipairs%(%s*{%s*"Madre"%s*,%s*"Hija"%s*,%s*"Novio"%s*}%s*%)','ipairs({"Madre","Hija","Novio","Invitada"})')
+if n==0 then newFace,n=oldFace:gsub('ipairs%(%s*{%s*"Madre"%s*,%s*"Hija"%s*}%s*%)','ipairs({"Madre","Hija","Novio","Invitada"})') end
+assert(n==1,"No se ha encontrado una unica lista de actores en las caras. Se conserva el sistema anterior.")
+for before,after in pairs({HR_PruebaReparto="HR_Boda",HR_PruebaActores="HR_BodaActores",HR_SoportesCaraLocales="HR_CarasBodaLocales",HR_CarasMarcos_Visual="HR_CarasBoda_Visual",HR_PRUEBA_REPARTO_1=OWNER}) do newFace=newFace:gsub(before,after) end
+local check=(function()
+local P={}
+function P.Verificar(model)
+ assert(model and model:IsA("Model"),"Falta un modelo del reparto.")
+ local h=model:FindFirstChildOfClass("Humanoid")
+ assert(h and h.RigType==Enum.HumanoidRigType.R15,"Se necesita el rig R15 que ya funcionaba: "..model.Name)
+ assert(model:FindFirstChild("HumanoidRootPart") and model:FindFirstChild("Head") and model:FindFirstChild("LeftFoot") and model:FindFirstChild("RightHand") and model:FindFirstChild("LeftHand"),"Rig incompleto: "..model.Name)
+ local joints={}
+ for _,item in ipairs(model:GetDescendants()) do
+  assert(not item:IsA("AnimationConstraint"),"Rig incompatible: "..model.Name)
+  if item:IsA("Motor6D") then
+   local key=item.Name:gsub("%s+","")
+   assert(not joints[key],"Articulacion duplicada: "..key)
+   assert(item.Part0 and item.Part1,"Articulacion desconectada: "..key)
+   joints[key]=item
+  end
+ end
+ for _,key in ipairs({"Root","Waist","Neck","RightShoulder","RightElbow","RightWrist","LeftShoulder","LeftElbow","LeftWrist"}) do
+  assert(joints[key],"Falta "..key.." en "..model.Name)
+ end
+ local s,e,w=joints.RightShoulder,joints.RightElbow,joints.RightWrist
+ assert(s.Part1==e.Part0 and e.Part1==w.Part0 and w.Part1==model.RightHand,"Cadena del brazo incompatible.")
+end
+function P.Crear(parent,roles,decor,C)
+ local origin=decor:GetAttribute("HR_Origen")
+ assert(typeof(origin)=="CFrame","Falta HR_Origen en la sala.")
+ local floor=decor.Sala.Suelo
+ local ground=floor.Position.Y+floor.Size.Y/2
+ local preview=Instance.new("Model");preview.Name="RepartoDonuts";preview:SetAttribute("HR_Owner","HR_DONUTS_HISTORIA_1")
+ preview.Parent=parent
+ for _,role in ipairs({"Madre","Hija"}) do
+  local m=roles[role].Value:Clone();m.Name=role;m.Parent=preview
+  P.Verificar(m)
+  local root=m.HumanoidRootPart;local foot=m.LeftFoot
+  local rootHeight=root.Position.Y-(foot.Position.Y-foot.Size.Y/2)
+  for _,item in ipairs(m:GetDescendants()) do
+   if item:IsA("BaseScript") then item.Enabled=false end
+   if item:IsA("BillboardGui") then item.Enabled=false end
+   if item:IsA("BasePart") then item.Anchored=item==root;item.CanCollide=false end
+  end
+  m.PrimaryPart=root;m.ModelStreamingMode=Enum.ModelStreamingMode.Persistent
+  local h=m:FindFirstChildOfClass("Humanoid")
+  h.AutomaticScalingEnabled=false;h.AutoRotate=false;h.DisplayDistanceType=Enum.HumanoidDisplayDistanceType.None
+  local localPosition=C.Posiciones[role]
+  local p=origin:PointToWorldSpace(localPosition);p=Vector3.new(p.X,ground+rootHeight,p.Z)
+  m:PivotTo(CFrame.lookAt(p,p+origin.ZVector))
+ end
+ return preview
+end
+return P
+
+end)()
+for _,role in ipairs({"Madre","Hija","Novio","Invitada"}) do check.Verificar(decor.Reparto:FindFirstChild(role)) end
+local existing=RS:FindFirstChild("HR_Boda")
+if existing then
+ assert(existing:GetAttribute("HR_Owner")==OWNER,"Existe otra configuracion con este nombre.")
+ for _,where in ipairs({{SSS,"HR_BodaServidor"},{SPS,"HR_BodaCamara"},{SPS,"HR_BodaCaras"},{SPS,"HR_BodaDetalles"}}) do
+  local script=where[1]:FindFirstChild(where[2])
+  assert(script and script:GetAttribute("HR_Owner")==OWNER and script.Enabled,"La instalacion existente esta incompleta; conserva el estado y comparte Salida.")
+ end
+ print("[HR BODA] Historia ya instalada. No se han creado copias. Guarda y pulsa F5.")
+ return
+end
+assert(not Storage:FindFirstChild("HR_BodaAntesHistoria"),"Existe un respaldo anterior de boda. Usa VOLVER_ESCENA_ANTERIOR antes de reinstalar.")
+local previous={}
+for _,candidate in ipairs({{SSS,"HR_PruebaRepartoServidor"},{SPS,"HR_PruebaRepartoCamara"},{SPS,"HR_CarasMarcos"},{SSS,"HR_CineServidor"},{SPS,"HR_CineCamara"}}) do
+ local script=candidate[1]:FindFirstChild(candidate[2])
+ if script then
+  assert(script:IsA("BaseScript") and (script:GetAttribute("HR_Owner")=="HR_PRUEBA_REPARTO_1" or script:GetAttribute("HR_Owner")=="HR_Cine_V2"),"Controlador no reconocido: "..script.Name)
+  table.insert(previous,{object=script,enabled=script.Enabled})
+ end
+end
+local staging=Instance.new("Folder");local created={};local backup
+local ok,err=pcall(function()
+ local root=Instance.new("Folder");root.Name="HR_Boda";root:SetAttribute("HR_Owner",OWNER);root:SetAttribute("Version","BODA_1");root.Parent=staging
+ local remote=Instance.new("RemoteEvent");remote.Name="Canal";remote.Parent=root
+ local definitions={
+  {parent=root,name="Configuracion",class="ModuleScript",source=[====[
+local C={Version="BODA_1",Duracion=14,Preparacion=3,FrenteSeguro=9/16,MarcoVertical=true,SubtitulosGuia=true}
+-- Papeles internos compatibles con los rigs y las caras de la biblioteca existente.
+C.Roles={"Madre","Hija","Novio","Invitada"}
+C.Nombres={Madre="Oficiante",Hija="Novia",Novio="Monkey",Invitada="Invitada"}
+C.Posiciones={Madre=Vector3.new(0,0,-2.3),Hija=Vector3.new(-1.75,0,.25),Novio=Vector3.new(1.75,0,.25),Invitada=Vector3.new(0,0,15)}
+C.Giros={Madre=0,Hija=25,Novio=-25,Invitada=180}
+C.Dormitorio=Vector3.new(-28,0,0)
+local function smooth(t) t=math.clamp(t,0,1);return t*t*(3-2*t) end
+function C.RaizEn(role,t,height,baseCF,origin)
+ local function at(x,y,z,yaw) return origin*CFrame.new(x,y,z)*CFrame.Angles(0,math.pi+math.rad(yaw or 0),0) end
+ if role=="Invitada" and t>=4 and t<5.2 then
+  local p=C.Posiciones.Invitada:Lerp(Vector3.new(.4,0,2.7),smooth((t-4)/1.2))
+  return at(p.X,height+.22+.07*math.abs(math.sin(t*18)),p.Z,180)
+ elseif role=="Invitada" and t>=5.2 and t<10.6 then return at(.4,height+.22,2.7)
+ elseif role=="Hija" and t>=7.2 and t<10.6 then return at(C.Dormitorio.X,2.36,-1.8)
+ elseif role=="Hija" and t>=10.6 then return at(-1.9,t>=12.2 and height-1.0 or height+.22,4.7,t<12.2 and 180 or 0)
+ elseif role=="Novio" and t>=10.6 then return at(1.30,height+.22,.65,-65)
+ elseif role=="Invitada" and t>=10.6 then return at(.3,height+.22,.65,65) end
+ return baseCF
+end
+local function scene(a,b,voz,text,acciones,caras)
+ local s={Inicio=a,Fin=b,Voz=voz,Texto=text,Acciones={},Caras={}}
+ for _,r in ipairs(C.Roles) do s.Acciones[r]="ESCUCHAR";s.Caras[r]="NEUTRA" end
+ for k,v in pairs(acciones or {}) do s.Acciones[k]=v end
+ for k,v in pairs(caras or {}) do s.Caras[k]=v end
+ return s
+end
+C.Escenas={
+ scene(0,1.6,"Madre","Puede besar a la novia.",{Madre="CEREMONIA"},{Madre="ALEGRE",Hija="ALEGRE",Novio="VERGUENZA"}),
+ scene(1.6,3,"Hija","¿Estás listo, Monkey?",{Hija="ILUSION"},{Hija="ALEGRE",Novio="VERGUENZA"}),
+ scene(3,4,"Novio","Listo…",{Novio="NERVIOSO"},{Novio="VERGUENZA",Hija="ALEGRE"}),
+ scene(4,5.2,nil,"",{Invitada="CORRER"},{Hija="ALEGRE",Novio="ALEGRE",Invitada="ENFADADA"}),
+ scene(5.2,6.5,"Invitada","¡Ey! ¡Yo me opongo!",{Invitada="OPONER",Hija="SUSTO"},{Invitada="ENFADADA",Hija="ALARMA",Madre="ALARMA",Novio="INQUIETA"}),
+ scene(6.5,7.2,"Hija","¡Aaah!",{Hija="TAPAR_CARA"},{Hija="ALARMA"}),
+ scene(7.2,10.6,"Hija","¡Qué bueno que era solo un sue…!",{Hija="DESPERTAR"},{Hija="INQUIETA"}),
+ scene(10.6,12.2,nil,"",{Novio="ABRAZAR",Invitada="ABRAZAR",Hija="SUSTO"},{Novio="ALEGRE",Invitada="ALEGRE",Hija="ALARMA"}),
+ scene(12.2,14,"Hija","¡Noooo!",{Hija="LLORAR"},{Hija="ALARMA",Novio="ALEGRE",Invitada="ALEGRE"}),
+}
+local function shot(a,b,tipo,roles,fov,angle)
+ return {Inicio=a,Fin=b,Tipo=tipo,Roles=roles,Fov=fov or 43,Angulo=angle or 0}
+end
+C.Planos={
+ shot(0,.95,"MEDIO",{"Madre"},43),
+ shot(.95,1.6,"ALTAR",{"Madre","Hija","Novio"},49),
+ shot(1.6,3,"MEDIO",{"Hija"},43,-8),
+ shot(3,4,"MEDIO",{"Novio"},43,8),
+ shot(4,5.2,"ENTRADA",{"Madre","Hija","Novio","Invitada"},52,12),
+ shot(5.2,6.5,"MEDIO",{"Invitada"},43),
+ shot(6.5,7.2,"CARA",{"Hija"},42),
+ shot(7.2,8,"CAMA",{"Hija"},47),
+ shot(8,10.6,"DESPERTAR",{"Hija"},43),
+ shot(10.6,12.2,"REVELACION",{"Hija","Novio","Invitada"},47,-10),
+ shot(12.2,14,"LLANTO",{"Hija"},43),
+}
+function C.EscenaEn(t)
+ for i,s in ipairs(C.Escenas) do if t<s.Fin then return s,i end end
+ return C.Escenas[#C.Escenas],#C.Escenas
+end
+function C.PlanoEn(t)
+ for i,s in ipairs(C.Planos) do if t<s.Fin then return s,i end end
+ return C.Planos[#C.Planos],#C.Planos
+end
+-- Puntos del plano ajustados a la zona central 9:16, sin recortar caras.
+function C.Encuadrar(points,front,aspect,fov,margin,slope)
+ local low=Vector3.new(math.huge,math.huge,math.huge);local high=-low
+ for _,p in ipairs(points) do low=low:Min(p);high=high:Max(p) end
+ local focus=(low+high)/2;local direction=(front+Vector3.yAxis*(slope or .06)).Unit
+ local axes=CFrame.lookAt(focus,focus-direction)
+ local tv=math.tan(math.rad(fov/2));local th=tv*math.max(.05,math.min(C.FrenteSeguro,aspect))
+ local distance=1
+ for _,p in ipairs(points) do
+  local q=axes:PointToObjectSpace(p)
+  distance=math.max(distance,q.Z+math.abs(q.X)*(margin or 1.08)/th,q.Z+math.abs(q.Y)*(margin or 1.08)/tv,q.Z+.8)
+ end
+ return axes*CFrame.new(0,0,distance),focus
+end
+return C
+]====]},
+  {parent=root,name="Brazos",class="ModuleScript",source=[====[
+-- IK analitica sobre los Motor6D existentes. No reconstruye el rig.
+local A={}
+function A.SoporteMano(hand)
+ local grip=hand:FindFirstChild(hand.Name=="LeftHand" and "LeftGripAttachment" or "RightGripAttachment")
+ return CFrame.new(grip and grip.Position or Vector3.new(0,-hand.Size.Y*.25,hand.Size.Z*.45))
+end
+-- Mismo soporte y UV de boca que el cliente facial que ya se ve correctamente.
+function A.PuntoBoca(head,cf)
+ local front=head:FindFirstChild("FaceFrontAttachment")
+ local hat=head:FindFirstChild("HatAttachment")
+ local mesh=head:FindFirstChildOfClass("SpecialMesh")
+ local radius=front and math.abs(front.Position.Z) or head.Size.Z*.6
+ local top=hat and math.abs(hat.Position.Y) or radius
+ local width=math.max(.5,math.min(head.Size.X,2*radius))
+ local height=math.max(.5,2*top)
+ local depth=math.max(radius,head.Size.Z/2*(mesh and math.max(1,mesh.Scale.Z) or 1))
+ local x=front and front.Position.X or 0
+ local y=(front and front.Position.Y or 0)-height*.20
+ return (cf or head.CFrame)*CFrame.new(x,y,-depth-width*.04-.035)
+end
+function A.Bocado(head,cf)
+ -- El borde posterior elevado de la rosca toca la boca, no su centro ni un lado.
+ return A.PuntoBoca(head,cf)*CFrame.Angles(math.rad(-68),0,0)*CFrame.new(0,0,-.72)
+end
+local function rotationFor(localAxis,worldAxis,reference)
+ local function basis(y,x)
+  y=y.Unit;x=x-y*x:Dot(y)
+  if x.Magnitude<0.001 then x=Vector3.zAxis-y*Vector3.zAxis:Dot(y) end
+  if x.Magnitude<0.001 then x=Vector3.xAxis-y*Vector3.xAxis:Dot(y) end
+  x=x.Unit
+  return CFrame.fromMatrix(Vector3.zero,x,y,x:Cross(y).Unit)
+ end
+ return basis(-worldAxis,reference)*basis(-localAxis,Vector3.xAxis):Inverse()
+end
+function A.Cadena(actor,side)
+ side=side or "Right"
+ local s,e,w=actor.joints[side.."Shoulder"],actor.joints[side.."Elbow"],actor.joints[side.."Wrist"]
+ assert(s and e and w,"Falta la cadena del brazo derecho de "..actor.model.Name)
+ local v1=e.base.Position-s.motor.C1.Position
+ local v2=w.base.Position-e.motor.C1.Position
+ assert(v1.Magnitude>0.05 and v2.Magnitude>0.05,"Longitudes de brazo no validas.")
+ return {s=s,e=e,w=w,v1=v1,v2=v2,l1=v1.Magnitude,l2=v2.Magnitude,sign=side=="Left" and -1 or 1}
+end
+function A.Marcos(actor)
+ local frames={[actor.root]=actor.root.CFrame}
+ local pending=true
+ while pending do
+  pending=false
+  for _,j in pairs(actor.joints) do
+   local m=j.motor
+   if m.Part0 and m.Part1 and frames[m.Part0] and not frames[m.Part1] then
+    frames[m.Part1]=frames[m.Part0]*m.C0*m.C1:Inverse();pending=true
+   end
+  end
+ end
+ return frames
+end
+function A.Resolver(actor,handTarget,weight,chain)
+ chain=chain or actor.arm
+ local s,e,w=chain.s,chain.e,chain.w
+ local frames=A.Marcos(actor)
+ local parent=frames[s.motor.Part0]
+ assert(parent,"No se pudo calcular el torso del actor.")
+ local shoulder=(parent*s.base).Position
+ local wrist=(handTarget*w.motor.C1).Position
+ local diff=wrist-shoulder
+ if diff.Magnitude<0.001 then diff=actor.root.CFrame.LookVector*0.001 end
+ local u=diff.Unit
+ local d=math.clamp(diff.Magnitude,math.abs(chain.l1-chain.l2)+0.002,chain.l1+chain.l2-0.002)
+ local pole=actor.root.CFrame.RightVector*(0.8*chain.sign)-Vector3.yAxis*0.4-actor.root.CFrame.LookVector*0.1
+ local bend=pole-u*pole:Dot(u)
+ if bend.Magnitude<0.001 then bend=u:Cross(Vector3.yAxis) end
+ if bend.Magnitude<0.001 then bend=u:Cross(Vector3.xAxis) end
+ bend=bend.Unit
+ local cosine=math.clamp((chain.l1^2+d^2-chain.l2^2)/(2*chain.l1*d),-1,1)
+ local elbow=shoulder+u*(cosine*chain.l1)+bend*(math.sqrt(math.max(0,1-cosine^2))*chain.l1)
+ local endPoint=shoulder+u*d
+ local upper=CFrame.new(shoulder)*rotationFor(chain.v1,elbow-shoulder,actor.root.CFrame.RightVector)*CFrame.new(-s.motor.C1.Position)
+ local lower=CFrame.new(elbow)*rotationFor(chain.v2,endPoint-elbow,actor.root.CFrame.RightVector)*CFrame.new(-e.motor.C1.Position)
+ local hand=CFrame.new(endPoint)*handTarget.Rotation*CFrame.new(-w.motor.C1.Position)
+ local goals={parent:ToObjectSpace(upper*s.motor.C1),upper:ToObjectSpace(lower*e.motor.C1),lower:ToObjectSpace(hand*w.motor.C1)}
+ for i,j in ipairs({s,e,w}) do j.motor.C0=j.motor.C0:Lerp(goals[i],weight) end
+ local final=A.Marcos(actor)[w.motor.Part1]
+ return final,math.max(0,diff.Magnitude-d)
+end
+function A.Susurrar(actor,weight)
+ local head=A.Marcos(actor)[actor.model.Head]
+ local mouth=A.PuntoBoca(actor.model.Head,head)
+ local errors={}
+ for i,side in ipairs({"Right","Left"}) do
+  local sign=side=="Right" and 1 or -1
+  local hand=actor.model[side.."Hand"]
+  local grip=mouth*CFrame.new(sign*.34,.03,-.16)*CFrame.Angles(math.rad(-68),0,math.rad(sign*18))
+  local _,excess=A.Resolver(actor,grip*A.SoporteMano(hand):Inverse(),weight,side=="Right" and actor.arm or actor.leftArm)
+  errors[i]=excess
+ end
+ return errors
+end
+return A
+]====]},
+  {parent=SSS,name="HR_BodaServidor",class="Script",source=[====[
+local RS=game:GetService("ReplicatedStorage")
+local Storage=game:GetService("ServerStorage")
+local Run=game:GetService("RunService")
+local Players=game:GetService("Players")
+local folder=RS:WaitForChild("HR_Boda",15)
+assert(folder and folder:GetAttribute("HR_Owner")=="HR_BODA_1","[HR BODA] Falta el sistema.")
+local C=require(folder:WaitForChild("Configuracion",10))
+local A=require(folder:WaitForChild("Brazos",10))
+local B=require(RS:WaitForChild("HR_PruebaReparto",15):WaitForChild("Interpretacion",10))
+local remote=folder:WaitForChild("Canal",10)
+local decor=workspace:WaitForChild("HR_Boda",15)
+assert(decor and decor:FindFirstChild("Reparto"),"[HR BODA] Ejecuta primero 01_PREPARAR_BODA.")
+assert(not workspace:FindFirstChild("HR_BodaActores"),"[HR BODA] Ya hay otro reparto activo.")
+local stage=Instance.new("Folder");stage.Name="HR_BodaActores";stage:SetAttribute("HR_Owner","HR_BODA_1")
+local origin=decor:GetAttribute("HR_Origen")
+local cast={}
+local function a(x,y,z) return CFrame.Angles(math.rad(x or 0),math.rad(y or 0),math.rad(z or 0)) end
+local function smooth(t) t=math.clamp(t,0,1);return t*t*(3-2*t) end
+for _,role in ipairs(C.Roles) do
+ local m=decor.Reparto:FindFirstChild(role):Clone();m.Name=role
+ local root=m.HumanoidRootPart;local joints={};local clothing={}
+ for _,d in ipairs(m:GetDescendants()) do
+  if d:IsA("BaseScript") then d.Enabled=false end
+  if d:IsA("BasePart") then d.Anchored=d==root;d.CanCollide=false end
+  if d:IsA("Motor6D") then
+   local key=d.Name:gsub("%s+","")
+   assert(not joints[key],"Articulacion duplicada: "..key)
+   joints[key]={motor=d,base=d.C0};d.Transform=CFrame.identity
+  end
+  if d:IsA("BasePart") and (d:GetAttribute("HR_Falda") or d:GetAttribute("HR_Velo")) then
+   local weld=d:FindFirstChildOfClass("Weld")
+   table.insert(clothing,{part=d,value=d.Transparency,size=d.Size,weld=weld,offset=weld and weld.C0})
+  end
+ end
+ local actor={model=m,root=root,joints=joints,baseCF=root.CFrame,offset=root.CFrame:ToObjectSpace(m:GetPivot()),clothing=clothing,height=m:GetAttribute("HR_AlturaRaiz")}
+ actor.arm=A.Cadena(actor);actor.leftArm=A.Cadena(actor,"Left")
+ B.Preparar(actor);B.Cara(actor,"NEUTRA");m.Parent=stage;cast[role]=actor
+end
+stage.Parent=workspace
+folder:SetAttribute("ActoresListos",false)
+local parked=Instance.new("Folder");parked.Name="HR_BodaOriginalesDurantePlay";parked.Parent=Storage
+decor.Reparto.Parent=parked
+for _,name in ipairs({"HR_RevisionReparto","HR_RetoDonuts","chicaB","chicaX","cute girl","perroB","perroX"}) do
+ local old=workspace:FindFirstChild(name)
+ if old and old:IsA("Model") then old.Parent=parked end
+end
+local startTime,director,finished,previousScene
+local lastReplay=-math.huge
+local function reset()
+ finished=false;previousScene=nil
+ for _,actor in pairs(cast) do
+  actor.model:PivotTo(actor.baseCF*actor.offset)
+  for _,j in pairs(actor.joints) do j.motor.C0=j.base;j.motor.Transform=CFrame.identity end
+  for _,p in ipairs(actor.clothing) do p.part.Transparency=p.value;p.part.Size=p.size;if p.weld then p.weld.C0=p.offset end end
+  B.Cara(actor,"NEUTRA");actor.model.Head:SetAttribute("HR_Lagrimas",false)
+ end
+ startTime=workspace:GetServerTimeNow()+C.Preparacion
+ folder:SetAttribute("Inicio",startTime);remote:FireAllClients("START",startTime)
+end
+remote.OnServerEvent:Connect(function(player,message)
+ if not player:IsDescendantOf(Players) then return end
+ if message=="READY" then
+  if not startTime then director=player;reset() end
+  remote:FireClient(player,"START",startTime)
+ elseif message=="REPLAY" and player==director and os.clock()-lastReplay>1 then lastReplay=os.clock();reset() end
+end)
+local function pose(actor,targets,dt)
+ for key,j in pairs(actor.joints) do j.motor.C0=j.motor.C0:Lerp(j.base*(targets[key] or CFrame.identity),1-math.exp(-dt*22)) end
+end
+Run.Heartbeat:Connect(function(dt)
+ if not startTime or finished then return end
+ local raw=workspace:GetServerTimeNow()-startTime
+ if raw<0 then return end
+ local t=math.min(raw,C.Duracion);local scene,index=C.EscenaEn(t);local lt=t-scene.Inicio
+ if previousScene~=index then
+  previousScene=index
+  print(string.format("[HR BODA] %.1f–%.1f | %s: %s",scene.Inicio,scene.Fin,C.Nombres[scene.Voz] or "Accion",scene.Texto))
+ end
+ -- Todas las raices cambian antes de resolver contactos entre dos actores.
+ for _,role in ipairs(C.Roles) do
+  local actor=cast[role];actor.model:PivotTo(C.RaizEn(role,t,actor.height,actor.baseCF,origin)*actor.offset)
+ end
+ for _,role in ipairs(C.Roles) do
+  local actor=cast[role];local action=scene.Acciones[role]
+  local targets=B.Pose(action,lt)
+  if action=="CEREMONIA" then
+   targets.LeftShoulder=a(25,0,8);targets.LeftElbow=a(95);targets.RightShoulder=a(48,0,-25);targets.RightElbow=a(35)
+  elseif action=="CORRER" then
+   local phase=(t-4)*19;local swing=math.sin(phase)*34
+   targets.RightHip=a(swing);targets.LeftHip=a(-swing)
+   targets.RightShoulder=a(-swing);targets.LeftShoulder=a(swing)
+   targets.RightElbow=a(65);targets.LeftElbow=a(65)
+   targets.RightKnee=a(math.max(0,-math.sin(phase))*60);targets.LeftKnee=a(math.max(0,math.sin(phase))*60)
+  elseif action=="OPONER" then
+   targets.RightShoulder=a(150,0,-12);targets.RightElbow=a(12)
+   targets.LeftShoulder=a(25,0,20);targets.LeftElbow=a(60);targets.Waist=a(-4)
+  elseif action=="DESPERTAR" then
+   targets.RightHip=a(-75,0,-18);targets.LeftHip=a(-75,0,18)
+   targets.RightKnee=a(75);targets.LeftKnee=a(75)
+   if lt<.8 then targets.RightShoulder=a(90,0,-8);targets.LeftShoulder=a(90,0,8);targets.RightElbow=a(110);targets.LeftElbow=a(110)
+   else targets.RightShoulder=a(20,0,-20);targets.LeftShoulder=a(20,0,20);targets.RightElbow=a(55);targets.LeftElbow=a(55) end
+  elseif action=="ABRAZAR" then
+   targets.RightShoulder=a(65,0,-18);targets.LeftShoulder=a(65,0,18)
+   targets.RightElbow=a(75);targets.LeftElbow=a(75);targets.Neck=a(2,0,role=="Novio" and -10 or 10)
+  elseif action=="LLORAR" then
+   targets.RightHip=a(-65,0,-20);targets.LeftHip=a(-65,0,20)
+   targets.RightKnee=a(75);targets.LeftKnee=a(75)
+   targets.RightShoulder=a(18,0,-48);targets.LeftShoulder=a(18,0,48)
+   targets.RightElbow=a(50);targets.LeftElbow=a(50);targets.Neck=a(0,0,math.sin(lt*12)*5)
+  end
+  pose(actor,targets,dt)
+  if action=="NERVIOSO" then
+   local frames=A.Marcos(actor);local head=frames[actor.model.Head]
+   local grip=head*CFrame.new(.62,.22,.10)*a(-70,0,-20)
+   A.Resolver(actor,grip*A.SoporteMano(actor.model.RightHand):Inverse(),smooth(lt/.25))
+  elseif action=="ABRAZAR" then
+   local other=cast[role=="Novio" and "Invitada" or "Novio"]
+   local torso=A.Marcos(other)[other.model.UpperTorso]
+   for _,side in ipairs({"Right","Left"}) do
+    local target=torso*CFrame.new(side=="Right" and .38 or -.38,-.32,-.23)
+    local hand=actor.model[side.."Hand"]
+    A.Resolver(actor,target*A.SoporteMano(hand):Inverse(),smooth((t-10.6)/.3),side=="Right" and actor.arm or actor.leftArm)
+   end
+  end
+  local sleep=role=="Hija" and t>=7.2 and t<10.6
+  for _,p in ipairs(actor.clothing) do
+   p.part.Transparency=sleep and 1 or p.value
+   local scale=role=="Hija" and t>=12.2 and p.part.Name=="PliegueFalda" and .52 or 1
+   p.part.Size=Vector3.new(p.size.X,p.size.Y*scale,p.size.Z)
+   if p.weld then
+    local pos=p.offset.Position
+    p.weld.C0=CFrame.new(pos.X,pos.Y*scale,pos.Z)*p.offset.Rotation
+   end
+  end
+  B.Cara(actor,scene.Caras[role]);actor.model.Head:SetAttribute("HR_Lagrimas",role=="Hija" and t>=12.2)
+ end
+ if raw>=C.Duracion then finished=true;remote:FireAllClients("FIN");print("[HR BODA] FIN. R repite; G oculta el dialogo; P devuelve la camara.") end
+end)
+folder:SetAttribute("ActoresListos",true)
+print("[HR BODA] Cuatro actores preparados. Esperando al cliente de camara.")
+]====]},
+  {parent=SPS,name="HR_BodaCamara",class="LocalScript",source=[====[
+local Players=game:GetService("Players")
+local RS=game:GetService("ReplicatedStorage")
+local Run=game:GetService("RunService")
+local Input=game:GetService("UserInputService")
+local StarterGui=game:GetService("StarterGui")
+local folder=RS:WaitForChild("HR_Boda",20)
+assert(folder,"[HR BODA] Falta la configuracion.")
+local C=require(folder:WaitForChild("Configuracion",10));local remote=folder:WaitForChild("Canal",10)
+local stage=workspace:WaitForChild("HR_BodaActores",25)
+local decor=workspace:WaitForChild("HR_Boda",20)
+assert(stage and decor,"[HR BODA] Falta el reparto o el decorado.")
+local actors={}
+for _,role in ipairs(C.Roles) do
+ local m=stage:WaitForChild(role,15)
+ assert(m and m:WaitForChild("Head",10) and m:WaitForChild("HumanoidRootPart",10),"[HR BODA] Falta "..role)
+ actors[role]=m
+end
+local deadline=os.clock()+20
+while not folder:GetAttribute("ActoresListos") and os.clock()<deadline do task.wait(.1) end
+assert(folder:GetAttribute("ActoresListos"),"[HR BODA] El reparto no termino de prepararse.")
+local player=Players.LocalPlayer
+local camera=workspace.CurrentCamera
+while not camera do Run.RenderStepped:Wait();camera=workspace.CurrentCamera end
+local saved={kind=camera.CameraType,subject=camera.CameraSubject,fov=camera.FieldOfView,cf=camera.CFrame,mode=camera.FieldOfViewMode}
+local active=true;local connections={};local hidden={};local core={};local effects={}
+for _,e in ipairs(camera:GetChildren()) do if e:IsA("PostEffect") then effects[e]=e.Enabled;e.Enabled=false end end
+for _,kind in ipairs(Enum.CoreGuiType:GetEnumItems()) do
+ if kind~=Enum.CoreGuiType.All then
+  local ok,v=pcall(function() return StarterGui:GetCoreGuiEnabled(kind) end)
+  if ok then core[kind]=v;pcall(function() StarterGui:SetCoreGuiEnabled(kind,false) end) end
+ end
+end
+local function hideCharacter(m)
+ local function hide(p)
+  if p:IsA("BasePart") then
+   if hidden[p]==nil then hidden[p]=p.LocalTransparencyModifier end
+   p.LocalTransparencyModifier=1
+  end
+ end
+ for _,p in ipairs(m:GetDescendants()) do hide(p) end
+ table.insert(connections,m.DescendantAdded:Connect(function(p) if active then hide(p) end end))
+end
+if player.Character then hideCharacter(player.Character) end
+table.insert(connections,player.CharacterAdded:Connect(function(m) if active then hideCharacter(m) end end))
+local gui=Instance.new("ScreenGui");gui.Name="HR_BodaRodaje";gui.IgnoreGuiInset=true;gui.ResetOnSpawn=false;gui.Parent=player:WaitForChild("PlayerGui")
+local caption=Instance.new("TextLabel");caption.AnchorPoint=Vector2.new(.5,.5);caption.Position=UDim2.fromScale(.5,.79)
+caption.BackgroundTransparency=1;caption.TextColor3=Color3.new(1,1,1);caption.TextStrokeTransparency=0
+caption.Font=Enum.Font.GothamBold;caption.TextScaled=true;caption.TextWrapped=true;caption.ZIndex=10;caption.Parent=gui
+local limit=Instance.new("UITextSizeConstraint");limit.MaxTextSize=38;limit.MinTextSize=12;limit.Parent=caption
+local countdown=Instance.new("TextLabel");countdown.Size=UDim2.fromScale(1,1);countdown.BackgroundColor3=Color3.new(0,0,0);countdown.BackgroundTransparency=.1
+countdown.TextColor3=Color3.new(1,1,1);countdown.Font=Enum.Font.GothamBold;countdown.TextSize=72;countdown.ZIndex=20;countdown.Parent=gui
+local left=Instance.new("Frame");left.Name="MargenIzquierdo";left.BackgroundColor3=Color3.new(0,0,0);left.BorderSizePixel=0;left.ZIndex=5;left.Parent=gui
+local right=left:Clone();right.Name="MargenDerecho";right.Parent=gui
+local visibility={}
+for role,m in pairs(actors) do
+ visibility[role]={}
+ for _,p in ipairs(m:GetDescendants()) do if p:IsA("BasePart") then table.insert(visibility[role],{part=p,value=p.LocalTransparencyModifier}) end end
+end
+local function showRoles(roles)
+ local visible={};for _,r in ipairs(roles) do visible[r]=true end
+ for r,list in pairs(visibility) do for _,e in ipairs(list) do if e.part.Parent then e.part.LocalTransparencyModifier=visible[r] and e.value or 1 end end end
+end
+local binding="HR_Boda_Camara"
+local function restore()
+ if not active then return end
+ active=false;Run:UnbindFromRenderStep(binding)
+ for _,c in ipairs(connections) do c:Disconnect() end
+ for p,v in pairs(hidden) do if p.Parent then p.LocalTransparencyModifier=v end end
+ for kind,v in pairs(core) do pcall(function() StarterGui:SetCoreGuiEnabled(kind,v) end) end
+ for e,v in pairs(effects) do if e.Parent then e.Enabled=v end end
+ showRoles(C.Roles)
+ camera.CameraType=saved.kind;camera.CameraSubject=saved.subject or (player.Character and player.Character:FindFirstChildOfClass("Humanoid"))
+ camera.FieldOfView=saved.fov;camera.FieldOfViewMode=saved.mode;camera.CFrame=saved.cf;gui:Destroy()
+end
+local startTime,priorShot,frame,focus,lastAspect,relative,anchor
+local guide=C.SubtitulosGuia
+local origin=decor:GetAttribute("HR_Origen")
+local references={}
+for r,m in pairs(actors) do
+ local h=m:GetAttribute("HR_AlturaRaiz");local p=C.Posiciones[r]
+ local base=CFrame.lookAt(origin:PointToWorldSpace(Vector3.new(p.X,h+.22,p.Z)),origin:PointToWorldSpace(Vector3.new(p.X,h+.22,p.Z))+origin.ZVector)*CFrame.Angles(0,math.rad(C.Giros[r]),0)
+ references[r]={height=h,base=base,headHeight=m.Head.Position.Y-m.HumanoidRootPart.Position.Y}
+end
+local function rootFor(role,t)
+ local r=references[role]
+ return C.RaizEn(role,t,r.height,r.base,origin)
+end
+table.insert(connections,Input.InputBegan:Connect(function(key,processed)
+ if processed or not active then return end
+ if key.KeyCode==Enum.KeyCode.P then restore()
+ elseif key.KeyCode==Enum.KeyCode.R then remote:FireServer("REPLAY")
+ elseif key.KeyCode==Enum.KeyCode.G then guide=not guide end
+end))
+table.insert(connections,remote.OnClientEvent:Connect(function(message,value)
+ if message=="START" and type(value)=="number" and value~=startTime then startTime=value;priorShot=nil end
+end))
+local function box(points,cf,half)
+ for _,x in ipairs({-1,1}) do for _,y in ipairs({-1,1}) do for _,z in ipairs({-1,1}) do table.insert(points,cf:PointToWorldSpace(half*Vector3.new(x,y,z))) end end end
+end
+local function prepare(shot,aspect,t)
+ local points={};anchor=nil;relative=nil
+ local front=origin:VectorToWorldSpace(CFrame.Angles(0,math.rad(shot.Angulo),0).ZVector)
+ local slope=.07
+ if shot.Tipo=="REVELACION" then
+  -- Hombro de la novia en primer termino; nueva pareja al fondo, manteniendo el eje.
+  local p=origin:PointToWorldSpace(Vector3.new(-3.3,4.8,8.6))
+  local q=origin:PointToWorldSpace(Vector3.new(.8,4.0,.65))
+  return CFrame.lookAt(p,q),q
+ end
+ for _,r in ipairs(shot.Roles) do
+  local root=rootFor(r,t)
+  local headPosition=root.Position+Vector3.yAxis*references[r].headHeight
+  if shot.Tipo=="CARA" then
+   box(points,CFrame.new(headPosition),Vector3.new(.78,.92,.64))
+  elseif shot.Tipo=="ALTAR" or shot.Tipo=="ENTRADA" then
+   box(points,CFrame.new(headPosition+Vector3.yAxis*.12),Vector3.new(.95,1.05,.70))
+   table.insert(points,root.Position-Vector3.yAxis*references[r].height)
+  elseif shot.Tipo=="CAMA" then
+   box(points,CFrame.new(headPosition),Vector3.new(1.4,1.05,.7))
+   table.insert(points,origin:PointToWorldSpace(Vector3.new(C.Dormitorio.X,1.2,.4)))
+  else
+   box(points,CFrame.new(headPosition+Vector3.yAxis*.05),Vector3.new(.92,1.0,.65))
+   table.insert(points,root.Position-Vector3.yAxis*.4)
+  end
+ end
+ if shot.Tipo=="ENTRADA" then slope=.72 end
+ local cf,target=C.Encuadrar(points,front,aspect,shot.Fov,1.08,slope)
+ if #shot.Roles==1 and shot.Tipo~="CAMA" then
+  anchor=shot.Roles[1]
+  local root=rootFor(anchor,t)
+  relative={cf=root:ToObjectSpace(cf),focus=root:PointToObjectSpace(target)}
+ end
+ return cf,target
+end
+Run:BindToRenderStep(binding,Enum.RenderPriority.Camera.Value+10,function()
+ if not active then return end
+ local raw=startTime and workspace:GetServerTimeNow()-startTime or -C.Preparacion
+ local t=math.clamp(raw,0,C.Duracion);local shot,index=C.PlanoEn(t)
+ local aspect=camera.ViewportSize.X/math.max(1,camera.ViewportSize.Y)
+ countdown.Visible=raw<0;countdown.Text=startTime and tostring(math.max(1,math.ceil(-raw))) or "Preparando..."
+ if priorShot~=index or lastAspect~=aspect then
+  priorShot=index;lastAspect=aspect;frame,focus=prepare(shot,aspect,t)
+  showRoles(shot.Roles)
+  print("[HR BODA CAMARA] Plano "..index.." / "..shot.Tipo)
+ end
+ camera.CameraType=Enum.CameraType.Scriptable;camera.FieldOfView=shot.Fov
+ camera.FieldOfViewMode=Enum.FieldOfViewMode.Vertical
+ local root=relative and rootFor(anchor,t)
+ camera.CFrame=relative and root*relative.cf or frame
+ camera.Focus=CFrame.new(relative and root:PointToWorldSpace(relative.focus) or focus)
+ local side=math.max(0,(1-C.FrenteSeguro/aspect)/2)
+ left.Size=UDim2.fromScale(side,1);right.Size=UDim2.fromScale(side,1);right.Position=UDim2.fromScale(1-side,0)
+ left.Visible=C.MarcoVertical;right.Visible=C.MarcoVertical
+ local scene=C.EscenaEn(t)
+ caption.Visible=guide and raw>=0 and raw<C.Duracion and scene.Voz~=nil
+ if caption.Visible then
+  caption.Size=UDim2.fromScale(math.min(.9,.86*C.FrenteSeguro/aspect),.14)
+  caption.Text=scene.Texto
+  caption.TextColor3=scene.Voz=="Invitada" and Color3.fromRGB(255,218,99) or Color3.fromRGB(255,255,250)
+ end
+end)
+script.Destroying:Connect(restore)
+task.spawn(function()
+ local ready=os.clock()+20
+ while active and not startTime and os.clock()<ready do remote:FireServer("READY");task.wait(.4) end
+ if active and not startTime then warn("[HR BODA] No llego el inicio del servidor.");restore() end
+end)
+print("[HR BODA CAMARA] Lista. R repite; G oculta el texto de guia; P devuelve la camara.")
+]====]},
+  {parent=SPS,name="HR_BodaCaras",class="LocalScript",source=newFace},
+  {parent=SPS,name="HR_BodaDetalles",class="LocalScript",source=[====[
+-- Lagrimas y dos corazones locales; no sustituye ni oculta el renderer facial.
+local Run=game:GetService("RunService")
+local stage=workspace:WaitForChild("HR_BodaActores",25)
+if not stage then return end
+local bride=stage:WaitForChild("Hija",15)
+if not bride then return end
+local groom=stage:WaitForChild("Novio",15)
+local guest=stage:WaitForChild("Invitada",15)
+local heart=Instance.new("BillboardGui");heart.Name="HR_CorazonesBoda";heart.Adornee=groom.Head
+heart.Size=UDim2.fromOffset(100,70);heart.StudsOffset=Vector3.new(0,1.45,0);heart.AlwaysOnTop=false;heart.Enabled=false;heart.Parent=groom.Head
+local label=Instance.new("TextLabel");label.Size=UDim2.fromScale(1,1);label.BackgroundTransparency=1;label.Text="♥  ♥";label.TextColor3=Color3.fromRGB(235,65,100);label.TextSize=36;label.Font=Enum.Font.GothamBold;label.Parent=heart
+local folder=game:GetService("ReplicatedStorage"):WaitForChild("HR_Boda",15)
+local C=require(folder:WaitForChild("Configuracion",10))
+local binding="HR_BodaDetalles"
+Run:BindToRenderStep(binding,Enum.RenderPriority.Camera.Value+12,function()
+ local support=workspace:FindFirstChild("HR_CarasBodaLocales")
+ local face=support and support:FindFirstChild("HR_Cara_Hija")
+ local gui=face and face:FindFirstChild("HR_ExpresionVisible")
+ if gui then
+  local tears=gui:FindFirstChild("HR_LagrimasBoda")
+  if not tears then
+   tears=Instance.new("Frame");tears.Name="HR_LagrimasBoda";tears.Size=UDim2.fromScale(1,1);tears.BackgroundTransparency=1;tears.Parent=gui
+   for _,x in ipairs({.33,.67}) do
+    local f=Instance.new("Frame");f.Position=UDim2.fromScale(x-.028,.51);f.Size=UDim2.fromScale(.056,.24)
+    f.BackgroundColor3=Color3.fromRGB(85,188,236);f.BackgroundTransparency=.12;f.BorderSizePixel=0;f.Parent=tears
+    local round=Instance.new("UICorner");round.CornerRadius=UDim.new(1,0);round.Parent=f
+   end
+  end
+  tears.Visible=bride.Head:GetAttribute("HR_Lagrimas")==true
+ end
+ local start=folder:GetAttribute("Inicio");local t=start and workspace:GetServerTimeNow()-start or -1
+ heart.Enabled=t>=10.6 and t<=C.Duracion+.5 and groom.Head.LocalTransparencyModifier<.99
+ heart.StudsOffset=Vector3.new(0,1.45+math.sin(t*5)*.10,0)
+end)
+script.Destroying:Connect(function() Run:UnbindFromRenderStep(binding);heart:Destroy() end)
+]====]},
+ }
+ for _,e in ipairs(definitions) do
+  assert(not e.parent:FindFirstChild(e.name),"Ya existe "..e.name..". Se conserva.")
+  local script=Instance.new(e.class);script.Name=e.name;script:SetAttribute("HR_Owner",OWNER)
+  if script:IsA("BaseScript") then script.Enabled=false end
+  script.Parent=staging;table.insert(created,script);e.object=script
+  editor:UpdateSourceAsync(script,function() return e.source end)
+  assert(editor:GetEditorSource(script)==e.source,"No se sincronizo "..e.name)
+ end
+ backup=Instance.new("Folder");backup.Name="HR_BodaAntesHistoria";backup:SetAttribute("HR_Owner",OWNER)
+ for _,e in ipairs(previous) do
+  local ref=Instance.new("ObjectValue");ref.Name=e.object.Name;ref.Value=e.object;ref:SetAttribute("EstabaActivo",e.enabled);ref.Parent=backup
+ end
+ backup.Parent=Storage
+ for _,e in ipairs(previous) do e.object.Enabled=false end
+ root.Parent=RS;table.insert(created,root)
+ for _,e in ipairs(definitions) do e.object.Parent=e.parent end
+ for _,e in ipairs(definitions) do if e.object:IsA("BaseScript") then e.object.Enabled=true end end
+end)
+if not ok then
+ for _,e in ipairs(previous) do e.object.Enabled=e.enabled end
+ for i=#created,1,-1 do pcall(function() created[i]:Destroy() end) end
+ if backup then backup:Destroy() end
+ staging:Destroy();error("[HR BODA] Activacion detenida y cambios revertidos: "..tostring(err))
+end
+staging:Destroy();game:GetService("Selection"):Set({decor.Ceremonia.ArcoFloral,decor.Reparto.Madre,decor.Reparto.Hija,decor.Reparto.Novio})
+print("[HR BODA] INSTALADA: 14 segundos, 11 planos, cuatro actores y dos decorados.")
+print("[HR BODA] Guarda, cierra las pestanas de codigo y pulsa F5. Cuenta atras de tres segundos.")
+print("[HR BODA] R repite; G muestra/oculta el dialogo de guia; P devuelve la camara.")
+print("[HR BODA] El archivo de referencia no tiene audio: texto reconstruido de sus subtitulos; las voces se anaden despues.")
+print("[HR BODA] Pendiente revision visual: vestido en la cama, manos en el abrazo y encuadre vertical de cada corte.")

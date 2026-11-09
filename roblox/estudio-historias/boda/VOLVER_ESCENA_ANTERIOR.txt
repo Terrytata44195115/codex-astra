@@ -1,0 +1,32 @@
+assert(not game:GetService("RunService"):IsRunning(),"Primero pulsa Stop.")
+local Storage=game:GetService("ServerStorage")
+local RS=game:GetService("ReplicatedStorage")
+local SSS=game:GetService("ServerScriptService")
+local SPS=game:GetService("StarterPlayer").StarterPlayerScripts
+local owner="HR_BODA_1"
+local decor=workspace:FindFirstChild("HR_Boda") or Storage:FindFirstChild("HR_Boda")
+local backup=Storage:FindFirstChild("HR_BodaAntesHistoria")
+local runtime=RS:FindFirstChild("HR_Boda")
+for _,o in pairs({decor,backup,runtime}) do assert(o:GetAttribute("HR_Owner")==owner,"Objeto de otro origen; no se modifica.") end
+local scripts={}
+for _,e in ipairs({{SSS,"HR_BodaServidor"},{SPS,"HR_BodaCamara"},{SPS,"HR_BodaCaras"},{SPS,"HR_BodaDetalles"}}) do
+ local s=e[1]:FindFirstChild(e[2]);if s then assert(s:GetAttribute("HR_Owner")==owner,"Controlador de otro origen.");table.insert(scripts,s) end
+end
+if backup then
+ for _,ref in ipairs(backup:GetChildren()) do
+  assert(ref:IsA("ObjectValue") and ref.Value and ref.Value:IsA("BaseScript") and type(ref:GetAttribute("EstabaActivo"))=="boolean","Respaldo incompleto; no se modifica.")
+ end
+end
+if decor and decor:FindFirstChild("AspectoAnterior") then
+ for _,ref in ipairs(decor.AspectoAnterior:GetChildren()) do
+  if ref.Value then for k,v in pairs(ref:GetAttributes()) do ref.Value[k]=v end end
+ end
+end
+for _,s in ipairs(scripts) do s:Destroy() end
+if runtime then runtime:Destroy() end
+if backup then
+ for _,ref in ipairs(backup:GetChildren()) do ref.Value.Enabled=ref:GetAttribute("EstabaActivo") end
+ backup:Destroy()
+end
+if decor then decor:Destroy() end
+print("[HR BODA] Restaurados la iluminacion y los controladores anteriores. Se ha retirado el montaje de boda.")

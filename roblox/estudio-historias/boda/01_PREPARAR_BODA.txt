@@ -1,0 +1,451 @@
+-- PASO 1. Ejecutar en una copia del proyecto, con Stop.
+assert(not game:GetService("RunService"):IsRunning(),"Primero pulsa Stop. Este comando se ejecuta fuera de Play.")
+local Storage=game:GetService("ServerStorage")
+local owner="HR_BODA_1"
+local exists=workspace:FindFirstChild("HR_Boda") or Storage:FindFirstChild("HR_Boda")
+if exists then
+ assert(exists:GetAttribute("HR_Owner")==owner,"Ya existe otro objeto HR_Boda. Se conserva.")
+ exists.Parent=workspace;game:GetService("Selection"):Set({exists.Ceremonia.ArcoFloral,exists.Reparto.Madre,exists.Reparto.Hija,exists.Reparto.Novio})
+ print("[HR BODA] El decorado ya existe; no se han creado copias. Pulsa F con el raton sobre la vista 3D.")
+ return
+end
+local cast=Storage:FindFirstChild("HR_EstudioReparto")
+assert(cast and cast:GetAttribute("HR_Owner")=="HR_ESTUDIO_REPARTO_1" and cast:FindFirstChild("Reparto"),"Abre una copia del proyecto que ya tiene madre, hija y novio. Faltan las plantillas compatibles.")
+local C=(function()
+local C={Version="BODA_1",Duracion=14,Preparacion=3,FrenteSeguro=9/16,MarcoVertical=true,SubtitulosGuia=true}
+-- Papeles internos compatibles con los rigs y las caras de la biblioteca existente.
+C.Roles={"Madre","Hija","Novio","Invitada"}
+C.Nombres={Madre="Oficiante",Hija="Novia",Novio="Monkey",Invitada="Invitada"}
+C.Posiciones={Madre=Vector3.new(0,0,-2.3),Hija=Vector3.new(-1.75,0,.25),Novio=Vector3.new(1.75,0,.25),Invitada=Vector3.new(0,0,15)}
+C.Giros={Madre=0,Hija=25,Novio=-25,Invitada=180}
+C.Dormitorio=Vector3.new(-28,0,0)
+local function smooth(t) t=math.clamp(t,0,1);return t*t*(3-2*t) end
+function C.RaizEn(role,t,height,baseCF,origin)
+ local function at(x,y,z,yaw) return origin*CFrame.new(x,y,z)*CFrame.Angles(0,math.pi+math.rad(yaw or 0),0) end
+ if role=="Invitada" and t>=4 and t<5.2 then
+  local p=C.Posiciones.Invitada:Lerp(Vector3.new(.4,0,2.7),smooth((t-4)/1.2))
+  return at(p.X,height+.22+.07*math.abs(math.sin(t*18)),p.Z,180)
+ elseif role=="Invitada" and t>=5.2 and t<10.6 then return at(.4,height+.22,2.7)
+ elseif role=="Hija" and t>=7.2 and t<10.6 then return at(C.Dormitorio.X,2.36,-1.8)
+ elseif role=="Hija" and t>=10.6 then return at(-1.9,t>=12.2 and height-1.0 or height+.22,4.7,t<12.2 and 180 or 0)
+ elseif role=="Novio" and t>=10.6 then return at(1.30,height+.22,.65,-65)
+ elseif role=="Invitada" and t>=10.6 then return at(.3,height+.22,.65,65) end
+ return baseCF
+end
+local function scene(a,b,voz,text,acciones,caras)
+ local s={Inicio=a,Fin=b,Voz=voz,Texto=text,Acciones={},Caras={}}
+ for _,r in ipairs(C.Roles) do s.Acciones[r]="ESCUCHAR";s.Caras[r]="NEUTRA" end
+ for k,v in pairs(acciones or {}) do s.Acciones[k]=v end
+ for k,v in pairs(caras or {}) do s.Caras[k]=v end
+ return s
+end
+C.Escenas={
+ scene(0,1.6,"Madre","Puede besar a la novia.",{Madre="CEREMONIA"},{Madre="ALEGRE",Hija="ALEGRE",Novio="VERGUENZA"}),
+ scene(1.6,3,"Hija","¿Estás listo, Monkey?",{Hija="ILUSION"},{Hija="ALEGRE",Novio="VERGUENZA"}),
+ scene(3,4,"Novio","Listo…",{Novio="NERVIOSO"},{Novio="VERGUENZA",Hija="ALEGRE"}),
+ scene(4,5.2,nil,"",{Invitada="CORRER"},{Hija="ALEGRE",Novio="ALEGRE",Invitada="ENFADADA"}),
+ scene(5.2,6.5,"Invitada","¡Ey! ¡Yo me opongo!",{Invitada="OPONER",Hija="SUSTO"},{Invitada="ENFADADA",Hija="ALARMA",Madre="ALARMA",Novio="INQUIETA"}),
+ scene(6.5,7.2,"Hija","¡Aaah!",{Hija="TAPAR_CARA"},{Hija="ALARMA"}),
+ scene(7.2,10.6,"Hija","¡Qué bueno que era solo un sue…!",{Hija="DESPERTAR"},{Hija="INQUIETA"}),
+ scene(10.6,12.2,nil,"",{Novio="ABRAZAR",Invitada="ABRAZAR",Hija="SUSTO"},{Novio="ALEGRE",Invitada="ALEGRE",Hija="ALARMA"}),
+ scene(12.2,14,"Hija","¡Noooo!",{Hija="LLORAR"},{Hija="ALARMA",Novio="ALEGRE",Invitada="ALEGRE"}),
+}
+local function shot(a,b,tipo,roles,fov,angle)
+ return {Inicio=a,Fin=b,Tipo=tipo,Roles=roles,Fov=fov or 43,Angulo=angle or 0}
+end
+C.Planos={
+ shot(0,.95,"MEDIO",{"Madre"},43),
+ shot(.95,1.6,"ALTAR",{"Madre","Hija","Novio"},49),
+ shot(1.6,3,"MEDIO",{"Hija"},43,-8),
+ shot(3,4,"MEDIO",{"Novio"},43,8),
+ shot(4,5.2,"ENTRADA",{"Madre","Hija","Novio","Invitada"},52,12),
+ shot(5.2,6.5,"MEDIO",{"Invitada"},43),
+ shot(6.5,7.2,"CARA",{"Hija"},42),
+ shot(7.2,8,"CAMA",{"Hija"},47),
+ shot(8,10.6,"DESPERTAR",{"Hija"},43),
+ shot(10.6,12.2,"REVELACION",{"Hija","Novio","Invitada"},47,-10),
+ shot(12.2,14,"LLANTO",{"Hija"},43),
+}
+function C.EscenaEn(t)
+ for i,s in ipairs(C.Escenas) do if t<s.Fin then return s,i end end
+ return C.Escenas[#C.Escenas],#C.Escenas
+end
+function C.PlanoEn(t)
+ for i,s in ipairs(C.Planos) do if t<s.Fin then return s,i end end
+ return C.Planos[#C.Planos],#C.Planos
+end
+-- Puntos del plano ajustados a la zona central 9:16, sin recortar caras.
+function C.Encuadrar(points,front,aspect,fov,margin,slope)
+ local low=Vector3.new(math.huge,math.huge,math.huge);local high=-low
+ for _,p in ipairs(points) do low=low:Min(p);high=high:Max(p) end
+ local focus=(low+high)/2;local direction=(front+Vector3.yAxis*(slope or .06)).Unit
+ local axes=CFrame.lookAt(focus,focus-direction)
+ local tv=math.tan(math.rad(fov/2));local th=tv*math.max(.05,math.min(C.FrenteSeguro,aspect))
+ local distance=1
+ for _,p in ipairs(points) do
+  local q=axes:PointToObjectSpace(p)
+  distance=math.max(distance,q.Z+math.abs(q.X)*(margin or 1.08)/th,q.Z+math.abs(q.Y)*(margin or 1.08)/tv,q.Z+.8)
+ end
+ return axes*CFrame.new(0,0,distance),focus
+end
+return C
+
+end)()
+local P=(function()
+local P={}
+function P.Verificar(model)
+ assert(model and model:IsA("Model"),"Falta un modelo del reparto.")
+ local h=model:FindFirstChildOfClass("Humanoid")
+ assert(h and h.RigType==Enum.HumanoidRigType.R15,"Se necesita el rig R15 que ya funcionaba: "..model.Name)
+ assert(model:FindFirstChild("HumanoidRootPart") and model:FindFirstChild("Head") and model:FindFirstChild("LeftFoot") and model:FindFirstChild("RightHand") and model:FindFirstChild("LeftHand"),"Rig incompleto: "..model.Name)
+ local joints={}
+ for _,item in ipairs(model:GetDescendants()) do
+  assert(not item:IsA("AnimationConstraint"),"Rig incompatible: "..model.Name)
+  if item:IsA("Motor6D") then
+   local key=item.Name:gsub("%s+","")
+   assert(not joints[key],"Articulacion duplicada: "..key)
+   assert(item.Part0 and item.Part1,"Articulacion desconectada: "..key)
+   joints[key]=item
+  end
+ end
+ for _,key in ipairs({"Root","Waist","Neck","RightShoulder","RightElbow","RightWrist","LeftShoulder","LeftElbow","LeftWrist"}) do
+  assert(joints[key],"Falta "..key.." en "..model.Name)
+ end
+ local s,e,w=joints.RightShoulder,joints.RightElbow,joints.RightWrist
+ assert(s.Part1==e.Part0 and e.Part1==w.Part0 and w.Part1==model.RightHand,"Cadena del brazo incompatible.")
+end
+function P.Crear(parent,roles,decor,C)
+ local origin=decor:GetAttribute("HR_Origen")
+ assert(typeof(origin)=="CFrame","Falta HR_Origen en la sala.")
+ local floor=decor.Sala.Suelo
+ local ground=floor.Position.Y+floor.Size.Y/2
+ local preview=Instance.new("Model");preview.Name="RepartoDonuts";preview:SetAttribute("HR_Owner","HR_DONUTS_HISTORIA_1")
+ preview.Parent=parent
+ for _,role in ipairs({"Madre","Hija"}) do
+  local m=roles[role].Value:Clone();m.Name=role;m.Parent=preview
+  P.Verificar(m)
+  local root=m.HumanoidRootPart;local foot=m.LeftFoot
+  local rootHeight=root.Position.Y-(foot.Position.Y-foot.Size.Y/2)
+  for _,item in ipairs(m:GetDescendants()) do
+   if item:IsA("BaseScript") then item.Enabled=false end
+   if item:IsA("BillboardGui") then item.Enabled=false end
+   if item:IsA("BasePart") then item.Anchored=item==root;item.CanCollide=false end
+  end
+  m.PrimaryPart=root;m.ModelStreamingMode=Enum.ModelStreamingMode.Persistent
+  local h=m:FindFirstChildOfClass("Humanoid")
+  h.AutomaticScalingEnabled=false;h.AutoRotate=false;h.DisplayDistanceType=Enum.HumanoidDisplayDistanceType.None
+  local localPosition=C.Posiciones[role]
+  local p=origin:PointToWorldSpace(localPosition);p=Vector3.new(p.X,ground+rootHeight,p.Z)
+  m:PivotTo(CFrame.lookAt(p,p+origin.ZVector))
+ end
+ return preview
+end
+return P
+
+end)()
+local V=(function()
+-- Vestuario unido al rig: no descarga accesorios ni ejecuta modelos de la tienda.
+local V={}
+local ivory=Color3.fromRGB(234,229,218)
+local dark=Color3.fromRGB(34,37,44)
+local gold=Color3.fromRGB(191,151,80)
+local function piece(folder,body,name,size,offset,color,shape)
+ local p=Instance.new("Part");p.Name=name;p.Size=size;p.Color=color;p.Material=Enum.Material.SmoothPlastic
+ p.CanCollide=false;p.CanTouch=false;p.CanQuery=false;p.Massless=true;p.CastShadow=false;p.Anchored=false
+ p.TopSurface=Enum.SurfaceType.Smooth;p.BottomSurface=Enum.SurfaceType.Smooth
+ if shape then p.Shape=shape end
+ p.CFrame=body.CFrame*offset;p.Parent=folder
+ local w=Instance.new("Weld");w.Part0=body;w.Part1=p;w.C0=offset;w.C1=CFrame.identity;w.Parent=p
+ return p
+end
+local function panel(folder,body,name,color)
+ local p=piece(folder,body,name,Vector3.new(body.Size.X*.82,body.Size.Y*.90,.025),CFrame.new(0,0,-body.Size.Z/2-.025),color)
+ local gui=Instance.new("SurfaceGui");gui.Name="DetallesCostura";gui.Face=Enum.NormalId.Front
+ gui.CanvasSize=Vector2.new(400,400);gui.LightInfluence=1;gui.AlwaysOnTop=false;gui.Parent=p
+ return gui
+end
+local function rectangle(gui,name,x,y,w,h,color,rotation,round)
+ local p=Instance.new("Frame");p.Name=name;p.AnchorPoint=Vector2.new(.5,.5);p.Position=UDim2.fromScale(x,y)
+ p.Size=UDim2.fromScale(w,h);p.BackgroundColor3=color;p.BorderSizePixel=0;p.Rotation=rotation or 0;p.Parent=gui
+ if round then local c=Instance.new("UICorner");c.CornerRadius=UDim.new(1,0);c.Parent=p end
+ return p
+end
+local function skirt(folder,body,color,floorDistance,short)
+ local height=math.max(.8,floorDistance-(short and .55 or .12))
+ local top=body.Size.X*.47;local bottom=short and top*1.35 or top*1.75
+ local run=bottom-top;local slant=math.sqrt(height*height+run*run)
+ for i=0,23 do
+  local t=i*math.pi/12
+  local radius=(top+bottom)/2
+  local offset=CFrame.new(math.sin(t)*radius,-height/2,math.cos(t)*radius)*CFrame.Angles(0,t,0)*CFrame.Angles(-math.atan2(run,height),0,0)
+  local p=piece(folder,body,"PliegueFalda",Vector3.new(2*math.pi*bottom/24*1.13,slant,.09),offset,color:Lerp(Color3.new(1,1,1),i%2*.035))
+  p:SetAttribute("HR_Falda",true)
+ end
+ local belt=piece(folder,body,"Cinturon",Vector3.new(body.Size.X*1.03,.13,body.Size.Z*1.06),CFrame.new(0,body.Size.Y*.3,0),gold)
+ belt:SetAttribute("HR_Falda",true)
+end
+function V.Aplicar(model,role)
+ local folder=Instance.new("Folder");folder.Name="VestuarioBoda";folder.Parent=model
+ local h=model:FindFirstChildOfClass("Humanoid");local torso=model.UpperTorso;local lower=model.LowerTorso
+ local skin=model.Head.Color
+ for _,d in ipairs(model:GetChildren()) do
+  if d:IsA("Shirt") or d:IsA("Pants") or d:IsA("ShirtGraphic") then d:Destroy() end
+  if d:IsA("Accessory") then
+   local handle=d:FindFirstChild("Handle")
+   -- Se conservan los cabellos ya incrustados; se retiran gafas/collares ajenos a la boda.
+   local hair=d.Name:lower():find("hair") or d.Name:lower():find("braid") or d.AccessoryType==Enum.AccessoryType.Hair
+   if not hair and handle then d:Destroy() end
+  end
+  if d:IsA("BasePart") and d.Name~="HumanoidRootPart" and d.Name~="Head" and d.Name~="LeftHand" and d.Name~="RightHand" then
+   if d:IsA("MeshPart") then d.TextureID="" end
+   for _,effect in ipairs(d:GetChildren()) do if effect:IsA("SurfaceAppearance") then effect:Destroy() end end
+   if role=="Hija" then d.Color=ivory
+   elseif role=="Invitada" then d.Color=Color3.fromRGB(218,171,63)
+   elseif role=="Madre" then d.Color=Color3.fromRGB(54,39,64)
+   else d.Color=dark end
+  end
+ end
+ model.Head:SetAttribute("HR_MascaraTextura",false)
+ for _,d in ipairs(model:GetDescendants()) do
+  if d:IsA("BasePart") and (d:GetAttribute("HR_Complemento") or d.Name=="Gorra" or d.Name=="Visera") then d:Destroy() end
+ end
+ if role=="Hija" or role=="Invitada" then
+  for _,name in ipairs({"LeftUpperArm","LeftLowerArm","RightUpperArm","RightLowerArm"}) do model[name].Color=skin end
+  local foot=model.LeftFoot
+  local distance=lower.Position.Y-(foot.Position.Y-foot.Size.Y/2)
+  skirt(folder,lower,role=="Hija" and ivory or Color3.fromRGB(215,166,58),distance,role=="Invitada")
+  local gui=panel(folder,torso,"Corpiño",role=="Hija" and ivory or Color3.fromRGB(215,166,58))
+  rectangle(gui,"Escote",.5,.1,.36,.20,skin,45)
+  for i=1,4 do rectangle(gui,"Perla",.5,.28+i*.12,.025,.025,gold,0,true) end
+  for _,name in ipairs({"LeftFoot","RightFoot"}) do model[name].Color=role=="Hija" and ivory or gold end
+  local head=model.Head;local hat=head:FindFirstChild("HatAttachment")
+  local top=hat and hat.Position.Y or .6
+  for i=-4,4 do
+   local t=i*.19
+   local p=piece(folder,head,"PerlaDiadema",Vector3.new(.09,.09,.09),CFrame.new(math.sin(t)*.53,top+.14,math.cos(t)*-.44),role=="Hija" and ivory or gold,Enum.PartType.Ball)
+   p:SetAttribute("HR_Velo",true)
+  end
+  if role=="Hija" then
+   for i=-2,2 do
+    local veil=piece(folder,head,"Velo",Vector3.new(.36,2.55,.025),CFrame.new(i*.32,top-1.12,.66+math.abs(i)*.04)*CFrame.Angles(0,math.rad(i*5),0),ivory)
+    veil.Transparency=.62;veil:SetAttribute("HR_Velo",true)
+   end
+   for i=-2,2 do
+    local lace=piece(folder,head,"EncajeVelo",Vector3.new(.37,.035,.035),CFrame.new(i*.32,top-2.39,.66+math.abs(i)*.04),ivory)
+    lace.Transparency=.2;lace:SetAttribute("HR_Velo",true)
+   end
+  end
+ else
+  local suit=role=="Madre" and Color3.fromRGB(54,39,64) or dark
+  local gui=panel(folder,torso,"PecheraTraje",suit)
+  rectangle(gui,"Camisa",.5,.38,.36,.77,ivory)
+  rectangle(gui,"SolapaIzquierda",.29,.45,.17,.8,suit,-20)
+  rectangle(gui,"SolapaDerecha",.71,.45,.17,.8,suit,20)
+  rectangle(gui,"Nudo",.5,.18,.10,.10,role=="Madre" and gold or dark,45)
+  if role=="Novio" then
+   rectangle(gui,"PajaritaI",.42,.17,.17,.10,dark,-15)
+   rectangle(gui,"PajaritaD",.58,.17,.17,.10,dark,15)
+   rectangle(gui,"Pañuelo",.80,.40,.14,.07,ivory,-7)
+  else rectangle(gui,"Corbata",.5,.44,.08,.43,gold) end
+  for i=1,3 do rectangle(gui,"Boton",.5,.59+i*.1,.028,.028,gold,0,true) end
+  for _,side in ipairs({"Left","Right"}) do
+   local arm=model[side.."LowerArm"]
+   piece(folder,arm,"PuñoCamisa",Vector3.new(arm.Size.X*1.02,.13,arm.Size.Z*1.02),CFrame.new(0,-arm.Size.Y*.40,0),ivory)
+   model[side.."Foot"].Color=Color3.fromRGB(23,24,29)
+  end
+  if role=="Madre" then
+   local hand=model.LeftHand
+   piece(folder,hand,"Libro",Vector3.new(.55,.77,.11),CFrame.new(0,-.05,-.38)*CFrame.Angles(math.rad(-15),0,0),Color3.fromRGB(50,30,53))
+   piece(folder,hand,"Paginas",Vector3.new(.49,.70,.08),CFrame.new(0,-.05,-.45)*CFrame.Angles(math.rad(-15),0,0),ivory)
+  end
+ end
+ h.DisplayDistanceType=Enum.HumanoidDisplayDistanceType.None
+end
+return V
+
+end)()
+local E=(function()
+local E={Owner="HR_BODA_1"}
+local cream=Color3.fromRGB(220,213,199)
+local gold=Color3.fromRGB(179,145,85)
+local white=Color3.fromRGB(232,228,219)
+local pink=Color3.fromRGB(209,153,163)
+local green=Color3.fromRGB(62,100,65)
+local function part(parent,name,size,cf,color,shape)
+ local p=Instance.new("Part");p.Name=name;p.Size=size;p.CFrame=cf;p.Color=color
+ p.Material=Enum.Material.SmoothPlastic;p.Anchored=true;p.CanCollide=false;p.CanTouch=false;p.CanQuery=false;p.CastShadow=false
+ p.TopSurface=Enum.SurfaceType.Smooth;p.BottomSurface=Enum.SurfaceType.Smooth
+ if shape then p.Shape=shape end
+ p.Parent=parent;return p
+end
+local function rod(parent,name,a,b,radius,color)
+ local d=b-a;local p=part(parent,name,Vector3.new(d.Magnitude,radius*2,radius*2),CFrame.lookAt((a+b)/2,b)*CFrame.Angles(0,math.pi/2,0),color,Enum.PartType.Cylinder)
+ return p
+end
+local function flower(parent,cf,radius,color)
+ local m=Instance.new("Model");m.Name="Rosa";m.Parent=parent
+ for i=0,6 do
+  local a=i*math.pi*2/7
+  part(m,"Petalo",Vector3.new(radius*.9,radius*.27,radius*.65),cf*CFrame.new(math.sin(a)*radius*.44,.02,math.cos(a)*radius*.44)*CFrame.Angles(math.rad(-18),a,0),color,Enum.PartType.Ball)
+ end
+ for i=0,3 do
+  local a=i*math.pi/2+.3
+  part(m,"PetaloInterior",Vector3.new(radius*.63,radius*.34,radius*.43),cf*CFrame.new(math.sin(a)*radius*.21,.075,math.cos(a)*radius*.21)*CFrame.Angles(math.rad(-28),a,0),color:Lerp(white,.18),Enum.PartType.Ball)
+ end
+ part(m,"Centro",Vector3.new(radius*.3,radius*.24,radius*.3),cf*CFrame.new(0,.12,0),Color3.fromRGB(199,172,108),Enum.PartType.Ball)
+end
+local function foliage(parent,cf,scale)
+ for i=-1,1 do
+  local p=part(parent,"Hoja",Vector3.new(scale*.22,scale*.055,scale*.73),cf*CFrame.new(i*scale*.19,0,i*scale*.11)*CFrame.Angles(0,i*.85,math.rad(i*15)),green:Lerp(Color3.fromRGB(116,139,94),(i+1)*.16),Enum.PartType.Ball)
+  p.Material=Enum.Material.SmoothPlastic
+ end
+end
+function E.Crear(parent,origin,roles,C,P,V)
+ local root=Instance.new("Model");root.Name="HR_Boda";root:SetAttribute("HR_Owner",E.Owner);root:SetAttribute("HR_Origen",origin)
+ root.ModelStreamingMode=Enum.ModelStreamingMode.Persistent;root.Parent=parent
+ local decor=Instance.new("Model");decor.Name="Ceremonia";decor.Parent=root
+ local function at(x,y,z) return origin*CFrame.new(x,y,z) end
+ local ground=part(decor,"Cesped",Vector3.new(1024,.3,1024),at(0,-.15,16),Color3.fromRGB(102,143,80));ground.Material=Enum.Material.Grass;ground.CanCollide=true;ground.CanQuery=true
+ part(decor,"Tarima",Vector3.new(14,.22,8),at(0,.11,-.8),cream)
+ part(decor,"BordeTarima",Vector3.new(14.2,.10,8.2),at(0,.04,-.8),gold)
+ part(decor,"Pasillo",Vector3.new(3.8,.055,22),at(0,.03,13),white)
+ for _,side in ipairs({-1,1}) do
+  part(decor,"RibetePasillo",Vector3.new(.055,.06,22),at(side*1.84,.04,13),gold)
+ end
+ local arch=Instance.new("Model");arch.Name="ArcoFloral";arch.Parent=decor
+ for _,side in ipairs({-1,1}) do
+  part(arch,"Pedestal",Vector3.new(1.5,.3,1.35),at(side*4.7,.38,-3.1),cream)
+  part(arch,"MolduraBase",Vector3.new(1.25,.18,1.12),at(side*4.7,.62,-3.1),gold)
+  rod(arch,"Columna",at(side*4.7,.7,-3.1).Position,at(side*4.7,4.7,-3.1).Position,.23,cream)
+  for j=0,1 do part(arch,"Capitel",Vector3.new(.9,.12,.9),at(side*4.7,4.6+j*.18,-3.1),j==0 and gold or cream) end
+ end
+ -- Arco de dos perfiles curvos y montantes: abertura limpia, sin una pared tras las caras.
+ for _,depth in ipairs({-.24,.24}) do
+  for i=0,31 do
+   local a=i/32*math.pi;local b=(i+1)/32*math.pi
+   local p=at(math.cos(a)*4.7,4.7+math.sin(a)*3.5,-3.1+depth).Position
+   local q=at(math.cos(b)*4.7,4.7+math.sin(b)*3.5,-3.1+depth).Position
+   rod(arch,"PerfilArco",p,q,.11,depth<0 and cream or gold)
+  end
+ end
+ -- Guirnalda asimetrica: hojas de fondo y rosas orientadas hacia la camara.
+ for i=0,27 do
+  local a=i/27*math.pi
+  local x,y=math.cos(a)*4.7,4.7+math.sin(a)*3.5
+  foliage(arch,at(x,y,-2.85)*CFrame.Angles(math.pi/2,0,a),1.15)
+  if i<12 or i>22 then
+   flower(arch,at(x,y,-2.69)*CFrame.Angles(math.pi/2,a,0),.43,i%3==0 and pink or white)
+  end
+ end
+ for _,side in ipairs({-1,1}) do
+  for i=0,7 do
+   local y=.9+i*.46;local x=side*4.7+math.sin(i*1.7)*.20
+   foliage(arch,at(x,y,-2.82)*CFrame.Angles(math.pi/2,0,i*.5),1.0)
+   if i%2==0 or side==-1 then flower(arch,at(x,y,-2.65)*CFrame.Angles(math.pi/2,i,0),.4,i%3==0 and pink or white) end
+  end
+  -- Cintas colgantes junto al arco, fuera de los ojos de la oficiante.
+  for i=1,3 do part(arch,"Cinta",Vector3.new(.11,1.3+i*.25,.025),at(side*(3.2+i*.25),6.6,-2.95),white) end
+ end
+ for _,side in ipairs({-1,1}) do
+  for row=0,2 do
+   local x,z=side*4.4,5.4+row*3.2
+   for seat=0,1 do
+    local sx=x+side*seat*2.1
+    part(decor,"Asiento",Vector3.new(1.6,.18,1.55),at(sx,1.05,z),white)
+    part(decor,"Respaldo",Vector3.new(1.6,1.6,.16),at(sx,1.8,z+.68),white)
+    for _,leg in ipairs({-.6,.6}) do for _,dz in ipairs({-.55,.55}) do part(decor,"PataSilla",Vector3.new(.11,1,.11),at(sx+leg,.52,z+dz),gold) end end
+   end
+   part(decor,"MacetaPasillo",Vector3.new(.75,.50,.75),at(side*2.5,.25,z),cream)
+   for k=0,2 do
+    local a=k*math.pi*2/3
+    local cf=at(side*2.5+math.cos(a)*.25,.75,z+math.sin(a)*.25)
+    foliage(decor,cf,1);flower(decor,cf,.32,k==1 and pink or white)
+   end
+  end
+ end
+ local room=Instance.new("Model");room.Name="Dormitorio";room.Parent=root
+ local function bedroom(x,y,z) local p=C.Dormitorio;return at(p.X+x,y,p.Z+z) end
+ part(room,"Suelo",Vector3.new(11,.2,11),bedroom(0,.1,0),Color3.fromRGB(156,124,91))
+ part(room,"ParedFondo",Vector3.new(11,7,.2),bedroom(0,3.7,-4.8),Color3.fromRGB(159,177,185))
+ part(room,"Cabecero",Vector3.new(3.8,2.2,.3),bedroom(0,1.7,-3.4),Color3.fromRGB(97,59,51))
+ part(room,"BaseCama",Vector3.new(3.6,.45,5.3),bedroom(0,.55,-1),Color3.fromRGB(97,59,51))
+ part(room,"Colchon",Vector3.new(3.5,.4,5.1),bedroom(0,.98,-1),white)
+ part(room,"Edredon",Vector3.new(3.55,.24,3.9),bedroom(0,1.24,-.4),Color3.fromRGB(173,49,63))
+ part(room,"Almohada",Vector3.new(2.7,.34,1),bedroom(0,1.32,-2.85),white,Enum.PartType.Ball)
+ part(room,"Mesilla",Vector3.new(1.1,1.2,1.1),bedroom(2.8,.6,-2.8),cream)
+ rod(room,"PieLampara",bedroom(2.8,1.2,-2.8).Position,bedroom(2.8,1.9,-2.8).Position,.055,gold)
+ part(room,"PantallaLampara",Vector3.new(.85,.65,.85),bedroom(2.8,2.05,-2.8),white)
+ local cast=Instance.new("Model");cast.Name="Reparto";cast.Parent=root
+ for _,role in ipairs(C.Roles) do
+  local template=roles:FindFirstChild(role=="Invitada" and "Hija" or role).Value
+  local m=template:Clone();m.Name=role;m.Parent=cast;P.Verificar(m)
+  local humanoid=m:FindFirstChildOfClass("Humanoid");local hrp=m.HumanoidRootPart;local foot=m.LeftFoot
+  local height=hrp.Position.Y-foot.Position.Y+foot.Size.Y/2
+  for _,d in ipairs(m:GetDescendants()) do
+   if d:IsA("BaseScript") or d:IsA("BillboardGui") then d.Enabled=false end
+   if d:IsA("BasePart") then d.Anchored=d==hrp;d.CanCollide=false;d.CanTouch=false end
+   if d:IsA("Motor6D") then d.Transform=CFrame.identity end
+  end
+  humanoid.AutomaticScalingEnabled=false;humanoid.AutoRotate=false;humanoid.DisplayDistanceType=Enum.HumanoidDisplayDistanceType.None
+  m.PrimaryPart=hrp;m.ModelStreamingMode=Enum.ModelStreamingMode.Persistent
+  V.Aplicar(m,role)
+  local position=C.Posiciones[role]
+  local point=origin:PointToWorldSpace(Vector3.new(position.X,height+.22,position.Z))
+  m:PivotTo(CFrame.lookAt(point,point+origin.ZVector)*CFrame.Angles(0,math.rad(C.Giros[role]),0))
+  m:SetAttribute("HR_AlturaRaiz",height)
+ end
+ return root
+end
+return E
+
+end)()
+for _,role in ipairs({"Madre","Hija","Novio"}) do
+ local link=cast.Reparto:FindFirstChild(role)
+ assert(link and link:IsA("ObjectValue") and link.Value and link.Value:IsDescendantOf(cast),"Falta la plantilla: "..role)
+ P.Verificar(link.Value)
+end
+local gallery=workspace:FindFirstChild("HR_RevisionReparto")
+local oldStage=workspace:FindFirstChild("HR_RetoDonuts")
+local center=oldStage and oldStage:GetAttribute("HR_Origen")
+if typeof(center)~="CFrame" then center=gallery and gallery:GetPivot() or CFrame.new(0,0,0) end
+local point=center.Position+center.XVector*115
+local exclude={}
+for _,m in ipairs(workspace:GetChildren()) do if m:IsA("Model") and (m:FindFirstChildOfClass("Humanoid") or m==gallery or m==oldStage) then table.insert(exclude,m) end end
+local params=RaycastParams.new();params.FilterType=Enum.RaycastFilterType.Exclude;params.FilterDescendantsInstances=exclude
+local hit=workspace:Raycast(Vector3.new(point.X,point.Y+300,point.Z),Vector3.new(0,-1000,0),params)
+local y=hit and hit.Position.Y+.03 or center.Position.Y
+local front=Vector3.new(center.ZVector.X,0,center.ZVector.Z).Unit
+local origin=CFrame.lookAt(Vector3.new(point.X,y,point.Z),Vector3.new(point.X,y,point.Z)-front)
+local lighting=game:GetService("Lighting")
+local settings={Brightness=1.4,ExposureCompensation=-.20,ClockTime=14,Ambient=Color3.fromRGB(100,105,112),OutdoorAmbient=Color3.fromRGB(105,109,116),EnvironmentDiffuseScale=.35,EnvironmentSpecularScale=.15,GlobalShadows=true,ColorShift_Top=Color3.new(0,0,0),ColorShift_Bottom=Color3.new(0,0,0),FogStart=0,FogEnd=100000}
+local edits={}
+local function edit(object,values)
+ local before={};for k in pairs(values) do before[k]=object[k] end
+ table.insert(edits,{object=object,before=before,after=values})
+end
+edit(lighting,settings)
+for _,d in ipairs(lighting:GetChildren()) do
+ if d:IsA("PostEffect") then edit(d,{Enabled=false})
+ elseif d:IsA("Atmosphere") then edit(d,{Density=0,Haze=0,Glare=0}) end
+end
+local staging=Instance.new("Folder");local root
+local ok,err=pcall(function()
+ root=E.Crear(staging,origin,cast.Reparto,C,P,V)
+ local backup=Instance.new("Folder");backup.Name="AspectoAnterior";backup.Parent=root
+ for i,e in ipairs(edits) do
+  local ref=Instance.new("ObjectValue");ref.Name="Ajuste_"..i;ref.Value=e.object
+  for k,v in pairs(e.before) do ref:SetAttribute(k,v) end
+  ref.Parent=backup
+ end
+ for _,e in ipairs(edits) do for k,v in pairs(e.after) do e.object[k]=v end end
+ root.Parent=workspace
+end)
+if not ok then
+ for _,e in ipairs(edits) do for k,v in pairs(e.before) do pcall(function() e.object[k]=v end) end end
+ staging:Destroy();if root then root:Destroy() end
+ error("[HR BODA] Preparacion detenida y cambios revertidos: "..tostring(err))
+end
+staging:Destroy();game:GetService("Selection"):Set({root.Ceremonia.ArcoFloral,root.Reparto.Madre,root.Reparto.Hija,root.Reparto.Novio})
+print("[HR BODA] DECORADO LISTO: arco floral, pasillo, 12 asientos y dormitorio para el giro final.")
+print("[HR BODA] Cuatro actores con vestuario de celebracion; las plantillas originales no se han cambiado.")
+print("[HR BODA] Pulsa F con el raton en la vista 3D y guarda con Ctrl+S. El paso 2 activa la historia.")

@@ -19,6 +19,8 @@ Ya se ha inspeccionado Base_Historias.rbxl, la version de chicos con cierre adic
 
 ## Orden de trabajo
 
+Nueva escena preparada: [Boda con objeción y falso despertar](boda/README.md), 14 segundos y 11 planos. Incluye decorado floral y vestuario, instalación en dos pasos y restaurador. Adapta los rigs y el cliente facial existentes; falta revisar el resultado visual en Studio. El vídeo de referencia recibido no tiene pista de audio.
+
 1. Inspeccionar la copia real: scripts actuales, rigs, apariencias, caras, escenario y posibles conflictos. No modificar scripts ajenos ni personajes originales sin identificar su funcion.
 2. Extraer una base limpia desde los rigs que ya funcionan. No reinstalar los generadores antiguos. Asignar actores mediante referencias a modelos, no depender de los nombres que trae la Caja de herramientas.
 3. Preparar un unico conjunto de componentes y una configuracion. Las bibliotecas no se ejecutan como controladores duplicados.

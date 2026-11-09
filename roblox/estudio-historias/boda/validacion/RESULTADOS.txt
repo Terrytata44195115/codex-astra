@@ -1,0 +1,15 @@
+Compilation PASS: Configuracion.luau
+Compilation PASS: Vestuario.luau
+Compilation PASS: Escena.luau
+Compilation PASS: Servidor.luau
+Compilation PASS: Camara.luau
+Compilation PASS: DetallesCliente.luau
+Compilation PASS: 01_PREPARAR_BODA.txt
+Compilation PASS: 02_ACTIVAR_HISTORIA_BODA.txt
+Compilation PASS: VOLVER_ESCENA_ANTERIOR.txt
+[
+  'PASS: 14 seconds / 11 continuous shots; approach direction, reveal orientation, bedroom cut and portrait projection.'
+]
+[
+  'PASS: real R15 fixtures, four costumes, 12 seats and floral arch; idempotent preparation/activation, preserved original face source, restore; six injected source failures and partial lighting failure roll back.'
+]
