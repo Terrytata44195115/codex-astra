@@ -7,7 +7,8 @@ local owner="HR_BODA_1"
 local decor=workspace:FindFirstChild("HR_Boda") or Storage:FindFirstChild("HR_Boda")
 local backup=Storage:FindFirstChild("HR_BodaAntesHistoria")
 local runtime=RS:FindFirstChild("HR_Boda")
-for _,o in pairs({decor,backup,runtime}) do assert(o:GetAttribute("HR_Owner")==owner,"Objeto de otro origen; no se modifica.") end
+local cuts=Storage:FindFirstChild("HR_BodaAntesCortes")
+for _,o in pairs({decor,backup,runtime,cuts}) do assert(o:GetAttribute("HR_Owner")==owner,"Objeto de otro origen; no se modifica.") end
 local scripts={}
 for _,e in ipairs({{SSS,"HR_BodaServidor"},{SPS,"HR_BodaCamara"},{SPS,"HR_BodaCaras"},{SPS,"HR_BodaDetalles"}}) do
  local s=e[1]:FindFirstChild(e[2]);if s then assert(s:GetAttribute("HR_Owner")==owner,"Controlador de otro origen.");table.insert(scripts,s) end
@@ -29,4 +30,5 @@ if backup then
  backup:Destroy()
 end
 if decor then decor:Destroy() end
+if cuts then cuts:Destroy() end
 print("[HR BODA] Restaurados la iluminacion y los controladores anteriores. Se ha retirado el montaje de boda.")

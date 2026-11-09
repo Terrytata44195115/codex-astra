@@ -101,6 +101,10 @@ local function prepare(shot,aspect,t)
  local points={};anchor=nil;relative=nil
  local front=origin:VectorToWorldSpace(CFrame.Angles(0,math.rad(shot.Angulo),0).ZVector)
  local slope=.07
+ if shot.Tipo=="ENTRADA" then
+  local heights={};for r,ref in pairs(references) do heights[r]=ref.height end
+  return C.EncuadreEntrada(origin,heights,aspect,shot.Fov)
+ end
  if shot.Tipo=="REVELACION" then
   -- Hombro de la novia en primer termino; nueva pareja al fondo, manteniendo el eje.
   local p=origin:PointToWorldSpace(Vector3.new(-3.3,4.8,8.6))
@@ -123,7 +127,6 @@ local function prepare(shot,aspect,t)
    table.insert(points,root.Position-Vector3.yAxis*.4)
   end
  end
- if shot.Tipo=="ENTRADA" then slope=.72 end
  local cf,target=C.Encuadrar(points,front,aspect,shot.Fov,1.08,slope)
  if #shot.Roles==1 and shot.Tipo~="CAMA" then
   anchor=shot.Roles[1]
@@ -141,11 +144,12 @@ Run:BindToRenderStep(binding,Enum.RenderPriority.Camera.Value+10,function()
  if priorShot~=index or lastAspect~=aspect then
   priorShot=index;lastAspect=aspect;frame,focus=prepare(shot,aspect,t)
   showRoles(shot.Roles)
-  print("[HR BODA CAMARA] Plano "..index.." / "..shot.Tipo)
+  print("[HR BODA CAMARA] CORTE "..index.." / "..shot.Tipo)
  end
  camera.CameraType=Enum.CameraType.Scriptable;camera.FieldOfView=shot.Fov
  camera.FieldOfViewMode=Enum.FieldOfViewMode.Vertical
  local root=relative and rootFor(anchor,t)
+ -- Asignacion directa en cada corte: no hay Tween, Lerp ni recorrido entre planos.
  camera.CFrame=relative and root*relative.cf or frame
  camera.Focus=CFrame.new(relative and root:PointToWorldSpace(relative.focus) or focus)
  local side=math.max(0,(1-C.FrenteSeguro/aspect)/2)

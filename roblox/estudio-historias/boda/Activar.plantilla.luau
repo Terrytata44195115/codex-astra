@@ -29,7 +29,9 @@ if existing then
   local script=where[1]:FindFirstChild(where[2])
   assert(script and script:GetAttribute("HR_Owner")==OWNER and script.Enabled,"La instalacion existente esta incompleta; conserva el estado y comparte Salida.")
  end
- print("[HR BODA] Historia ya instalada. No se han creado copias. Guarda y pulsa F5.")
+ (function()
+__CUTS_CODE__
+ end)()
  return
 end
 assert(not Storage:FindFirstChild("HR_BodaAntesHistoria"),"Existe un respaldo anterior de boda. Usa VOLVER_ESCENA_ANTERIOR antes de reinstalar.")
@@ -43,7 +45,7 @@ for _,candidate in ipairs({{SSS,"HR_PruebaRepartoServidor"},{SPS,"HR_PruebaRepar
 end
 local staging=Instance.new("Folder");local created={};local backup
 local ok,err=pcall(function()
- local root=Instance.new("Folder");root.Name="HR_Boda";root:SetAttribute("HR_Owner",OWNER);root:SetAttribute("Version","BODA_1");root.Parent=staging
+ local root=Instance.new("Folder");root.Name="HR_Boda";root:SetAttribute("HR_Owner",OWNER);root:SetAttribute("Version","BODA_CORTES_2");root.Parent=staging
  local remote=Instance.new("RemoteEvent");remote.Name="Canal";remote.Parent=root
  local definitions={
   {parent=root,name="Configuracion",class="ModuleScript",source=__CONFIG_SOURCE__},
@@ -78,7 +80,7 @@ if not ok then
  staging:Destroy();error("[HR BODA] Activacion detenida y cambios revertidos: "..tostring(err))
 end
 staging:Destroy();game:GetService("Selection"):Set({decor.Ceremonia.ArcoFloral,decor.Reparto.Madre,decor.Reparto.Hija,decor.Reparto.Novio})
-print("[HR BODA] INSTALADA: 14 segundos, 11 planos, cuatro actores y dos decorados.")
+print("[HR BODA] INSTALADA: 14 segundos, 10 planos, cuatro actores y dos decorados.")
 print("[HR BODA] Guarda, cierra las pestanas de codigo y pulsa F5. Cuenta atras de tres segundos.")
 print("[HR BODA] R repite; G muestra/oculta el dialogo de guia; P devuelve la camara.")
 print("[HR BODA] El archivo de referencia no tiene audio: texto reconstruido de sus subtitulos; las voces se anaden despues.")

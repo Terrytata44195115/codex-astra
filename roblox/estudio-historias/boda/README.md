@@ -1,6 +1,12 @@
 # Boda con objeción y falso despertar
 
-Escena preparada a partir de `videoplayback (22).mp4`: ceremonia, novio nervioso, llegada de una invitada, «¡Me opongo!», despertar y sorpresa final. El archivo entregado tiene vídeo 720×1280 a 60 fps y dura 9,77 s, **sin pista de audio**. El diálogo se reconstruye de sus subtítulos visibles, con «Puede besar a la novia» como redacción natural. La secuencia preparada dura **14 s y tiene 11 planos**, dejando más tiempo para esas frases. No incluye voces ni sincronización labial.
+Escena preparada a partir de `videoplayback (22).mp4`: ceremonia, novio nervioso, llegada de una invitada, «¡Me opongo!», despertar y sorpresa final. El archivo entregado tiene vídeo 720×1280 a 60 fps y dura 9,77 s, **sin pista de audio**. El diálogo se reconstruye de sus subtítulos visibles, con «Puede besar a la novia» como redacción natural. La secuencia preparada dura **14 s y tiene 10 planos**, dejando más tiempo para esas frases. No incluye voces ni sincronización labial.
+
+## Actualizar los planos de una boda ya instalada
+
+Con **Stop**, ejecuta [03_CORREGIR_PLANOS.txt](03_CORREGIR_PLANOS.txt) en **Script → Comando**. Guarda y pulsa **F5**. También puedes ejecutar el paso 2 actualizado: detecta la instalación existente y aplica la misma corrección. Conserva el reparto, el decorado, los controladores de caras y servidor, los tiempos del diálogo y cualquier frase personalizada en `C.Escenas`.
+
+Los planos pasan de la novia al novio y al general lejano, con cortes directos entre cámaras. La oficiante abre hablando fuera de campo. El general está situado detrás y por encima de la invitada y permanece fijo durante toda su carrera: muestra a la chica avanzando y a la pareja frente al arco al fondo. Después corta al frente de la invitada para «¡Me opongo!» y a la reacción de la novia. El encuadre incluye el arco floral completo y ambos extremos de la trayectoria dentro del centro 9:16. El despertar y la revelación final conservan sus tiempos. La actualización respalda la configuración y la cámara en `ServerStorage.HR_BodaAntesCortes`.
 
 ## Insertar en Studio
 

@@ -1,6 +1,7 @@
 {
   "duracion": 14,
-  "planos": 11,
+  "planos": 10,
+  "version": "BODA_CORTES_2",
   "fuente": "Subtitulos visibles del MP4 sin audio; no es una transcripcion de voz.",
   "escenas": [
     {
@@ -56,6 +57,93 @@
       "fin": 14.0,
       "voz": "Hija",
       "texto": "¡Noooo!"
+    }
+  ],
+  "camaras": [
+    {
+      "inicio": 0.0,
+      "fin": 1.6,
+      "tipo": "MEDIO",
+      "roles": [
+        "Hija"
+      ]
+    },
+    {
+      "inicio": 1.6,
+      "fin": 3.0,
+      "tipo": "CARA",
+      "roles": [
+        "Hija"
+      ]
+    },
+    {
+      "inicio": 3.0,
+      "fin": 4.0,
+      "tipo": "MEDIO",
+      "roles": [
+        "Novio"
+      ]
+    },
+    {
+      "inicio": 4.0,
+      "fin": 5.2,
+      "tipo": "ENTRADA",
+      "roles": [
+        "Madre",
+        "Hija",
+        "Novio",
+        "Invitada"
+      ]
+    },
+    {
+      "inicio": 5.2,
+      "fin": 6.5,
+      "tipo": "MEDIO",
+      "roles": [
+        "Invitada"
+      ]
+    },
+    {
+      "inicio": 6.5,
+      "fin": 7.2,
+      "tipo": "CARA",
+      "roles": [
+        "Hija"
+      ]
+    },
+    {
+      "inicio": 7.2,
+      "fin": 8.0,
+      "tipo": "CAMA",
+      "roles": [
+        "Hija"
+      ]
+    },
+    {
+      "inicio": 8.0,
+      "fin": 10.6,
+      "tipo": "DESPERTAR",
+      "roles": [
+        "Hija"
+      ]
+    },
+    {
+      "inicio": 10.6,
+      "fin": 12.2,
+      "tipo": "REVELACION",
+      "roles": [
+        "Hija",
+        "Novio",
+        "Invitada"
+      ]
+    },
+    {
+      "inicio": 12.2,
+      "fin": 14.0,
+      "tipo": "LLANTO",
+      "roles": [
+        "Hija"
+      ]
     }
   ]
 }

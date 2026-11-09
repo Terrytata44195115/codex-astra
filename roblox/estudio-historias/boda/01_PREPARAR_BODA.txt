@@ -12,7 +12,7 @@ end
 local cast=Storage:FindFirstChild("HR_EstudioReparto")
 assert(cast and cast:GetAttribute("HR_Owner")=="HR_ESTUDIO_REPARTO_1" and cast:FindFirstChild("Reparto"),"Abre una copia del proyecto que ya tiene madre, hija y novio. Faltan las plantillas compatibles.")
 local C=(function()
-local C={Version="BODA_1",Duracion=14,Preparacion=3,FrenteSeguro=9/16,MarcoVertical=true,SubtitulosGuia=true}
+local C={Version="BODA_CORTES_2",Duracion=14,Preparacion=3,FrenteSeguro=9/16,MarcoVertical=true,SubtitulosGuia=true}
 -- Papeles internos compatibles con los rigs y las caras de la biblioteca existente.
 C.Roles={"Madre","Hija","Novio","Invitada"}
 C.Nombres={Madre="Oficiante",Hija="Novia",Novio="Monkey",Invitada="Invitada"}
@@ -54,11 +54,11 @@ local function shot(a,b,tipo,roles,fov,angle)
  return {Inicio=a,Fin=b,Tipo=tipo,Roles=roles,Fov=fov or 43,Angulo=angle or 0}
 end
 C.Planos={
- shot(0,.95,"MEDIO",{"Madre"},43),
- shot(.95,1.6,"ALTAR",{"Madre","Hija","Novio"},49),
- shot(1.6,3,"MEDIO",{"Hija"},43,-8),
+ -- La oficiante abre en voz fuera de campo: primero se ve a la novia.
+ shot(0,1.6,"MEDIO",{"Hija"},45,-8),
+ shot(1.6,3,"CARA",{"Hija"},42,-8),
  shot(3,4,"MEDIO",{"Novio"},43,8),
- shot(4,5.2,"ENTRADA",{"Madre","Hija","Novio","Invitada"},52,12),
+ shot(4,5.2,"ENTRADA",{"Madre","Hija","Novio","Invitada"},52),
  shot(5.2,6.5,"MEDIO",{"Invitada"},43),
  shot(6.5,7.2,"CARA",{"Hija"},42),
  shot(7.2,8,"CAMA",{"Hija"},47),
@@ -88,6 +88,55 @@ function C.Encuadrar(points,front,aspect,fov,margin,slope)
  end
  return axes*CFrame.new(0,0,distance),focus
 end
+-- HR_BODA_ENTRADA_INICIO
+-- Encuadre fijo de la carrera completa, desde detras de la invitada.
+-- Ajusta la perspectiva de ambos extremos: el altar lejano y la corredora cercana.
+function C.EncuadreEntrada(origin,heights,aspect,fov)
+ local points={}
+ local function box(position,half)
+  for _,x in ipairs({-1,1}) do for _,y in ipairs({-1,1}) do for _,z in ipairs({-1,1}) do
+   table.insert(points,position+half*Vector3.new(x,y,z))
+  end end end
+ end
+ for _,role in ipairs({"Madre","Hija","Novio"}) do
+  local p=C.Posiciones[role];local h=(heights[role] or 3)+2.35
+  box(Vector3.new(p.X,h/2+.22,p.Z),Vector3.new(.95,h/2,.7))
+ end
+ for _,p in ipairs({C.Posiciones.Invitada,Vector3.new(.4,0,2.7)}) do
+  local h=(heights.Invitada or 3)+2.6
+  box(Vector3.new(p.X,h/2+.22,p.Z),Vector3.new(1.1,h/2,.75))
+ end
+ box(Vector3.new(0,4.3,-3.1),Vector3.new(5.15,4.3,.5))
+ local axes=CFrame.lookAt(Vector3.zero,Vector3.new(0,-.68,-1))
+ local tv=math.tan(math.rad(fov/2));local th=tv*math.max(.05,math.min(C.FrenteSeguro,aspect))
+ local localPoints={};local nearest=-math.huge
+ for _,p in ipairs(points) do local q=axes:PointToObjectSpace(p);table.insert(localPoints,q);nearest=math.max(nearest,q.Z) end
+ local function limits(z)
+  local xl,xh,yl,yh=-math.huge,math.huge,-math.huge,math.huge
+  for _,p in ipairs(localPoints) do
+   local depth=z-p.Z
+   xl=math.max(xl,p.X-th*depth/1.04);xh=math.min(xh,p.X+th*depth/1.04)
+   yl=math.max(yl,p.Y-tv*depth/1.04);yh=math.min(yh,p.Y+tv*depth/1.04)
+  end
+  return xl,xh,yl,yh
+ end
+ local low=nearest+.8;local high=low+128
+ while true do
+  local xl,xh,yl,yh=limits(high)
+  if xl<=xh and yl<=yh then break end
+  high=nearest+(high-nearest)*2
+ end
+ for _=1,40 do
+  local middle=(low+high)/2;local xl,xh,yl,yh=limits(middle)
+  if xl<=xh and yl<=yh then high=middle else low=middle end
+ end
+ local xl,xh,yl,yh=limits(high)
+ local localCamera=axes*CFrame.new((xl+xh)/2,(yl+yh)/2,high)
+ local frame=origin*localCamera
+ local focus=frame.Position+frame.LookVector*15
+ return frame,focus,points
+end
+-- HR_BODA_ENTRADA_FIN
 return C
 
 end)()

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import {LuauState} from '/workspace/hr_entrega/validation/node_modules/luau-web/src/index.js';
 const base=new URL('../',import.meta.url),read=n=>fs.readFileSync(new URL(n,base),'utf8');
 const state=await LuauState.createAsync();
-for(const name of ['Configuracion.luau','Vestuario.luau','Escena.luau','Servidor.luau','Camara.luau','DetallesCliente.luau','01_PREPARAR_BODA.txt','02_ACTIVAR_HISTORIA_BODA.txt','VOLVER_ESCENA_ANTERIOR.txt']){
+for(const name of ['Configuracion.luau','Vestuario.luau','Escena.luau','Servidor.luau','Camara.luau','DetallesCliente.luau','01_PREPARAR_BODA.txt','02_ACTIVAR_HISTORIA_BODA.txt','03_CORREGIR_PLANOS.txt','VOLVER_ESCENA_ANTERIOR.txt']){
  state.loadstring(read(name),name,true);console.log('Compilation PASS:',name);
 }
 const math=fs.readFileSync(new URL('../../madre-hija-donuts/validacion/matematicas.luau',import.meta.url),'utf8');
@@ -13,7 +13,11 @@ for _,list in ipairs({C.Escenas,C.Planos}) do
  for _,s in ipairs(list) do assert(s.Inicio==t and s.Fin>t);t=s.Fin end
  assert(t==14)
 end
-assert(#C.Roles==4 and #C.Planos==11)
+assert(#C.Roles==4 and #C.Planos==10)
+assert(C.PlanoEn(0).Roles[1]=='Hija' and C.PlanoEn(1.7).Roles[1]=='Hija')
+assert(C.PlanoEn(3.1).Roles[1]=='Novio')
+assert(C.PlanoEn(4.1).Tipo=='ENTRADA' and #C.PlanoEn(4.1).Roles==4)
+assert(C.PlanoEn(5.2).Roles[1]=='Invitada')
 local original=CFrame.lookAt(Vector3.new(0,3.2,0),Vector3.new(0,3.2,1))
 local origin=CFrame.new()
 assert(C.RaizEn('Invitada',4.1,3,original,origin).LookVector:Dot(Vector3.zAxis)<-.99)
@@ -34,7 +38,27 @@ for _,aspect in ipairs({16/9,9/16,.48}) do
   for _,p in ipairs(points) do local q=camera:PointToObjectSpace(p);assert(q.Z<0 and math.abs(q.X)/(-q.Z*th)<1 and math.abs(q.Y)/(-q.Z*tv)<1) end
  end
 end
-return 'PASS: 14 seconds / 11 continuous shots; approach direction, reveal orientation, bedroom cut and portrait projection.'
+for _,aspect in ipairs({16/9,9/16,.48,.05}) do
+ local stageOrigin=CFrame.new(30,1.2,70)*CFrame.Angles(0,.35,0)
+ local camera,focus,points=C.EncuadreEntrada(stageOrigin,{Madre=3.15,Hija=3,Novio=3,Invitada=3},aspect,52)
+ local tv=math.tan(math.rad(52/2));local th=tv*math.min(aspect,9/16)
+ for _,p in ipairs(points) do
+  local q=camera:PointToObjectSpace(stageOrigin:PointToWorldSpace(p))
+  assert(q.Z<0 and math.abs(q.X)/(-q.Z*th)<1 and math.abs(q.Y)/(-q.Z*tv)<1)
+ end
+ local localCamera=stageOrigin:ToObjectSpace(camera)
+ assert(localCamera.Position.Z>16 and localCamera.Position.Y>8)
+ assert(camera.LookVector:Dot(stageOrigin.ZVector)<0)
+ for sample=0,120 do
+  local t=4+sample/100
+  local root=C.RaizEn('Invitada',t,3,original,stageOrigin)
+  for _,dy in ipairs({-3,2.0}) do
+   local q=camera:PointToObjectSpace(root.Position+Vector3.yAxis*dy)
+   assert(q.Z<0 and math.abs(q.X)/(-q.Z*th)<1 and math.abs(q.Y)/(-q.Z*tv)<1)
+  end
+ end
+end
+return 'PASS: 14 seconds / 10 hard cuts; bride then groom then fixed rear wide shot; complete approach and floral arch fit portrait frame, including transformed stages.'
 `,'timeline_geometry',true)());
 
 // Reuse the independent service/Instance harness, not any donut installation cases.
@@ -86,6 +110,7 @@ fixtures+='end\n';
 const quote=s=>'[======[\n'+s+']======]';
 let tests=math+mocks+fixtures+`
 local originalFace=${quote(fs.readFileSync(new URL('../../madre-hija-marcos/CarasCliente.luau',import.meta.url),'utf8'))}
+local legacyConfig=${quote(read('validacion/Configuracion_v1.luau'))}
 local function setup(failAt)
  workspace=make('Model','Workspace')
  local svc={RunService={IsRunning=function() return false end},Selection={Set=function() end}}
@@ -113,6 +138,8 @@ end
 local function prepare()\n${read('01_PREPARAR_BODA.txt')}\nend
 local function activate()\n${read('02_ACTIVAR_HISTORIA_BODA.txt')}\nend
 local function restore()\n${read('VOLVER_ESCENA_ANTERIOR.txt')}\nend
+local function patch()\n${read('03_CORREGIR_PLANOS.txt')}\nend
+local mergedConfig
 do
  local f=setup();local oldRoot=f.roles.Hija.Value.HumanoidRootPart.CFrame
  prepare()
@@ -137,6 +164,7 @@ do
  assert(f.sps.HR_BodaCaras.Source:find('HR_CarasBodaLocales',1,true))
  local runtime=f.svc.ReplicatedStorage.HR_Boda
  activate();assert(f.svc.ReplicatedStorage.HR_Boda==runtime)
+ assert(not f.svc.ServerStorage.HR_BodaAntesCortes)
  restore()
  assert(f.face.Enabled and f.server.Enabled and f.camera.Enabled)
  assert(not workspace.HR_Boda and not f.svc.ReplicatedStorage.HR_Boda and not f.sps.HR_BodaCamara)
@@ -148,6 +176,37 @@ for n=1,6 do
  assert(f.face.Enabled and f.server.Enabled and f.camera.Enabled and f.face.Source==originalFace)
  assert(not f.svc.ReplicatedStorage.HR_Boda and not f.sps.HR_BodaCaras and not f.svc.ServerStorage.HR_BodaAntesHistoria)
  assert(workspace.HR_Boda)
+end
+for n=7,8 do
+ local f=setup(n);prepare();activate()
+ local config=f.svc.ReplicatedStorage.HR_Boda.Configuracion
+ config.Source=legacyConfig;f.sps.HR_BodaCamara.Source='previous wedding camera'
+ f.svc.ReplicatedStorage.HR_Boda:SetAttribute('Version','BODA_1')
+ local source=f.svc.ServerScriptService.HR_BodaServidor.Source
+ assert(not pcall(patch))
+ assert(config.Source==legacyConfig and f.sps.HR_BodaCamara.Source=='previous wedding camera')
+ assert(f.sps.HR_BodaCamara.Enabled and f.svc.ServerScriptService.HR_BodaServidor.Source==source)
+ assert(f.svc.ReplicatedStorage.HR_Boda:GetAttribute('Version')=='BODA_1')
+ assert(not f.svc.ServerStorage.HR_BodaAntesCortes)
+end
+do
+ local f=setup();prepare();activate()
+ local config=f.svc.ReplicatedStorage.HR_Boda.Configuracion
+ local custom=legacyConfig:gsub('Puede besar a la novia%.','Puede empezar la ceremonia.')
+ config.Source=custom;f.sps.HR_BodaCamara.Source='old camera'
+ local server=f.svc.ServerScriptService.HR_BodaServidor.Source;local faces=f.sps.HR_BodaCaras.Source
+ activate() -- Existing installation upgrades without recreating the stage or actors.
+ assert(config.Source:find('BODA_CORTES_2',1,true))
+ assert(config.Source:find('Puede empezar la ceremonia.',1,true))
+ local originalScenes=custom:sub(custom:find('C.Escenas={',1,true),custom:find('local function shot(',1,true)-1)
+ local newScenes=config.Source:sub(config.Source:find('C.Escenas={',1,true),config.Source:find('local function shot(',1,true)-1)
+ assert(originalScenes==newScenes)
+ mergedConfig=config.Source
+ assert(f.svc.ServerScriptService.HR_BodaServidor.Source==server and f.sps.HR_BodaCaras.Source==faces)
+ local backup=f.svc.ServerStorage.HR_BodaAntesCortes
+ assert(backup.Configuracion.Value==custom and backup.Camara.Value=='old camera')
+ patch();assert(f.svc.ServerStorage.HR_BodaAntesCortes==backup)
+ restore();assert(not f.svc.ServerStorage.HR_BodaAntesCortes)
 end
 do
  local f=setup();f.face.Source=originalFace:gsub('ipairs%({"Madre","Hija","Novio"}%)','ipairs({"Madre","Hija"})')
@@ -167,8 +226,11 @@ end
 do
  local f=setup();prepare();restore();assert(not workspace.HR_Boda and f.server.Enabled)
 end
-return 'PASS: real R15 fixtures, four costumes, 12 seats and floral arch; idempotent preparation/activation, preserved original face source, restore; six injected source failures and partial lighting failure roll back.'
+return 'PASS: real R15 cast and scene; idempotent install and camera-only upgrade, custom dialogue and original faces/server preserved; eight injected source-write failures and partial lighting failure roll back; restore removes camera backup.',mergedConfig
 `;
 fs.writeFileSync('/tmp/boda-installation-test.luau',tests);
-console.log(await state.loadstring(tests,'installation',true)());
+const result=await state.loadstring(tests,'installation',true)();
+console.log(result[0]);
+state.loadstring(result[1],'upgraded_configuration_with_custom_dialogue',true);
+console.log('Compilation PASS: upgraded configuration preserves custom dialogue');
 state.destroy();
