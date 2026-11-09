@@ -1,0 +1,128 @@
+-- Ejecutar en Script > Comando, con Stop, en la copia Madre_Hija_Donuts.
+local function crearDecoradoDonuts()
+    assert(not game:GetService("RunService"):IsRunning(), "Primero pulsa Stop y vuelve a ejecutar.")
+    local selection = game:GetService("Selection")
+    local NAME, OWNER = "HR_RetoDonuts", "HR_DONUTS_DECORADO_1"
+    local existing = workspace:FindFirstChild(NAME)
+    if existing then
+        assert(existing:GetAttribute("HR_Owner") == OWNER, "Ya existe HR_RetoDonuts de otro origen; no se sustituye.")
+        local mesa = existing:FindFirstChild("Mesa")
+        assert(mesa, "El decorado existente no contiene Mesa. Conserva el archivo y revisa antes de repetir.")
+        selection:Set({mesa})
+        print("[HR DONUTS] La sala ya existe. Se conservan tus cambios. Pulsa F para ver la mesa.")
+        return
+    end
+
+    -- La orientacion se obtiene del actor de la galeria; no se accede a CurrentCamera.
+    local gallery = workspace:FindFirstChild("HR_RevisionReparto")
+    local actor = gallery and gallery:FindFirstChild("Hija")
+    local anchor = actor and actor:FindFirstChild("HumanoidRootPart")
+    local foot = actor and actor:FindFirstChild("LeftFoot")
+    local origin = Vector3.new(65, 0.1, 0)
+    local front = Vector3.new(0, 0, -1)
+    if anchor and anchor:IsA("BasePart") then
+        front = Vector3.new(anchor.CFrame.LookVector.X, 0, anchor.CFrame.LookVector.Z)
+        if front.Magnitude < 0.01 then front = Vector3.new(0, 0, -1) end
+        front = front.Unit
+        local side = Vector3.new(anchor.CFrame.RightVector.X, 0, anchor.CFrame.RightVector.Z).Unit
+        local shifted = anchor.Position + side * 65
+        local ground = foot and foot:IsA("BasePart") and foot.Position.Y - foot.Size.Y / 2 or anchor.Position.Y - 3
+        origin = Vector3.new(shifted.X, ground + 0.06, shifted.Z)
+    end
+    -- El frente abierto es +Z en coordenadas locales de este decorado.
+    local stage = CFrame.lookAt(origin, origin - front)
+    local root = Instance.new("Model")
+    root.Name = NAME
+    root:SetAttribute("HR_Owner", OWNER)
+    root:SetAttribute("HR_Estado", "SALA_Y_MESA")
+    root:SetAttribute("HR_Origen", stage)
+    local mesa
+    local ok, err = pcall(function()
+        local function model(name, parent)
+            local value = Instance.new("Model")
+            value.Name = name
+            value.Parent = parent
+            return value
+        end
+        local function part(parent, name, size, position, color, material)
+            local value = Instance.new("Part")
+            value.Name = name
+            value.Size = size
+            value.CFrame = stage * CFrame.new(position)
+            value.Anchored = true
+            value.CanCollide = true
+            value.TopSurface = Enum.SurfaceType.Smooth
+            value.BottomSurface = Enum.SurfaceType.Smooth
+            value.Color = color
+            value.Material = material or Enum.Material.SmoothPlastic
+            value.Parent = parent
+            return value
+        end
+        local blue = Color3.fromRGB(171, 210, 220)
+        local trim = Color3.fromRGB(240, 237, 226)
+        local wood = Color3.fromRGB(174, 137, 86)
+        local dark = Color3.fromRGB(61, 72, 81)
+        local sala = model("Sala", root)
+        local floor = part(sala, "Suelo", Vector3.new(28, 0.3, 24), Vector3.new(0, -0.15, 0), wood, Enum.Material.WoodPlanks)
+        root.PrimaryPart = floor
+        part(sala, "ParedIzquierda", Vector3.new(0.4, 11, 24), Vector3.new(-14, 5.5, 0), blue)
+        part(sala, "ParedDerecha", Vector3.new(0.4, 11, 24), Vector3.new(14, 5.5, 0), blue)
+        part(sala, "Techo", Vector3.new(28, 0.3, 24), Vector3.new(0, 11.15, 0), trim)
+        -- Pared posterior dividida para dejar los huecos de ventana y puerta.
+        part(sala, "FondoIzquierda", Vector3.new(4.75, 11, 0.4), Vector3.new(-11.625, 5.5, -10.5), blue)
+        part(sala, "FondoCentral", Vector3.new(5.95, 11, 0.4), Vector3.new(3.225, 5.5, -10.5), blue)
+        part(sala, "FondoDerecha", Vector3.new(4.2, 11, 0.4), Vector3.new(11.9, 5.5, -10.5), blue)
+        part(sala, "BajoVentana", Vector3.new(9.5, 3.3, 0.4), Vector3.new(-4.5, 1.65, -10.5), blue)
+        part(sala, "SobreVentana", Vector3.new(9.5, 2.7, 0.4), Vector3.new(-4.5, 9.65, -10.5), blue)
+        part(sala, "SobrePuerta", Vector3.new(3.6, 3.8, 0.4), Vector3.new(8, 9.1, -10.5), blue)
+        part(sala, "RodapieIzquierdo", Vector3.new(0.12, 0.25, 24), Vector3.new(-13.76, 0.125, 0), trim)
+        part(sala, "RodapieDerecho", Vector3.new(0.12, 0.25, 24), Vector3.new(13.76, 0.125, 0), trim)
+        local function opening(name, x, bottom, width, height)
+            local group = model(name, sala)
+            part(group, "VistaCielo", Vector3.new(width, height, 0.12), Vector3.new(x, bottom + height / 2, -10.7), Color3.fromRGB(74, 203, 236))
+            part(group, "VistaCesped", Vector3.new(width, height * 0.22, 0.13), Vector3.new(x, bottom + height * 0.11, -10.61), Color3.fromRGB(133, 183, 94))
+            part(group, "MarcoIzquierdo", Vector3.new(0.18, height + 0.3, 0.26), Vector3.new(x - width / 2, bottom + height / 2, -10.23), dark)
+            part(group, "MarcoDerecho", Vector3.new(0.18, height + 0.3, 0.26), Vector3.new(x + width / 2, bottom + height / 2, -10.23), dark)
+            part(group, "MarcoSuperior", Vector3.new(width + 0.18, 0.18, 0.26), Vector3.new(x, bottom + height, -10.23), dark)
+            part(group, "MarcoInferior", Vector3.new(width + 0.18, 0.18, 0.26), Vector3.new(x, bottom, -10.23), dark)
+        end
+        opening("Ventana", -4.5, 3.3, 9.5, 5)
+        opening("PuertaDecorativa", 8, 0, 3.6, 7.2)
+
+        mesa = model("Mesa", root)
+        local board = part(mesa, "Tablero", Vector3.new(14, 0.45, 7), Vector3.new(0, 3, 0), Color3.fromRGB(205, 174, 120), Enum.Material.WoodPlanks)
+        mesa.PrimaryPart = board
+        for i, x in ipairs({-5.8, 5.8}) do
+            for j, z in ipairs({-2.5, 2.5}) do
+                part(mesa, "Pata_" .. i .. "_" .. j, Vector3.new(0.65, 2.775, 0.65), Vector3.new(x, 1.3875, z), wood, Enum.Material.Wood)
+            end
+        end
+        for i, z in ipairs({-2.5, 2.5}) do
+            part(mesa, "Travesano_" .. i, Vector3.new(12.3, 0.35, 0.35), Vector3.new(0, 0.65, z), wood, Enum.Material.Wood)
+        end
+        for i = 1, 6 do
+            local seam = part(mesa, "UnionTablas_" .. i, Vector3.new(14, 0.006, 0.012), Vector3.new(0, 3.228, -3.5 + i), Color3.fromRGB(130, 104, 69))
+            seam.CanCollide = false
+        end
+        local marks = Instance.new("Folder")
+        marks.Name = "Marcas"
+        marks.Parent = root
+        for i, role in ipairs({"Madre", "Hija"}) do
+            local marker = part(marks, "Marca" .. role, Vector3.new(1.4, 0.025, 1.4), Vector3.new(i == 1 and -2.2 or 2.2, 0.025, -4.8), i == 1 and Color3.fromRGB(255, 202, 80) or Color3.fromRGB(196, 135, 247), Enum.Material.Neon)
+            marker.Transparency = 0.65
+            marker.CanCollide = false
+            marker.CanTouch = false
+            marker:SetAttribute("HR_Rol", role)
+        end
+    end)
+    if not ok then
+        root:Destroy()
+        error("[HR DONUTS] Creacion detenida: " .. tostring(err))
+    end
+    root.Parent = workspace
+    selection:Set({mesa})
+    print("[HR DONUTS] SALA Y MESA LISTAS. Pulsa F (solo F) para ver la mesa.")
+    print("[HR DONUTS] El decorado esta al lado del anterior. Los personajes siguen en su sitio.")
+    print("[HR DONUTS] Guarda con Ctrl+S. Siguiente paso: colocar los donuts.")
+end
+crearDecoradoDonuts()
