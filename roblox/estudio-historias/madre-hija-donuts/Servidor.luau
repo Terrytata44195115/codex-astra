@@ -47,7 +47,7 @@ for _,role in ipairs({"Madre","Hija"}) do
  h.DisplayName=role;model.PrimaryPart=root;model.ModelStreamingMode=Enum.ModelStreamingMode.Persistent
  local actor={model=model,root=root,joints=joints,baseCF=root.CFrame,offset=root.CFrame:ToObjectSpace(model:GetPivot())}
  actor.arm=A.Cadena(actor)
- actor.hold=CFrame.new(0,-model.RightHand.Size.Y*0.42,-0.12)
+ actor.hold=A.SoporteMano(model.RightHand)
  B.Preparar(actor);B.Cara(actor,"NEUTRA")
  model.Parent=stage;cast[role]=actor
 end
@@ -59,23 +59,25 @@ for _,name in ipairs({"HR_RevisionReparto","chicaX","chicaB","cute girl","perroX
  if old and old:IsA("Model") then old.Parent=parked end
 end
 for _,part in ipairs(decor.Marcas:GetChildren()) do if part:IsA("BasePart") then part.Transparency=1 end end
-for i=1,18 do
+for i=1,C.CantidadDonuts do
  local m=food:FindFirstChild(string.format("Donut_%02d",i))
  assert(m and m:IsA("Model") and m.PrimaryPart,"[HR DONUTS] Falta el donut "..i)
  states[m.Name]={model=m,initial=m:GetPivot(),visible=true,bitten=false}
 end
-local fx=Instance.new("Part");fx.Name="HR_Confeti";fx.Size=Vector3.new(.1,.1,.1);fx.Anchored=true;fx.Transparency=1
+local fx=Instance.new("Part");fx.Name="HR_Picante";fx.Size=Vector3.new(.1,.1,.1);fx.Anchored=true;fx.Transparency=1
 fx.CanCollide=false;fx.CanTouch=false;fx.CanQuery=false;fx.CastShadow=false;fx.Parent=stage
 local emitter=Instance.new("ParticleEmitter");emitter.Name="Sorpresa"
-emitter.Texture="rbxasset://textures/particles/sparkles_main.dds";emitter.Rate=0
-emitter.Lifetime=NumberRange.new(.6,1.1);emitter.Speed=NumberRange.new(4,8)
-emitter.SpreadAngle=Vector2.new(90,90);emitter.Acceleration=Vector3.new(0,-7,0)
+emitter.Texture="rbxasset://textures/particles/smoke_main.dds";emitter.Rate=0
+emitter.Lifetime=NumberRange.new(.4,.9);emitter.Speed=NumberRange.new(2,4)
+emitter.SpreadAngle=Vector2.new(35,35);emitter.Acceleration=Vector3.new(0,3,0)
 emitter.Rotation=NumberRange.new(-180,180);emitter.RotSpeed=NumberRange.new(-160,160)
 emitter.Size=NumberSequence.new({NumberSequenceKeypoint.new(0,.13),NumberSequenceKeypoint.new(.8,.13),NumberSequenceKeypoint.new(1,0)})
-emitter.Color=ColorSequence.new({ColorSequenceKeypoint.new(0,Color3.fromRGB(255,220,90)),ColorSequenceKeypoint.new(.5,Color3.fromRGB(255,130,195)),ColorSequenceKeypoint.new(1,Color3.fromRGB(100,210,255))})
+emitter.Color=ColorSequence.new(Color3.fromRGB(255,161,82),Color3.fromRGB(255,228,189))
 emitter.LightEmission=.35;emitter.Parent=fx
 local function foodState(s,visible,bitten)
- if s.visible~=visible or s.bitten~=bitten then D.Estado(s.model,visible,bitten);s.visible=visible;s.bitten=bitten end
+ if s.visible~=visible or s.bitten~=bitten then
+  D.Estado(s.model,visible,bitten);s.visible=visible;s.bitten=bitten;s.model:SetAttribute("HR_Visible",visible)
+ end
 end
 local function interaction(role,t)
  for _,item in ipairs(C.Interacciones) do if item.Rol==role and t>=item.Inicio and t<item.Fin then return item end end
@@ -87,9 +89,8 @@ end
 local function donutPath(actor,item,t,frames)
  local original=CFrame.new(states[item.Donut].initial.Position)*actor.root.CFrame.Rotation
  local head=frames[actor.model.Head] or actor.model.Head.CFrame
- local face=actor.model.Head:FindFirstChild("FaceFrontAttachment")
- local radius=face and math.abs(face.Position.Z) or actor.model.Head.Size.Z*.6
- local mouth=head*CFrame.new(0,-actor.model.Head.Size.Y*.82,-radius-.35)*angles(68)
+ local mouth=A.Bocado(actor.model.Head,head)
+ if item.Montaje then return mouth end
  local chest=CFrame.new(original.Position+Vector3.yAxis*.8)*original.Rotation
  if t<item.Alzar then return original:Lerp(chest,smooth((t-item.Agarre)/(item.Alzar-item.Agarre))) end
  return chest:Lerp(mouth,smooth((t-item.Alzar)/(item.Boca-item.Alzar)))
@@ -105,7 +106,7 @@ local function reset()
   for _,j in pairs(actor.joints) do j.motor.C0=j.base;j.motor.Transform=CFrame.identity end
   B.Cara(actor,"NEUTRA")
  end
- for _,s in pairs(states) do s.model:PivotTo(s.initial);D.Estado(s.model,true,false);s.visible=true;s.bitten=false end
+ for _,s in pairs(states) do s.model:PivotTo(s.initial);D.Estado(s.model,true,false);s.visible=true;s.bitten=false;s.model:SetAttribute("HR_Visible",true) end
  startTime=workspace:GetServerTimeNow()+C.Preparacion
  folder:SetAttribute("Inicio",startTime);remote:FireAllClients("START",startTime)
 end
@@ -128,8 +129,8 @@ Run.Heartbeat:Connect(function(dt)
  for role,actor in pairs(cast) do
   local item=interaction(role,t)
   local approach=0
-  if item then approach=smooth((t-item.Inicio)/.55)*(1-smooth((t-item.Alzar)/(item.Boca-item.Alzar))) end
-  local jump=role=="Madre" and .55*math.sin(math.pi*math.clamp((t-15.1)/.65,0,1)) or 0
+  if item and not item.Montaje then approach=smooth((t-item.Inicio)/.55)*(1-smooth((t-item.Alzar)/(item.Boca-item.Alzar))) end
+  local jump=role==C.Sorpresa.Rol and .50*math.sin(math.pi*math.clamp((t-C.Sorpresa.Salto)/.65,0,1)) or 0
   local cf=actor.baseCF+origin.ZVector*(approach*.40)+Vector3.yAxis*jump
   actor.model:PivotTo(cf*actor.offset)
   local targets=B.Pose(scene.Acciones[role],lt)
@@ -146,8 +147,13 @@ Run.Heartbeat:Connect(function(dt)
    targets.Neck=(targets.Neck or CFrame.identity)*angles(0,yaw)
   end
   if scene.Voz==role then targets.Neck=(targets.Neck or CFrame.identity)*angles(math.sin(lt*7)*1.5) end
+  -- Durante el agarre/mordisco no se gira la cabeza hacia el otro personaje.
+  if item then targets.Neck=CFrame.identity end
   pose(actor,targets,dt)
+  if item then actor.joints.Neck.motor.C0=actor.joints.Neck.base end
   B.Cara(actor,scene.Caras[role])
+  local heat=role==C.Sorpresa.Rol and smooth((t-C.Sorpresa.Inicio)/.4)*.42 or 0
+  for _,entry in ipairs(actor.skin) do entry.part.Color=entry.color:Lerp(Color3.fromRGB(255,128,104),heat) end
   if item then
    local s=states[item.Donut]
    local frames=A.Marcos(actor)
@@ -165,10 +171,10 @@ Run.Heartbeat:Connect(function(dt)
   end
  end
  for _,item in ipairs(C.Interacciones) do if t>=item.Retirar then foodState(states[item.Donut],false,true) end end
- if t>=15 and not confetti then
-  confetti=true;fx.CFrame=CFrame.new(cast.Madre.model.Head.Position+origin.ZVector*.65);emitter:Emit(50)
+ if t>=C.Sorpresa.Inicio and not confetti then
+  confetti=true;fx.CFrame=CFrame.new(cast[C.Sorpresa.Rol].model.Head.Position+Vector3.yAxis*.7);emitter:Emit(18)
  end
- if raw>=C.Duracion then finished=true;remote:FireAllClients("FIN");print("[HR DONUTS] FIN: 23 segundos. R repite; P devuelve la camara; Stop termina.") end
+ if raw>=C.Duracion then finished=true;remote:FireAllClients("FIN");print("[HR DONUTS] FIN: 25 segundos. R repite; P devuelve la camara; Stop termina.") end
 end)
 folder:SetAttribute("ActoresListos",true)
-print("[HR DONUTS] Madre, hija y 18 donuts preparados. Esperando la camara...")
+print("[HR DONUTS] Madre, hija y 6 donuts preparados. Esperando la camara...")

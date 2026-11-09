@@ -64,7 +64,7 @@ end
 local existingFood=decor:FindFirstChild("Donuts")
 if existingFood then
  assert(existingFood:GetAttribute("HR_Owner")==OWNER,"Ya hay otros donuts en la sala: se conservan y se detiene la instalacion.")
- for i=1,18 do assert(existingFood:FindFirstChild(string.format("Donut_%02d",i)),"Falta el donut "..i) end
+ for i=1,6 do assert(existingFood:FindFirstChild(string.format("Donut_%02d",i)),"Falta el donut "..i) end
 end
 local existingCast=decor:FindFirstChild("RepartoDonuts")
 if existingCast then
@@ -129,7 +129,7 @@ end
 staging:Destroy()
 decor.ModelStreamingMode=Enum.ModelStreamingMode.Persistent
 game:GetService("Selection"):Set({decor.RepartoDonuts})
-print("[HR DONUTS] HISTORIA INSTALADA: madre, hija, 18 donuts, 23 segundos y 22 planos.")
+print("[HR DONUTS] HISTORIA INSTALADA: madre, hija, 6 donuts, 25 segundos y 14 planos frontales.")
 print("[HR DONUTS] Caras conservadas; historia anterior respaldada. Guarda con Ctrl+S, cierra las pestanas de codigo y pulsa F5.")
 print("[HR DONUTS] Espera la cuenta atras. R repite; G oculta/muestra el dialogo; P devuelve la camara.")
 print("[HR DONUTS] Dialogo en pantalla como guia. Las voces se montan despues. Revisar el contacto de manos y los planos en la primera toma.")

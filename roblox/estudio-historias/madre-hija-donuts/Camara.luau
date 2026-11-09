@@ -19,7 +19,7 @@ for _,role in ipairs({"Madre","Hija"}) do
 end
 local food=decor:WaitForChild("Donuts",15)
 assert(food,"[HR CAMARA DONUTS] Faltan los donuts.")
-for i=1,18 do assert(food:WaitForChild(string.format("Donut_%02d",i),15),"[HR CAMARA DONUTS] No ha llegado el donut "..i) end
+for i=1,C.CantidadDonuts do assert(food:WaitForChild(string.format("Donut_%02d",i),15),"[HR CAMARA DONUTS] No ha llegado el donut "..i) end
 local deadline=os.clock()+20
 while not folder:GetAttribute("ActoresListos") and os.clock()<deadline do task.wait(.1) end
 assert(folder:GetAttribute("ActoresListos"),"[HR CAMARA DONUTS] El servidor no termino de preparar la escena.")
@@ -53,9 +53,12 @@ local caption=Instance.new("TextLabel");caption.AnchorPoint=Vector2.new(.5,.5);c
 caption.Size=UDim2.fromScale(.3,.15);caption.BackgroundTransparency=1;caption.TextColor3=Color3.new(1,1,1)
 caption.TextStrokeTransparency=0;caption.Font=Enum.Font.GothamBold;caption.TextScaled=true;caption.TextWrapped=true;caption.Parent=gui
 local maximum=Instance.new("UITextSizeConstraint");maximum.MaxTextSize=38;maximum.MinTextSize=12;maximum.Parent=caption
+local counter=Instance.new("TextLabel");counter.AnchorPoint=Vector2.new(.5,.5);counter.Position=UDim2.fromScale(.5,.65)
+counter.Size=UDim2.fromScale(.3,.06);counter.BackgroundTransparency=1;counter.TextColor3=Color3.fromRGB(255,229,99)
+counter.TextStrokeTransparency=0;counter.Font=Enum.Font.GothamBold;counter.TextSize=28;counter.Parent=gui
 local guide=C.SubtitulosGuia
 local binding="HR_PruebaReparto_Camara"
-local startTime,priorShot,cached
+local startTime,priorShot,fixedFrame,fixedFocus,fittedAspect
 local function restore()
  if not active then return end
  active=false;Run:UnbindFromRenderStep(binding)
@@ -73,93 +76,57 @@ table.insert(connections,Input.InputBegan:Connect(function(input,processed)
  elseif input.KeyCode==Enum.KeyCode.G then guide=not guide end
 end))
 table.insert(connections,remote.OnClientEvent:Connect(function(message,value)
- if message=="START" and type(value)=="number" and startTime~=value then startTime=value;priorShot=nil;cached=nil end
+ if message=="START" and type(value)=="number" and startTime~=value then startTime=value;priorShot=nil end
 end))
 local function box(points,cf,half)
  for _,x in ipairs({-1,1}) do for _,y in ipairs({-1,1}) do for _,z in ipairs({-1,1}) do
   table.insert(points,cf:PointToWorldSpace(half*Vector3.new(x,y,z)))
  end end end
 end
-local function pointsFor(shot)
+local function pointsForBase()
  local points={}
- if shot.Tipo=="DONUT" or shot.Tipo=="DETALLE" then
-  local donut=food[shot.Donut]
-  box(points,donut:GetPivot(),Vector3.new(.95,.55,.95))
-  if shot.Tipo=="DETALLE" then
-   local hand=actors[shot.Roles[1]].RightHand
-   box(points,hand.CFrame,hand.Size*.65)
-  end
-  return points
- end
- for _,role in ipairs(shot.Roles) do
+ for _,role in ipairs({"Madre","Hija"}) do
   local model=actors[role]
   for _,part in ipairs(model:GetDescendants()) do
    if part:IsA("BasePart") and part.Name~="HumanoidRootPart" then
     local n=part.Name
     local accessory=part.Parent:IsA("Accessory")
-    local include=shot.Tipo=="CARA" and (n=="Head" or accessory) or
-     shot.Tipo~="CARA" and (n=="Head" or n:find("Torso") or n:find("Arm") or n:find("Hand") or accessory)
-    if include then box(points,part.CFrame,part.Size/2) end
+    if n=="Head" or n:find("Torso") or accessory then box(points,part.CFrame,part.Size/2) end
    end
   end
-  if shot.Tipo~="CARA" then
-   local head=model.Head;local root=model.HumanoidRootPart
-   box(points,CFrame.new(head.Position+Vector3.yAxis*.05),Vector3.new(1.6,.80,.65))
-   table.insert(points,root.Position-Vector3.yAxis*.6)
-  end
  end
- if shot.Tipo=="MESA" then
-  for _,name in ipairs({"Donut_02","Donut_05","Donut_14","Donut_17"}) do
-   box(points,food[name]:GetPivot(),Vector3.new(.8,.25,.8))
-  end
+ -- La mesa ocupa el primer termino; los dos actores quedan juntos al fondo.
+ for _,name in ipairs({"Donut_01","Donut_03","Donut_04","Donut_06"}) do
+  box(points,food[name]:GetPivot(),Vector3.new(.8,.25,.8))
  end
  return points
 end
-local function fit(shot)
- local points=pointsFor(shot);assert(#points>0,"[HR CAMARA DONUTS] No hay puntos para el plano.")
- local low=Vector3.new(math.huge,math.huge,math.huge);local high=-low
- for _,p in ipairs(points) do low=low:Min(p);high=high:Max(p) end
- local focus=(low+high)/2
- local front=folder:GetAttribute("Frente")
- local direction=CFrame.Angles(0,math.rad(shot.Angulo),0):VectorToWorldSpace(front)
- direction=(direction+Vector3.yAxis*((shot.Tipo=="DETALLE" or shot.Tipo=="DONUT") and .85 or shot.Tipo=="MESA" and .30 or .06)).Unit
- local axes=CFrame.lookAt(focus,focus-direction)
- local aspect=math.min(C.FrenteSeguro,camera.ViewportSize.X/math.max(1,camera.ViewportSize.Y))
- local tanV=math.tan(math.rad(42/2));local tanH=tanV*math.max(aspect,.05)
- local distance=1;local margin=shot.Margen or 1.20
- for _,p in ipairs(points) do
-  local q=axes:PointToObjectSpace(p)
-  distance=math.max(distance,q.Z+math.abs(q.X)*margin/tanH,q.Z+math.abs(q.Y)*margin/tanV,q.Z+.8)
- end
- local cf=axes*CFrame.new(0,0,distance)
- if shot.Tipo=="DONUT" or shot.Tipo=="DETALLE" then
-  return {donut=food[shot.Donut],direction=direction,distance=distance,focus=focus,offset=focus-food[shot.Donut]:GetPivot().Position}
- elseif #shot.Roles==1 then
-  local anchor=actors[shot.Roles[1]].HumanoidRootPart
-  return {anchor=anchor,relative=anchor.CFrame:ToObjectSpace(cf),relativeFocus=anchor.CFrame:PointToObjectSpace(focus)}
- end
- return {camera=cf,focus=focus}
-end
+local basePoints=pointsForBase()
 Run:BindToRenderStep(binding,Enum.RenderPriority.Camera.Value+10,function()
  if not active then return end
  local raw=startTime and workspace:GetServerTimeNow()-startTime or -C.Preparacion
  local t=math.clamp(raw,0,C.Duracion)
  countdown.Visible=raw<0;countdown.Text=startTime and tostring(math.max(1,math.ceil(-raw))) or "Preparando..."
  local shot,index=C.PlanoEn(t)
- if priorShot~=index or not cached then
-  cached=fit(shot);priorShot=index
+ local aspect=camera.ViewportSize.X/math.max(1,camera.ViewportSize.Y)
+ if not fixedFrame or fittedAspect~=aspect then
+  fixedFrame,fixedFocus=C.EncuadreFrontal(basePoints,folder:GetAttribute("Frente"),aspect)
+  fittedAspect=aspect
+ end
+ if priorShot~=index then
+  priorShot=index
   print("[HR CAMARA DONUTS] Plano "..index.." / "..shot.Tipo)
  end
- local cf,focus
- if cached.donut then
-  focus=cached.donut:GetPivot().Position+cached.offset
-  cf=CFrame.lookAt(focus+cached.direction*cached.distance,focus)
- elseif cached.anchor then cf=cached.anchor.CFrame*cached.relative;focus=cached.anchor.CFrame:PointToWorldSpace(cached.relativeFocus)
- else cf=cached.camera;focus=cached.focus end
- local u=math.clamp((t-shot.Inicio)/(shot.Fin-shot.Inicio),0,1)
- camera.CameraType=Enum.CameraType.Scriptable;camera.FieldOfView=42
- camera.CFrame=CFrame.lookAt(cf.Position:Lerp(focus,(shot.Acercar or 0)*u),focus);camera.Focus=CFrame.new(focus)
+ -- Una sola posicion y un solo eje durante toda la toma. El zoom solo cambia el FOV.
+ camera.CameraType=Enum.CameraType.Scriptable;camera.FieldOfView=shot.Fov
+ camera.CFrame=fixedFrame;camera.Focus=CFrame.new(fixedFocus)
  local scene=C.EscenaEn(t)
+ counter.Visible=guide and raw>=4.5 and raw<17
+ if counter.Visible then
+  local remaining=0
+  for _,m in ipairs(food:GetChildren()) do if m:IsA("Model") and m:GetAttribute("HR_Visible")~=false then remaining+=1 end end
+  counter.Text=raw>=C.Sorpresa.Inicio and "¡PICANTE!" or tostring(remaining).." dónuts"
+ end
  caption.Visible=guide and raw>=0 and raw<C.Duracion and scene.Voz~=nil
  if caption.Visible then
   caption.Text=C.Nombres[scene.Voz]..": "..scene.Texto

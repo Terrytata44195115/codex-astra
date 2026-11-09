@@ -4,10 +4,12 @@ Compilation PASS: Brazo.luau
 Compilation PASS: PrepararReparto.luau
 Compilation PASS: Servidor.luau
 Compilation PASS: Camara.luau
+Compilation PASS: AjustarMesa.luau
 Compilation PASS: 03_INSTALAR_HISTORIA_DONUTS.txt
+Compilation PASS: 04_RETO_6_DONUTS.txt
 Compilation PASS: VOLVER_A_MARCOS.txt
 [
-  'PASS: 23 seconds, 22 contiguous shots, two ordered grab/bite/release paths and only two roles.'
+  'PASS: 25 seconds, 14 frontal shots, six bites, only two roles, no axis changes, projected points fit the protected portrait frame.'
 ]
 Actual rig grip PASS: Hija; clamp excess 0
 Actual rig bite PASS: Hija; clamp excess 0
@@ -17,5 +19,5 @@ Actual rig bite PASS: Madre; clamp excess 0
   'PASS: IK on both recorded rigs, reachable targets, unreachable clamping, bone lengths, elbow connectivity and scene grip positions.'
 ]
 [
-  'PASS: 18 static donuts, two actors, existing face body preserved, repeat without duplicates, original backup preserved, restoration, foreign face rejection and all 16 injected write failures rolled back.'
+  'PASS: 6 static donuts, two actors, face source preserved, repeat without duplicates, restoration, foreign face rejection; 18-to-6 update and waist-height calibration idempotent; all 21 injected source-write failures rolled back.'
 ]

@@ -3,7 +3,7 @@ import {LuauState} from '/workspace/hr_entrega/validation/node_modules/luau-web/
 const base=new URL('../',import.meta.url);
 const read=f=>fs.readFileSync(new URL(f,base),'utf8');
 const s=await LuauState.createAsync();
-for(const name of ['Configuracion.luau','Donuts.luau','Brazo.luau','PrepararReparto.luau','Servidor.luau','Camara.luau','03_INSTALAR_HISTORIA_DONUTS.txt','VOLVER_A_MARCOS.txt']){
+for(const name of ['Configuracion.luau','Donuts.luau','Brazo.luau','PrepararReparto.luau','Servidor.luau','Camara.luau','AjustarMesa.luau','03_INSTALAR_HISTORIA_DONUTS.txt','04_RETO_6_DONUTS.txt','VOLVER_A_MARCOS.txt']){
  s.loadstring(read(name),name,true);console.log('Compilation PASS:',name);
 }
 const math=read('validacion/matematicas.luau');
@@ -12,10 +12,11 @@ let timeline=math+c+`
 local function contiguous(items)
  local t=0
  for _,item in ipairs(items) do assert(item.Inicio==t and item.Fin>t);t=item.Fin end
- assert(t==23)
+ assert(t==25)
 end
 contiguous(C.Escenas);contiguous(C.Planos)
-assert(#C.Planos==22 and #C.Interacciones==2)
+assert(#C.Planos==14 and #C.Interacciones==6 and C.CantidadDonuts==6)
+for _,shot in ipairs(C.Planos) do assert(shot.Angulo==0 and shot.Acercar==0 and #shot.Roles==2 and shot.Fov>=58) end
 for _,s in ipairs(C.Escenas) do
  assert(s.Acciones.Novio==nil and s.Caras.Novio==nil)
  for _,role in ipairs({'Madre','Hija'}) do assert(s.Caras[role] and s.Acciones[role]) end
@@ -23,9 +24,18 @@ end
 for _,item in ipairs(C.Interacciones) do
  local a={item.Inicio,item.Agarre,item.Alzar,item.Boca,item.Morder,item.Retirar,item.Fin}
  for i=1,#a-1 do assert(a[i]<a[i+1]) end
- assert(item.Fin<23)
+ assert(item.Fin<25)
 end
-return 'PASS: 23 seconds, 22 contiguous shots, two ordered grab/bite/release paths and only two roles.'
+local pts={Vector3.new(-3.4,5,-4),Vector3.new(2.8,5.2,-4),Vector3.new(-3,2.2,-4),Vector3.new(2.5,2.2,-4),Vector3.new(-2.9,2.7,.8),Vector3.new(1.9,2.7,.8)}
+for _,aspect in ipairs({16/9,9/16,.48}) do
+ local camera,focus=C.EncuadreFrontal(pts,Vector3.zAxis,aspect)
+ for _,p in ipairs(pts) do
+  local q=camera:PointToObjectSpace(p);assert(q.Z<0)
+  local tv=math.tan(math.rad(58/2));local th=tv*math.min(aspect,9/16)
+  assert(math.abs(q.X)/(-q.Z*th)<1 and math.abs(q.Y)/(-q.Z*tv)<1)
+ end
+end
+return 'PASS: 25 seconds, 14 frontal shots, six bites, only two roles, no axis changes, projected points fit the protected portrait frame.'
 `;
 console.log(await s.loadstring(timeline,'timeline',true)());
 const inventory=JSON.parse(fs.readFileSync('/workspace/base_inspection/instances.json','utf8'));
@@ -45,6 +55,11 @@ for(const [role,prefix,scale,x] of [['Hija','Workspace.chicaX',1,1.8],['Madre','
  const height=(root.props.CFrame.position[1]-foot.props.CFrame.position[1]+foot.props.size[1]/2)*scale;
  rig+=`do\nlocal srcRoot=${cf(root.props.CFrame)}\nlocal rootCF=CFrame.lookAt(Vector3.new(${x},${height},-4.1),Vector3.new(${x},${height},-3.1))\nlocal parts={}\n`;
  for(const p of parts){rig+=`do local rel=srcRoot:ToObjectSpace(${cf(p.props.CFrame)});parts[${JSON.stringify(p.name)}]={Name=${JSON.stringify(p.name)},CFrame=rootCF*CFrame.new(rel.Position*${scale})*rel.Rotation,Size=${vec(p.props.size.map(v=>v*scale))}} end\n`;}
+ rig+=`local faceAttachment={Position=Vector3.new(0,0,-.57*${scale})};local hatAttachment={Position=Vector3.new(0,.57*${scale},0)}\n`;
+ rig+=`parts.Head.FindFirstChild=function(_,name) if name=='FaceFrontAttachment' then return faceAttachment elseif name=='HatAttachment' then return hatAttachment end end\n`;
+ rig+=`parts.Head.FindFirstChildOfClass=function(_,name) if name=='SpecialMesh' then return {Scale=Vector3.new(1.25,1.25,1.25)} end end\n`;
+ const grip=inventory.find(o=>o.path===prefix+'.RightHand.RightGripAttachment').props.CFrame.position;
+ rig+=`parts.RightHand.FindFirstChild=function(_,name) if name=='RightGripAttachment' then return {Position=${vec(grip.map(v=>v*scale))}} end end\n`;
  rig+=`local actor={root=parts.HumanoidRootPart,model={Name='${role}'},joints={}}\n`;
  for(const m of motors){const prop=m.props;rig+=`actor.joints[${JSON.stringify(m.name.replaceAll(' ',''))}]={motor={Part0=parts[${JSON.stringify(byId.get(prop.Part0).name)}],Part1=parts[${JSON.stringify(byId.get(prop.Part1).name)}],C0=${cf(prop.C0,scale)},C1=${cf(prop.C1,scale)}},base=${cf(prop.C0,scale)}}\n`;}
  rig+=`
@@ -70,8 +85,8 @@ end
 for _,j in pairs(actor.joints) do j.motor.C0=j.base end
 actor.root.CFrame=rootCF+Vector3.new(0,0,.4)
 actor.joints.Waist.motor.C0=actor.joints.Waist.base*CFrame.Angles(math.rad(-30),0,0)
-local donut=CFrame.new(${role==='Madre'?-3.15:1.05},3.41,-2.5)*rootCF.Rotation
-local hold=CFrame.new(0,-parts.RightHand.Size.Y*.42,-.12)
+local donut=CFrame.new(${role==='Madre'?-3.15:1.1},2.647,-2.5)*rootCF.Rotation
+local hold=A.SoporteMano(parts.RightHand)
 local hand,excess=A.Resolver(actor,donut*hold:Inverse(),1)
 assert(excess<.08,'Grip out of reach: ${role} '..excess)
 assert(((hand*hold).Position-donut.Position).Magnitude<.08)
@@ -79,8 +94,11 @@ print('Actual rig grip PASS: ${role}; clamp excess '..excess)
 for _,j in pairs(actor.joints) do j.motor.C0=j.base end
 actor.root.CFrame=rootCF
 local head=A.Marcos(actor)[parts.Head]
-local faceRadius=.57*${scale}
-local bite=head*CFrame.new(0,-parts.Head.Size.Y*.82,-faceRadius-.35)*CFrame.Angles(math.rad(68),0,0)
+local bite=A.Bocado(parts.Head,head)
+local localTouch=head:PointToObjectSpace(bite:PointToWorldSpace(Vector3.new(0,0,.72)))
+assert(math.abs(localTouch.X)<.00001)
+assert(math.abs(localTouch.Y-(-1.14*${scale}*.20))<.00001)
+assert(math.abs(localTouch.Z-(-(.95*${scale}/2*1.25)-1.14*${scale}*.04-.035))<.00001)
 local biteHand,biteExcess=A.Resolver(actor,bite*hold:Inverse(),1)
 assert(biteExcess<.08,'Bite out of reach: ${role} '..biteExcess)
 assert(((biteHand*hold).Position-bite.Position).Magnitude<.08)
@@ -94,6 +112,7 @@ const originalFaces=fs.readFileSync(new URL('../../madre-hija-marcos/CarasClient
 const transaction=math+'\n'+read('validacion/instalacion.luau')
  .replace('__ORIGINAL_FACE_SOURCE__','[====[\n'+originalFaces+']====]')
  .replace('__INSTALLER__',read('03_INSTALAR_HISTORIA_DONUTS.txt'))
- .replace('__RESTORE__',read('VOLVER_A_MARCOS.txt'));
+ .replace('__RESTORE__',read('VOLVER_A_MARCOS.txt'))
+ .replace('__PATCH__',read('04_RETO_6_DONUTS.txt'));
 console.log(await s.loadstring(transaction,'installation_transactions',true)());
 s.destroy();

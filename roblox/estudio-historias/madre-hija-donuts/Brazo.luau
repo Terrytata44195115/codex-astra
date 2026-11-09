@@ -1,5 +1,27 @@
 -- IK analitica sobre los Motor6D existentes. No reconstruye el rig.
 local A={}
+function A.SoporteMano(hand)
+ local grip=hand:FindFirstChild("RightGripAttachment")
+ return CFrame.new(grip and grip.Position or Vector3.new(0,-hand.Size.Y*.25,hand.Size.Z*.45))
+end
+-- Mismo soporte y UV de boca que el cliente facial que ya se ve correctamente.
+function A.PuntoBoca(head,cf)
+ local front=head:FindFirstChild("FaceFrontAttachment")
+ local hat=head:FindFirstChild("HatAttachment")
+ local mesh=head:FindFirstChildOfClass("SpecialMesh")
+ local radius=front and math.abs(front.Position.Z) or head.Size.Z*.6
+ local top=hat and math.abs(hat.Position.Y) or radius
+ local width=math.max(.5,math.min(head.Size.X,2*radius))
+ local height=math.max(.5,2*top)
+ local depth=math.max(radius,head.Size.Z/2*(mesh and math.max(1,mesh.Scale.Z) or 1))
+ local x=front and front.Position.X or 0
+ local y=(front and front.Position.Y or 0)-height*.20
+ return (cf or head.CFrame)*CFrame.new(x,y,-depth-width*.04-.035)
+end
+function A.Bocado(head,cf)
+ -- El borde posterior elevado de la rosca toca la boca, no su centro ni un lado.
+ return A.PuntoBoca(head,cf)*CFrame.Angles(math.rad(-68),0,0)*CFrame.new(0,0,-.72)
+end
 local function rotationFor(localAxis,worldAxis,reference)
  local function basis(y,x)
   y=y.Unit;x=x-y*x:Dot(y)

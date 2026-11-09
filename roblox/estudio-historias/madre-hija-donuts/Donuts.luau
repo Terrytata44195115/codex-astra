@@ -32,10 +32,11 @@ end
 function D.Mesa(parent,board)
  local folder=Instance.new("Folder");folder.Name="Donuts";folder:SetAttribute("HR_Owner",D.Owner)
  local index=0
- for _,z in ipairs({-2.5,-0.1,2.3}) do
-  for _,x in ipairs({-5.25,-3.15,-1.05,1.05,3.15,5.25}) do
+ for _,z in ipairs({2.0,-2.5}) do
+  for _,x in ipairs({-2.1,-.5,1.1}) do
    index+=1
-   D.Crear(string.format("Donut_%02d",index),folder,board.CFrame*CFrame.new(x,board.Size.Y/2+0.185,z),index)
+   local donut=D.Crear(string.format("Donut_%02d",index),folder,board.CFrame*CFrame.new(x,board.Size.Y/2+0.185,z),index)
+   donut:SetAttribute("HR_Picante",index==6)
   end
  end
  folder.Parent=parent;return folder
@@ -44,7 +45,7 @@ function D.Estado(model,visible,mordido)
  for _,p in ipairs(model:GetDescendants()) do
   if p:IsA("BasePart") and p.Name~="Centro" then
    local theta=p:GetAttribute("HR_Angulo")
-   local bite=mordido and theta and math.cos(theta)>0.60 and math.sin(theta)<0.35
+   local bite=mordido and theta and math.sin(theta)>.82
    p.Transparency=visible and not bite and 0 or 1
   end
  end

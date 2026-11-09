@@ -105,9 +105,12 @@ end
 local function restore()
 __RESTORE__
 end
+local function patch()
+__PATCH__
+end
 do
  local f=setup();install()
- assert(f.decor.Donuts and #f.decor.Donuts.children==18 and f.decor.RepartoDonuts)
+ assert(f.decor.Donuts and #f.decor.Donuts.children==6 and f.decor.RepartoDonuts)
  assert(f.server.Enabled and f.camera.Enabled and f.faces.Enabled)
  assert(f.root.Interpretacion.Source=="preserve poses")
  local backup=f.svc.ServerStorage.HR_DonutsAntesHistoria
@@ -150,4 +153,30 @@ end
 do
  local f=setup();f.faces.Source="unrecognized facial controller";assert(not pcall(install));assert(not f.decor.Donuts)
 end
-return "PASS: 18 static donuts, two actors, existing face body preserved, repeat without duplicates, original backup preserved, restoration, foreign face rejection and all 16 injected write failures rolled back."
+do
+ local f=setup();install()
+ for i=7,18 do local m=f.decor.Donuts.Donut_06:Clone();m.Name=string.format("Donut_%02d",i);m.Parent=f.decor.Donuts end
+ assert(#f.decor.Donuts.children==18)
+ local face=f.faces.Source;local poses=f.root.Interpretacion.Source
+ patch()
+ assert(#f.decor.Donuts.children==6)
+ local archive=f.svc.ServerStorage.HR_DonutsAntesRetoPicante
+ assert(archive and #archive.DonutsAnteriores.children==18)
+ assert(f.faces.Source==face and f.root.Interpretacion.Source==poses)
+ assert(f.decor.Donuts.Donut_06:GetAttribute("HR_Picante"))
+ local saved=archive.DonutsAnteriores;local height=f.decor.Mesa.Tablero.Position.Y
+ patch()
+ assert(f.svc.ServerStorage.HR_DonutsAntesRetoPicante.DonutsAnteriores==saved)
+ assert(#f.decor.Donuts.children==6 and math.abs(f.decor.Mesa.Tablero.Position.Y-height)<.00001)
+end
+for n=1,5 do
+ local f=setup(6+n);install()
+ local before={f.config.Source,f.root.Donuts.Source,f.root.BrazoDonut.Source,f.server.Source,f.camera.Source}
+ local food=f.decor.Donuts;local height=f.decor.Mesa.Tablero.Position.Y;local face=f.faces.Source
+ assert(not pcall(patch))
+ assert(f.config.Source==before[1] and f.root.Donuts.Source==before[2] and f.root.BrazoDonut.Source==before[3] and f.server.Source==before[4] and f.camera.Source==before[5])
+ assert(f.server.Enabled and f.camera.Enabled and f.decor.Donuts==food and #food.children==6)
+ assert(f.faces.Source==face and math.abs(f.decor.Mesa.Tablero.Position.Y-height)<.00001)
+ assert(not f.svc.ServerStorage.HR_DonutsAntesRetoPicante)
+end
+return "PASS: 6 static donuts, two actors, face source preserved, repeat without duplicates, restoration, foreign face rejection; 18-to-6 update and waist-height calibration idempotent; all 21 injected source-write failures rolled back."
