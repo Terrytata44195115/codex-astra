@@ -3,7 +3,7 @@ function P.Verificar(model)
  assert(model and model:IsA("Model"),"Falta un modelo del reparto.")
  local h=model:FindFirstChildOfClass("Humanoid")
  assert(h and h.RigType==Enum.HumanoidRigType.R15,"Se necesita el rig R15 que ya funcionaba: "..model.Name)
- assert(model:FindFirstChild("HumanoidRootPart") and model:FindFirstChild("Head") and model:FindFirstChild("LeftFoot") and model:FindFirstChild("RightHand"),"Rig incompleto: "..model.Name)
+ assert(model:FindFirstChild("HumanoidRootPart") and model:FindFirstChild("Head") and model:FindFirstChild("LeftFoot") and model:FindFirstChild("RightHand") and model:FindFirstChild("LeftHand"),"Rig incompleto: "..model.Name)
  local joints={}
  for _,item in ipairs(model:GetDescendants()) do
   assert(not item:IsA("AnimationConstraint"),"Rig incompatible: "..model.Name)
@@ -14,7 +14,7 @@ function P.Verificar(model)
    joints[key]=item
   end
  end
- for _,key in ipairs({"Root","Waist","Neck","RightShoulder","RightElbow","RightWrist","LeftShoulder","LeftElbow"}) do
+ for _,key in ipairs({"Root","Waist","Neck","RightShoulder","RightElbow","RightWrist","LeftShoulder","LeftElbow","LeftWrist"}) do
   assert(joints[key],"Falta "..key.." en "..model.Name)
  end
  local s,e,w=joints.RightShoulder,joints.RightElbow,joints.RightWrist

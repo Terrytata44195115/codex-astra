@@ -21,7 +21,7 @@ function P.Verificar(model)
  assert(model and model:IsA("Model"),"Falta un modelo del reparto.")
  local h=model:FindFirstChildOfClass("Humanoid")
  assert(h and h.RigType==Enum.HumanoidRigType.R15,"Se necesita el rig R15 que ya funcionaba: "..model.Name)
- assert(model:FindFirstChild("HumanoidRootPart") and model:FindFirstChild("Head") and model:FindFirstChild("LeftFoot") and model:FindFirstChild("RightHand"),"Rig incompleto: "..model.Name)
+ assert(model:FindFirstChild("HumanoidRootPart") and model:FindFirstChild("Head") and model:FindFirstChild("LeftFoot") and model:FindFirstChild("RightHand") and model:FindFirstChild("LeftHand"),"Rig incompleto: "..model.Name)
  local joints={}
  for _,item in ipairs(model:GetDescendants()) do
   assert(not item:IsA("AnimationConstraint"),"Rig incompatible: "..model.Name)
@@ -32,7 +32,7 @@ function P.Verificar(model)
    joints[key]=item
   end
  end
- for _,key in ipairs({"Root","Waist","Neck","RightShoulder","RightElbow","RightWrist","LeftShoulder","LeftElbow"}) do
+ for _,key in ipairs({"Root","Waist","Neck","RightShoulder","RightElbow","RightWrist","LeftShoulder","LeftElbow","LeftWrist"}) do
   assert(joints[key],"Falta "..key.." en "..model.Name)
  end
  local s,e,w=joints.RightShoulder,joints.RightElbow,joints.RightWrist
@@ -81,67 +81,69 @@ local _,twoRoles=newFace:gsub('ipairs%(%s*{%s*"Madre"%s*,%s*"Hija"%s*}%s*%)','')
 assert(replacements==1 or (replacements==0 and twoRoles==1),"El cliente de caras tiene otra estructura. Instalacion detenida para conservarlo; comparte su codigo.")
 local texts={Configuracion=[====[
 local C={
- Version="DONUTS_PICANTES_25S_3",Duracion=25,Preparacion=3,FrenteSeguro=9/16,
- CantidadDonuts=6,RetoPicante=true,Sorpresa={Rol="Hija",Inicio=14.7,Salto=15.0},
+ Version="DONUTS_SUSURRO_20S_4",Duracion=20,Preparacion=3,FrenteSeguro=9/16,
+ CantidadDonuts=6,RetoPicante=true,MarcoVertical=true,
+ Sorpresa={Rol="Hija",Inicio=12.5,Salto=12.65},
+ Apertura={Fin=2.4,GiroInicio=.55,GiroFin=1.4,Senalar=1.5},
+ Saltos={{Inicio=12.65,Fin=13.2,Altura=.50},{Inicio=13.25,Fin=13.75,Altura=.35}},
+ MontajeInicio=7.6,
  SubtitulosGuia=true,Nombres={Madre="Madre",Hija="Hija"},
  Posiciones={Madre=Vector3.new(-2.4,0,-4.1),Hija=Vector3.new(1.8,0,-4.1)},
  Interacciones={},
 }
--- Cinco jump cuts comprimen el tiempo; solo el ultimo necesita mostrar el alcance.
-for i=1,5 do
- local t=4.5+(i-1)*.8
+for i=1,4 do
+ local t=7.6+(i-1)*.7
  table.insert(C.Interacciones,{Rol="Hija",Donut=string.format("Donut_%02d",i),Montaje=true,
-  Inicio=t,Agarre=t+.03,Alzar=t+.10,Boca=t+.18,Morder=t+.25,Retirar=t+.57,Fin=t+.72})
+  Inicio=t,Agarre=t+.03,Alzar=t+.09,Boca=t+.16,Morder=t+.23,Retirar=t+.52,Fin=t+.64})
 end
-table.insert(C.Interacciones,{Rol="Hija",Donut="Donut_06",Inicio=12.5,Agarre=13.2,Alzar=13.55,Boca=14.5,Morder=14.7,Retirar=15.05,Fin=15.30})
+table.insert(C.Interacciones,{Rol="Hija",Donut="Donut_05",Inicio=10.4,Agarre=11.1,Alzar=11.45,Boca=12.3,Morder=12.5,Retirar=12.85,Fin=13.05})
 local function scene(a,b,voz,text,ma,hi,mf,hf,ml,hl)
  return {Inicio=a,Fin=b,Voz=voz,Texto=text,Acciones={Madre=ma or "ESCUCHAR",Hija=hi or "ESCUCHAR"},
   Caras={Madre=mf or "NEUTRA",Hija=hf or "NEUTRA"},Miradas={Madre=ml or "Hija",Hija=hl or "Madre"}}
 end
 C.Escenas={
- scene(0,2.5,"Hija","¡A que me como los seis!","ESCUCHAR","ILUSION","INQUIETA","ALEGRE"),
- scene(2.5,4.5,"Madre","El último no lo toques.","SENALAR","ESCUCHAR","NEUTRA","ALEGRE","Donut_06","Madre"),
- scene(4.5,8.5,nil,"","INCOMODA","COMER","INQUIETA","ALEGRE","Hija","Madre"),
- scene(8.5,10.5,"Hija","¡Solo queda uno!","ESCUCHAR","ILUSION","NEUTRA","ALEGRE"),
- scene(10.5,12.5,"Madre","Te he dicho que ese no.","SENALAR","INCOMODA","ENFADADA","INQUIETA","Donut_06","Madre"),
- scene(12.5,14.7,"Hija","¡Pues también me lo como!","ESCUCHAR","COGER","INQUIETA","ALEGRE","Hija","Donut_06"),
- scene(14.7,17,"Hija","¡Mamá, esto pica!","ESCUCHAR","SUSTO","ALEGRE","ALARMA"),
- scene(17,20,"Madre","Ese era el mío. ¡Extra picante!","ILUSION","INCOMODA","ALEGRE","ALARMA"),
- scene(20,22.5,"Hija","¡Agua, agua!","ESCUCHAR","SUSTO","ALEGRE","ALARMA"),
- scene(22.5,25,"Madre","¿Te guardo otro?","ILUSION","NEGAR","ALEGRE","INQUIETA"),
+ scene(0,2.4,"Hija","¡Mamá, mira esos dónuts!","ILUSION","ILUSION","ALEGRE","ALEGRE","CAMARA","CAMARA"),
+ scene(2.4,6.1,"Madre","Hay uno que pica, pero mi hija no lo sabe.","SUSURRAR","ESCUCHAR","ALEGRE","ALEGRE","CAMARA","Donut_05"),
+ scene(6.1,7.6,"Hija","¡Me los voy a comer!","ESCUCHAR","ILUSION","ALEGRE","ALEGRE"),
+ scene(7.6,10.4,nil,"","INCOMODA","COMER","ALEGRE","ALEGRE","Hija","CAMARA"),
+ scene(10.4,12.5,"Hija","¡Qué ricos!","ESCUCHAR","COGER","ALEGRE","ALEGRE","Hija","Donut_05"),
+ scene(12.5,13.85,"Hija","¡Mamá, esto pica!","ILUSION","SUSTO","ALEGRE","ENFADADA","Hija","CAMARA"),
+ scene(13.85,15.3,nil,"","ESCUCHAR","ENFADO","ALEGRE","ENFADADA","Hija","CAMARA"),
+ scene(15.3,17.6,"Madre","¿Te guardo el último?","ILUSION","ENFADO","ALEGRE","ENFADADA","CAMARA","Madre"),
+ scene(17.6,20,"Hija","¡Ni loca! ¡Agua!","ILUSION","NEGAR","ALEGRE","ENFADADA","Hija","CAMARA"),
 }
-local function shot(a,b,kind,fov)
- return {Inicio=a,Fin=b,Roles={"Madre","Hija"},Tipo=kind,Angulo=0,Acercar=0,Fov=fov}
+local function shot(a,b,kind,fov,roles)
+ return {Inicio=a,Fin=b,Roles=roles or {"Madre","Hija"},Tipo=kind,Angulo=0,Acercar=0,Fov=fov}
 end
 C.Planos={
- shot(0,2.5,"GENERAL",70),
- shot(2.5,4.5,"ZOOM",58),
- shot(4.5,5.3,"MONTAJE",58),
- shot(5.3,6.1,"MONTAJE",65),
- shot(6.1,6.9,"MONTAJE",58),
- shot(6.9,7.7,"MONTAJE",65),
- shot(7.7,8.5,"MONTAJE",58),
- shot(8.5,10.5,"ZOOM",58),
- shot(10.5,12.5,"GENERAL",70),
- shot(12.5,14.7,"ZOOM",60),
- shot(14.7,17,"REACCION",70),
- shot(17,20,"ZOOM",58),
- shot(20,22.5,"GENERAL",70),
- shot(22.5,25,"ZOOM",58),
+ shot(0,1.5,"GENERAL",56),
+ shot(1.5,2.4,"ZOOM",50),
+ shot(2.4,6.1,"SUSURRO",42,{"Madre"}),
+ shot(6.1,7.6,"ZOOM",50),
+ shot(7.6,8.3,"MONTAJE",50),
+ shot(8.3,9,"MONTAJE",54),
+ shot(9,9.7,"MONTAJE",50),
+ shot(9.7,10.4,"MONTAJE",54),
+ shot(10.4,12.5,"ZOOM",50),
+ shot(12.5,13.85,"REACCION",46,{"Hija"}),
+ shot(13.85,15.3,"CARA",42,{"Hija"}),
+ shot(15.3,17.6,"CARA",42,{"Madre"}),
+ shot(17.6,19,"CARA",42,{"Hija"}),
+ shot(19,20,"ZOOM",50),
 }
-function C.EncuadreFrontal(points,front,aspect)
+function C.EncuadreFrontal(points,front,aspect,fov,margin,slope)
  assert(#points>0,"No hay puntos para el encuadre frontal.")
  local low=Vector3.new(math.huge,math.huge,math.huge);local high=-low
  for _,p in ipairs(points) do low=low:Min(p);high=high:Max(p) end
  local focus=(low+high)/2
- local direction=(front+Vector3.yAxis*.25).Unit
+ local direction=(front+Vector3.yAxis*(slope or .20)).Unit
  local axes=CFrame.lookAt(focus,focus-direction)
- local tanV=math.tan(math.rad(58/2))
+ local tanV=math.tan(math.rad((fov or 50)/2))
  local tanH=tanV*math.max(.05,math.min(C.FrenteSeguro,aspect))
- local distance=1
+ local distance=1;margin=margin or 1.03
  for _,p in ipairs(points) do
   local q=axes:PointToObjectSpace(p)
-  distance=math.max(distance,q.Z+math.abs(q.X)*1.12/tanH,q.Z+math.abs(q.Y)*1.12/tanV,q.Z+.8)
+  distance=math.max(distance,q.Z+math.abs(q.X)*margin/tanH,q.Z+math.abs(q.Y)*margin/tanV,q.Z+.8)
  end
  return axes*CFrame.new(0,0,distance),focus
 end
@@ -172,9 +174,9 @@ function D.Crear(nombre,parent,cf,seed)
  for i=0,D.Segmentos-1 do
   local theta=i*math.pi*2/D.Segmentos
   local x,z=math.cos(theta)*0.505,math.sin(theta)*0.505
-  local dough=piece("Masa_"..i,Vector3.new(0.43,0.36,0.43),CFrame.new(x,0,z),Color3.fromRGB(210,145,82),theta)
+  local dough=piece("Masa_"..i,Vector3.new(0.43,0.36,0.43),CFrame.new(x,0,z),Color3.fromRGB(188,136,87),theta)
   dough.Shape=Enum.PartType.Ball
-  local icing=piece("Glaseado_"..i,Vector3.new(0.425,0.125,0.425),CFrame.new(x,0.145,z),Color3.fromRGB(255,151,191),theta)
+  local icing=piece("Glaseado_"..i,Vector3.new(0.425,0.125,0.425),CFrame.new(x,0.145,z),Color3.fromRGB(240,205,211),theta)
   icing.Shape=Enum.PartType.Ball
  end
  local colors={Color3.fromRGB(255,235,109),Color3.fromRGB(104,211,244),Color3.fromRGB(255,255,246),Color3.fromRGB(182,132,234)}
@@ -192,8 +194,9 @@ function D.Mesa(parent,board)
  for _,z in ipairs({2.0,-2.5}) do
   for _,x in ipairs({-2.1,-.5,1.1}) do
    index+=1
-   local donut=D.Crear(string.format("Donut_%02d",index),folder,board.CFrame*CFrame.new(x,board.Size.Y/2+0.185,z),index)
-   donut:SetAttribute("HR_Picante",index==6)
+   local label=index==5 and 6 or index==6 and 5 or index
+   local donut=D.Crear(string.format("Donut_%02d",label),folder,board.CFrame*CFrame.new(x,board.Size.Y/2+0.185,z),label)
+   donut:SetAttribute("HR_Picante",label==5)
   end
  end
  folder.Parent=parent;return folder
@@ -212,7 +215,7 @@ return D
 -- IK analitica sobre los Motor6D existentes. No reconstruye el rig.
 local A={}
 function A.SoporteMano(hand)
- local grip=hand:FindFirstChild("RightGripAttachment")
+ local grip=hand:FindFirstChild(hand.Name=="LeftHand" and "LeftGripAttachment" or "RightGripAttachment")
  return CFrame.new(grip and grip.Position or Vector3.new(0,-hand.Size.Y*.25,hand.Size.Z*.45))
 end
 -- Mismo soporte y UV de boca que el cliente facial que ya se ve correctamente.
@@ -243,13 +246,14 @@ local function rotationFor(localAxis,worldAxis,reference)
  end
  return basis(-worldAxis,reference)*basis(-localAxis,Vector3.xAxis):Inverse()
 end
-function A.Cadena(actor)
- local s,e,w=actor.joints.RightShoulder,actor.joints.RightElbow,actor.joints.RightWrist
+function A.Cadena(actor,side)
+ side=side or "Right"
+ local s,e,w=actor.joints[side.."Shoulder"],actor.joints[side.."Elbow"],actor.joints[side.."Wrist"]
  assert(s and e and w,"Falta la cadena del brazo derecho de "..actor.model.Name)
  local v1=e.base.Position-s.motor.C1.Position
  local v2=w.base.Position-e.motor.C1.Position
  assert(v1.Magnitude>0.05 and v2.Magnitude>0.05,"Longitudes de brazo no validas.")
- return {s=s,e=e,w=w,v1=v1,v2=v2,l1=v1.Magnitude,l2=v2.Magnitude}
+ return {s=s,e=e,w=w,v1=v1,v2=v2,l1=v1.Magnitude,l2=v2.Magnitude,sign=side=="Left" and -1 or 1}
 end
 function A.Marcos(actor)
  local frames={[actor.root]=actor.root.CFrame}
@@ -265,8 +269,8 @@ function A.Marcos(actor)
  end
  return frames
 end
-function A.Resolver(actor,handTarget,weight)
- local chain=actor.arm
+function A.Resolver(actor,handTarget,weight,chain)
+ chain=chain or actor.arm
  local s,e,w=chain.s,chain.e,chain.w
  local frames=A.Marcos(actor)
  local parent=frames[s.motor.Part0]
@@ -277,7 +281,7 @@ function A.Resolver(actor,handTarget,weight)
  if diff.Magnitude<0.001 then diff=actor.root.CFrame.LookVector*0.001 end
  local u=diff.Unit
  local d=math.clamp(diff.Magnitude,math.abs(chain.l1-chain.l2)+0.002,chain.l1+chain.l2-0.002)
- local pole=actor.root.CFrame.RightVector*0.8-Vector3.yAxis*0.4-actor.root.CFrame.LookVector*0.1
+ local pole=actor.root.CFrame.RightVector*(0.8*chain.sign)-Vector3.yAxis*0.4-actor.root.CFrame.LookVector*0.1
  local bend=pole-u*pole:Dot(u)
  if bend.Magnitude<0.001 then bend=u:Cross(Vector3.yAxis) end
  if bend.Magnitude<0.001 then bend=u:Cross(Vector3.xAxis) end
@@ -292,6 +296,19 @@ function A.Resolver(actor,handTarget,weight)
  for i,j in ipairs({s,e,w}) do j.motor.C0=j.motor.C0:Lerp(goals[i],weight) end
  local final=A.Marcos(actor)[w.motor.Part1]
  return final,math.max(0,diff.Magnitude-d)
+end
+function A.Susurrar(actor,weight)
+ local head=A.Marcos(actor)[actor.model.Head]
+ local mouth=A.PuntoBoca(actor.model.Head,head)
+ local errors={}
+ for i,side in ipairs({"Right","Left"}) do
+  local sign=side=="Right" and 1 or -1
+  local hand=actor.model[side.."Hand"]
+  local grip=mouth*CFrame.new(sign*.34,.03,-.16)*CFrame.Angles(math.rad(-68),0,math.rad(sign*18))
+  local _,excess=A.Resolver(actor,grip*A.SoporteMano(hand):Inverse(),weight,side=="Right" and actor.arm or actor.leftArm)
+  errors[i]=excess
+ end
+ return errors
 end
 return A
 ]====],Servidor=[====[
@@ -344,6 +361,7 @@ for _,role in ipairs({"Madre","Hija"}) do
  h.DisplayName=role;model.PrimaryPart=root;model.ModelStreamingMode=Enum.ModelStreamingMode.Persistent
  local actor={model=model,root=root,joints=joints,baseCF=root.CFrame,offset=root.CFrame:ToObjectSpace(model:GetPivot())}
  actor.arm=A.Cadena(actor)
+ actor.leftArm=A.Cadena(actor,"Left")
  actor.hold=A.SoporteMano(model.RightHand)
  B.Preparar(actor);B.Cara(actor,"NEUTRA")
  model.Parent=stage;cast[role]=actor
@@ -402,6 +420,7 @@ local function reset()
   actor.model:PivotTo(actor.baseCF*actor.offset)
   for _,j in pairs(actor.joints) do j.motor.C0=j.base;j.motor.Transform=CFrame.identity end
   B.Cara(actor,"NEUTRA")
+  for _,entry in ipairs(actor.skin) do entry.part.Color=entry.color end
  end
  for _,s in pairs(states) do s.model:PivotTo(s.initial);D.Estado(s.model,true,false);s.visible=true;s.bitten=false;s.model:SetAttribute("HR_Visible",true) end
  startTime=workspace:GetServerTimeNow()+C.Preparacion
@@ -427,13 +446,31 @@ Run.Heartbeat:Connect(function(dt)
   local item=interaction(role,t)
   local approach=0
   if item and not item.Montaje then approach=smooth((t-item.Inicio)/.55)*(1-smooth((t-item.Alzar)/(item.Boca-item.Alzar))) end
-  local jump=role==C.Sorpresa.Rol and .50*math.sin(math.pi*math.clamp((t-C.Sorpresa.Salto)/.65,0,1)) or 0
+  local jump=0
+  if role==C.Sorpresa.Rol then
+   for _,hop in ipairs(C.Saltos) do jump+=hop.Altura*math.sin(math.pi*math.clamp((t-hop.Inicio)/(hop.Fin-hop.Inicio),0,1)) end
+  end
+  local opening=t<C.Apertura.Fin
+  local phase=t-(role=="Hija" and .10 or 0)
+  local spin=opening and smooth((phase-C.Apertura.GiroInicio)/(C.Apertura.GiroFin-C.Apertura.GiroInicio))*math.pi*2 or 0
+  if opening then jump+=.42*math.sin(math.pi*math.clamp(phase/.65,0,1)) end
   local cf=actor.baseCF+origin.ZVector*(approach*.40)+Vector3.yAxis*jump
+  cf=cf*CFrame.Angles(0,spin,0)
   actor.model:PivotTo(cf*actor.offset)
   local targets=B.Pose(scene.Acciones[role],lt)
   if item then
    targets.Waist=angles(-30*approach)
    targets.LeftElbow=angles(25)
+  end
+  if opening and t>=C.Apertura.Senalar then targets=B.Pose("SENALAR",.4) end
+  if jump>.02 then
+   targets.RightHip=angles(-10);targets.LeftHip=angles(-8)
+   targets.RightKnee=angles(20);targets.LeftKnee=angles(20)
+  end
+  if scene.Acciones[role]=="ENFADO" then
+   targets.RightShoulder=angles(12,0,-18);targets.LeftShoulder=angles(12,0,18)
+   targets.RightElbow=angles(70);targets.LeftElbow=angles(70)
+   targets.Neck=angles(0,math.sin(lt*9)*5)
   end
   local targetKey=scene.Miradas[role]
   local other=cast[targetKey]
@@ -445,12 +482,19 @@ Run.Heartbeat:Connect(function(dt)
   end
   if scene.Voz==role then targets.Neck=(targets.Neck or CFrame.identity)*angles(math.sin(lt*7)*1.5) end
   -- Durante el agarre/mordisco no se gira la cabeza hacia el otro personaje.
-  if item then targets.Neck=CFrame.identity end
+  local whisper=scene.Acciones[role]=="SUSURRAR"
+  if item or opening or whisper then targets.Neck=CFrame.identity end
   pose(actor,targets,dt)
-  if item then actor.joints.Neck.motor.C0=actor.joints.Neck.base end
+  if item or whisper then actor.joints.Neck.motor.C0=actor.joints.Neck.base end
+  if whisper then A.Susurrar(actor,smooth(lt/.22)) end
+  if opening and t>=C.Apertura.Senalar then
+   local chosen=states[role=="Madre" and "Donut_04" or "Donut_05"].initial.Position
+   local desired=CFrame.new(chosen+Vector3.yAxis*.45)*actor.root.CFrame.Rotation
+   A.Resolver(actor,desired*actor.hold:Inverse(),smooth((t-C.Apertura.Senalar)/.2)*.80)
+  end
   B.Cara(actor,scene.Caras[role])
-  local heat=role==C.Sorpresa.Rol and smooth((t-C.Sorpresa.Inicio)/.4)*.42 or 0
-  for _,entry in ipairs(actor.skin) do entry.part.Color=entry.color:Lerp(Color3.fromRGB(255,128,104),heat) end
+  local heat=role==C.Sorpresa.Rol and smooth((t-C.Sorpresa.Inicio)/.3)*.65 or 0
+  for _,entry in ipairs(actor.skin) do entry.part.Color=entry.color:Lerp(Color3.fromRGB(255,87,74),heat) end
   if item then
    local s=states[item.Donut]
    local frames=A.Marcos(actor)
@@ -471,10 +515,12 @@ Run.Heartbeat:Connect(function(dt)
  if t>=C.Sorpresa.Inicio and not confetti then
   confetti=true;fx.CFrame=CFrame.new(cast[C.Sorpresa.Rol].model.Head.Position+Vector3.yAxis*.7);emitter:Emit(18)
  end
- if raw>=C.Duracion then finished=true;remote:FireAllClients("FIN");print("[HR DONUTS] FIN: 25 segundos. R repite; P devuelve la camara; Stop termina.") end
+ if raw>=C.Duracion then finished=true;remote:FireAllClients("FIN");print("[HR DONUTS] FIN: 20 segundos. Queda un donut sin comer. R repite; P devuelve la camara; Stop termina.") end
 end)
 folder:SetAttribute("ActoresListos",true)
 print("[HR DONUTS] Madre, hija y 6 donuts preparados. Esperando la camara...")
+local lighting=game:GetService("Lighting")
+print(string.format("[HR DONUTS] Luz en Play: brillo %.2f; exposicion %.2f.",lighting.Brightness,lighting.ExposureCompensation))
 ]====],Camara=[====[
 local Players=game:GetService("Players")
 local RS=game:GetService("ReplicatedStorage")
@@ -504,6 +550,10 @@ assert(folder:GetAttribute("ActoresListos"),"[HR CAMARA DONUTS] El servidor no t
 local camera=workspace.CurrentCamera
 while not camera do Run.RenderStepped:Wait();camera=workspace.CurrentCamera end
 local saved={kind=camera.CameraType,subject=camera.CameraSubject,fov=camera.FieldOfView,cf=camera.CFrame}
+local cameraEffects={}
+for _,effect in ipairs(camera:GetChildren()) do
+ if effect:IsA("PostEffect") then cameraEffects[effect]=effect.Enabled;effect.Enabled=false end
+end
 local active=true;local connections={};local hidden={};local core={}
 for _,kind in ipairs(Enum.CoreGuiType:GetEnumItems()) do
  if kind~=Enum.CoreGuiType.All then
@@ -534,15 +584,34 @@ local maximum=Instance.new("UITextSizeConstraint");maximum.MaxTextSize=38;maximu
 local counter=Instance.new("TextLabel");counter.AnchorPoint=Vector2.new(.5,.5);counter.Position=UDim2.fromScale(.5,.65)
 counter.Size=UDim2.fromScale(.3,.06);counter.BackgroundTransparency=1;counter.TextColor3=Color3.fromRGB(255,229,99)
 counter.TextStrokeTransparency=0;counter.Font=Enum.Font.GothamBold;counter.TextSize=28;counter.Parent=gui
+local leftMask=Instance.new("Frame");leftMask.Name="MargenIzquierdo";leftMask.BackgroundColor3=Color3.new(0,0,0);leftMask.BorderSizePixel=0;leftMask.ZIndex=5;leftMask.Parent=gui
+local rightMask=leftMask:Clone();rightMask.Name="MargenDerecho";rightMask.Parent=gui
+countdown.ZIndex=20;caption.ZIndex=10;counter.ZIndex=10
 local guide=C.SubtitulosGuia
 local binding="HR_PruebaReparto_Camara"
-local startTime,priorShot,fixedFrame,fixedFocus,fittedAspect
+local startTime,priorShot,fixedFrame,fixedFocus,fittedAspect,solo
+local actorVisibility={}
+for role,model in pairs(actors) do
+ actorVisibility[role]={}
+ for _,p in ipairs(model:GetDescendants()) do
+  if p:IsA("BasePart") then table.insert(actorVisibility[role],{part=p,value=p.LocalTransparencyModifier}) end
+ end
+end
+local function showRoles(roles)
+ local visible={}
+ for _,role in ipairs(roles) do visible[role]=true end
+ for role,list in pairs(actorVisibility) do
+  for _,e in ipairs(list) do if e.part.Parent then e.part.LocalTransparencyModifier=visible[role] and e.value or 1 end end
+ end
+end
 local function restore()
  if not active then return end
  active=false;Run:UnbindFromRenderStep(binding)
  for _,c in ipairs(connections) do c:Disconnect() end
  for p,value in pairs(hidden) do if p.Parent then p.LocalTransparencyModifier=value end end
+ showRoles({"Madre","Hija"})
  for kind,value in pairs(core) do pcall(function() StarterGui:SetCoreGuiEnabled(kind,value) end) end
+ for effect,value in pairs(cameraEffects) do if effect.Parent then effect.Enabled=value end end
  camera.CameraType=saved.kind;camera.CameraSubject=saved.subject or (player.Character and player.Character:FindFirstChildOfClass("Humanoid"))
  camera.FieldOfView=saved.fov;camera.CFrame=saved.cf;gui:Destroy()
  print("[HR CAMARA DONUTS] Camara del jugador restaurada. Stop termina la prueba.")
@@ -554,7 +623,7 @@ table.insert(connections,Input.InputBegan:Connect(function(input,processed)
  elseif input.KeyCode==Enum.KeyCode.G then guide=not guide end
 end))
 table.insert(connections,remote.OnClientEvent:Connect(function(message,value)
- if message=="START" and type(value)=="number" and startTime~=value then startTime=value;priorShot=nil end
+ if message=="START" and type(value)=="number" and startTime~=value then startTime=value;priorShot=nil;solo=nil end
 end))
 local function box(points,cf,half)
  for _,x in ipairs({-1,1}) do for _,y in ipairs({-1,1}) do for _,z in ipairs({-1,1}) do
@@ -565,21 +634,30 @@ local function pointsForBase()
  local points={}
  for _,role in ipairs({"Madre","Hija"}) do
   local model=actors[role]
-  for _,part in ipairs(model:GetDescendants()) do
-   if part:IsA("BasePart") and part.Name~="HumanoidRootPart" then
-    local n=part.Name
-    local accessory=part.Parent:IsA("Accessory")
-    if n=="Head" or n:find("Torso") or accessory then box(points,part.CFrame,part.Size/2) end
-   end
-  end
+  local head=model.Head
+  box(points,CFrame.new(head.Position+Vector3.yAxis*.05),Vector3.new(.82,1.0,.65))
+  table.insert(points,model.HumanoidRootPart.Position-Vector3.yAxis*.6)
  end
  -- La mesa ocupa el primer termino; los dos actores quedan juntos al fondo.
  for _,name in ipairs({"Donut_01","Donut_03","Donut_04","Donut_06"}) do
-  box(points,food[name]:GetPivot(),Vector3.new(.8,.25,.8))
+  table.insert(points,food[name]:GetPivot().Position)
  end
  return points
 end
 local basePoints=pointsForBase()
+local function prepareSolo(shot,aspect)
+ local actor=actors[shot.Roles[1]]
+ local points={};local head=actor.Head
+ if shot.Tipo=="REACCION" then
+  box(points,CFrame.new(head.Position+Vector3.yAxis*.2),Vector3.new(1.45,1.30,.65))
+  table.insert(points,actor.HumanoidRootPart.Position-Vector3.yAxis*.7)
+ else
+  box(points,CFrame.new(head.Position-Vector3.yAxis*.08),Vector3.new(.75,1.1,.60))
+ end
+ local cf,focus=C.EncuadreFrontal(points,folder:GetAttribute("Frente"),aspect,shot.Fov,1.06,.04)
+ local root=actor.HumanoidRootPart
+ return {anchor=root,relative=root.CFrame:ToObjectSpace(cf),relativeFocus=root.CFrame:PointToObjectSpace(focus),fixed=shot.Tipo=="REACCION",cf=cf,focus=focus}
+end
 Run:BindToRenderStep(binding,Enum.RenderPriority.Camera.Value+10,function()
  if not active then return end
  local raw=startTime and workspace:GetServerTimeNow()-startTime or -C.Preparacion
@@ -588,22 +666,32 @@ Run:BindToRenderStep(binding,Enum.RenderPriority.Camera.Value+10,function()
  local shot,index=C.PlanoEn(t)
  local aspect=camera.ViewportSize.X/math.max(1,camera.ViewportSize.Y)
  if not fixedFrame or fittedAspect~=aspect then
-  fixedFrame,fixedFocus=C.EncuadreFrontal(basePoints,folder:GetAttribute("Frente"),aspect)
+  fixedFrame,fixedFocus=C.EncuadreFrontal(basePoints,folder:GetAttribute("Frente"),aspect,50,1.03,.20)
   fittedAspect=aspect
+  priorShot=nil
  end
  if priorShot~=index then
   priorShot=index
+  showRoles(shot.Roles)
+  solo=#shot.Roles==1 and prepareSolo(shot,aspect) or nil
   print("[HR CAMARA DONUTS] Plano "..index.." / "..shot.Tipo)
  end
- -- Una sola posicion y un solo eje durante toda la toma. El zoom solo cambia el FOV.
+ -- Los conjuntos usan un unico eje; los primeros planos tambien son frontales.
  camera.CameraType=Enum.CameraType.Scriptable;camera.FieldOfView=shot.Fov
- camera.CFrame=fixedFrame;camera.Focus=CFrame.new(fixedFocus)
+ if solo then
+  local cf=solo.fixed and solo.cf or solo.anchor.CFrame*solo.relative
+  local focus=solo.fixed and solo.focus or solo.anchor.CFrame:PointToWorldSpace(solo.relativeFocus)
+  camera.CFrame=cf;camera.Focus=CFrame.new(focus)
+ else camera.CFrame=fixedFrame;camera.Focus=CFrame.new(fixedFocus) end
+ local side=math.max(0,(1-C.FrenteSeguro/aspect)/2)
+ leftMask.Size=UDim2.fromScale(side,1);rightMask.Size=UDim2.fromScale(side,1);rightMask.Position=UDim2.fromScale(1-side,0)
+ leftMask.Visible=C.MarcoVertical;rightMask.Visible=C.MarcoVertical
  local scene=C.EscenaEn(t)
- counter.Visible=guide and raw>=4.5 and raw<17
+ counter.Visible=guide and raw>=C.MontajeInicio and raw<15.3
  if counter.Visible then
   local remaining=0
   for _,m in ipairs(food:GetChildren()) do if m:IsA("Model") and m:GetAttribute("HR_Visible")~=false then remaining+=1 end end
-  counter.Text=raw>=C.Sorpresa.Inicio and "¡PICANTE!" or tostring(remaining).." dónuts"
+  counter.Text=raw>=C.Sorpresa.Inicio and "¡PICANTE!" or tostring(remaining)..(remaining==1 and " dónut" or " dónuts")
  end
  caption.Visible=guide and raw>=0 and raw<C.Duracion and scene.Voz~=nil
  if caption.Visible then
@@ -681,9 +769,9 @@ function D.Crear(nombre,parent,cf,seed)
  for i=0,D.Segmentos-1 do
   local theta=i*math.pi*2/D.Segmentos
   local x,z=math.cos(theta)*0.505,math.sin(theta)*0.505
-  local dough=piece("Masa_"..i,Vector3.new(0.43,0.36,0.43),CFrame.new(x,0,z),Color3.fromRGB(210,145,82),theta)
+  local dough=piece("Masa_"..i,Vector3.new(0.43,0.36,0.43),CFrame.new(x,0,z),Color3.fromRGB(188,136,87),theta)
   dough.Shape=Enum.PartType.Ball
-  local icing=piece("Glaseado_"..i,Vector3.new(0.425,0.125,0.425),CFrame.new(x,0.145,z),Color3.fromRGB(255,151,191),theta)
+  local icing=piece("Glaseado_"..i,Vector3.new(0.425,0.125,0.425),CFrame.new(x,0.145,z),Color3.fromRGB(240,205,211),theta)
   icing.Shape=Enum.PartType.Ball
  end
  local colors={Color3.fromRGB(255,235,109),Color3.fromRGB(104,211,244),Color3.fromRGB(255,255,246),Color3.fromRGB(182,132,234)}
@@ -701,8 +789,9 @@ function D.Mesa(parent,board)
  for _,z in ipairs({2.0,-2.5}) do
   for _,x in ipairs({-2.1,-.5,1.1}) do
    index+=1
-   local donut=D.Crear(string.format("Donut_%02d",index),folder,board.CFrame*CFrame.new(x,board.Size.Y/2+0.185,z),index)
-   donut:SetAttribute("HR_Picante",index==6)
+   local label=index==5 and 6 or index==6 and 5 or index
+   local donut=D.Crear(string.format("Donut_%02d",label),folder,board.CFrame*CFrame.new(x,board.Size.Y/2+0.185,z),label)
+   donut:SetAttribute("HR_Picante",label==5)
   end
  end
  folder.Parent=parent;return folder
@@ -721,67 +810,69 @@ return D
  end)()
  local C=(function()
 local C={
- Version="DONUTS_PICANTES_25S_3",Duracion=25,Preparacion=3,FrenteSeguro=9/16,
- CantidadDonuts=6,RetoPicante=true,Sorpresa={Rol="Hija",Inicio=14.7,Salto=15.0},
+ Version="DONUTS_SUSURRO_20S_4",Duracion=20,Preparacion=3,FrenteSeguro=9/16,
+ CantidadDonuts=6,RetoPicante=true,MarcoVertical=true,
+ Sorpresa={Rol="Hija",Inicio=12.5,Salto=12.65},
+ Apertura={Fin=2.4,GiroInicio=.55,GiroFin=1.4,Senalar=1.5},
+ Saltos={{Inicio=12.65,Fin=13.2,Altura=.50},{Inicio=13.25,Fin=13.75,Altura=.35}},
+ MontajeInicio=7.6,
  SubtitulosGuia=true,Nombres={Madre="Madre",Hija="Hija"},
  Posiciones={Madre=Vector3.new(-2.4,0,-4.1),Hija=Vector3.new(1.8,0,-4.1)},
  Interacciones={},
 }
--- Cinco jump cuts comprimen el tiempo; solo el ultimo necesita mostrar el alcance.
-for i=1,5 do
- local t=4.5+(i-1)*.8
+for i=1,4 do
+ local t=7.6+(i-1)*.7
  table.insert(C.Interacciones,{Rol="Hija",Donut=string.format("Donut_%02d",i),Montaje=true,
-  Inicio=t,Agarre=t+.03,Alzar=t+.10,Boca=t+.18,Morder=t+.25,Retirar=t+.57,Fin=t+.72})
+  Inicio=t,Agarre=t+.03,Alzar=t+.09,Boca=t+.16,Morder=t+.23,Retirar=t+.52,Fin=t+.64})
 end
-table.insert(C.Interacciones,{Rol="Hija",Donut="Donut_06",Inicio=12.5,Agarre=13.2,Alzar=13.55,Boca=14.5,Morder=14.7,Retirar=15.05,Fin=15.30})
+table.insert(C.Interacciones,{Rol="Hija",Donut="Donut_05",Inicio=10.4,Agarre=11.1,Alzar=11.45,Boca=12.3,Morder=12.5,Retirar=12.85,Fin=13.05})
 local function scene(a,b,voz,text,ma,hi,mf,hf,ml,hl)
  return {Inicio=a,Fin=b,Voz=voz,Texto=text,Acciones={Madre=ma or "ESCUCHAR",Hija=hi or "ESCUCHAR"},
   Caras={Madre=mf or "NEUTRA",Hija=hf or "NEUTRA"},Miradas={Madre=ml or "Hija",Hija=hl or "Madre"}}
 end
 C.Escenas={
- scene(0,2.5,"Hija","¡A que me como los seis!","ESCUCHAR","ILUSION","INQUIETA","ALEGRE"),
- scene(2.5,4.5,"Madre","El último no lo toques.","SENALAR","ESCUCHAR","NEUTRA","ALEGRE","Donut_06","Madre"),
- scene(4.5,8.5,nil,"","INCOMODA","COMER","INQUIETA","ALEGRE","Hija","Madre"),
- scene(8.5,10.5,"Hija","¡Solo queda uno!","ESCUCHAR","ILUSION","NEUTRA","ALEGRE"),
- scene(10.5,12.5,"Madre","Te he dicho que ese no.","SENALAR","INCOMODA","ENFADADA","INQUIETA","Donut_06","Madre"),
- scene(12.5,14.7,"Hija","¡Pues también me lo como!","ESCUCHAR","COGER","INQUIETA","ALEGRE","Hija","Donut_06"),
- scene(14.7,17,"Hija","¡Mamá, esto pica!","ESCUCHAR","SUSTO","ALEGRE","ALARMA"),
- scene(17,20,"Madre","Ese era el mío. ¡Extra picante!","ILUSION","INCOMODA","ALEGRE","ALARMA"),
- scene(20,22.5,"Hija","¡Agua, agua!","ESCUCHAR","SUSTO","ALEGRE","ALARMA"),
- scene(22.5,25,"Madre","¿Te guardo otro?","ILUSION","NEGAR","ALEGRE","INQUIETA"),
+ scene(0,2.4,"Hija","¡Mamá, mira esos dónuts!","ILUSION","ILUSION","ALEGRE","ALEGRE","CAMARA","CAMARA"),
+ scene(2.4,6.1,"Madre","Hay uno que pica, pero mi hija no lo sabe.","SUSURRAR","ESCUCHAR","ALEGRE","ALEGRE","CAMARA","Donut_05"),
+ scene(6.1,7.6,"Hija","¡Me los voy a comer!","ESCUCHAR","ILUSION","ALEGRE","ALEGRE"),
+ scene(7.6,10.4,nil,"","INCOMODA","COMER","ALEGRE","ALEGRE","Hija","CAMARA"),
+ scene(10.4,12.5,"Hija","¡Qué ricos!","ESCUCHAR","COGER","ALEGRE","ALEGRE","Hija","Donut_05"),
+ scene(12.5,13.85,"Hija","¡Mamá, esto pica!","ILUSION","SUSTO","ALEGRE","ENFADADA","Hija","CAMARA"),
+ scene(13.85,15.3,nil,"","ESCUCHAR","ENFADO","ALEGRE","ENFADADA","Hija","CAMARA"),
+ scene(15.3,17.6,"Madre","¿Te guardo el último?","ILUSION","ENFADO","ALEGRE","ENFADADA","CAMARA","Madre"),
+ scene(17.6,20,"Hija","¡Ni loca! ¡Agua!","ILUSION","NEGAR","ALEGRE","ENFADADA","Hija","CAMARA"),
 }
-local function shot(a,b,kind,fov)
- return {Inicio=a,Fin=b,Roles={"Madre","Hija"},Tipo=kind,Angulo=0,Acercar=0,Fov=fov}
+local function shot(a,b,kind,fov,roles)
+ return {Inicio=a,Fin=b,Roles=roles or {"Madre","Hija"},Tipo=kind,Angulo=0,Acercar=0,Fov=fov}
 end
 C.Planos={
- shot(0,2.5,"GENERAL",70),
- shot(2.5,4.5,"ZOOM",58),
- shot(4.5,5.3,"MONTAJE",58),
- shot(5.3,6.1,"MONTAJE",65),
- shot(6.1,6.9,"MONTAJE",58),
- shot(6.9,7.7,"MONTAJE",65),
- shot(7.7,8.5,"MONTAJE",58),
- shot(8.5,10.5,"ZOOM",58),
- shot(10.5,12.5,"GENERAL",70),
- shot(12.5,14.7,"ZOOM",60),
- shot(14.7,17,"REACCION",70),
- shot(17,20,"ZOOM",58),
- shot(20,22.5,"GENERAL",70),
- shot(22.5,25,"ZOOM",58),
+ shot(0,1.5,"GENERAL",56),
+ shot(1.5,2.4,"ZOOM",50),
+ shot(2.4,6.1,"SUSURRO",42,{"Madre"}),
+ shot(6.1,7.6,"ZOOM",50),
+ shot(7.6,8.3,"MONTAJE",50),
+ shot(8.3,9,"MONTAJE",54),
+ shot(9,9.7,"MONTAJE",50),
+ shot(9.7,10.4,"MONTAJE",54),
+ shot(10.4,12.5,"ZOOM",50),
+ shot(12.5,13.85,"REACCION",46,{"Hija"}),
+ shot(13.85,15.3,"CARA",42,{"Hija"}),
+ shot(15.3,17.6,"CARA",42,{"Madre"}),
+ shot(17.6,19,"CARA",42,{"Hija"}),
+ shot(19,20,"ZOOM",50),
 }
-function C.EncuadreFrontal(points,front,aspect)
+function C.EncuadreFrontal(points,front,aspect,fov,margin,slope)
  assert(#points>0,"No hay puntos para el encuadre frontal.")
  local low=Vector3.new(math.huge,math.huge,math.huge);local high=-low
  for _,p in ipairs(points) do low=low:Min(p);high=high:Max(p) end
  local focus=(low+high)/2
- local direction=(front+Vector3.yAxis*.25).Unit
+ local direction=(front+Vector3.yAxis*(slope or .20)).Unit
  local axes=CFrame.lookAt(focus,focus-direction)
- local tanV=math.tan(math.rad(58/2))
+ local tanV=math.tan(math.rad((fov or 50)/2))
  local tanH=tanV*math.max(.05,math.min(C.FrenteSeguro,aspect))
- local distance=1
+ local distance=1;margin=margin or 1.03
  for _,p in ipairs(points) do
   local q=axes:PointToObjectSpace(p)
-  distance=math.max(distance,q.Z+math.abs(q.X)*1.12/tanH,q.Z+math.abs(q.Y)*1.12/tanV,q.Z+.8)
+  distance=math.max(distance,q.Z+math.abs(q.X)*margin/tanH,q.Z+math.abs(q.Y)*margin/tanV,q.Z+.8)
  end
  return axes*CFrame.new(0,0,distance),focus
 end
@@ -845,7 +936,7 @@ end
 staging:Destroy()
 decor.ModelStreamingMode=Enum.ModelStreamingMode.Persistent
 game:GetService("Selection"):Set({decor.RepartoDonuts})
-print("[HR DONUTS] HISTORIA INSTALADA: madre, hija, 6 donuts, 25 segundos y 14 planos frontales.")
+print("[HR DONUTS] HISTORIA INSTALADA: madre, hija, 6 donuts, 20 segundos y 14 planos.")
 print("[HR DONUTS] Caras conservadas; historia anterior respaldada. Guarda con Ctrl+S, cierra las pestanas de codigo y pulsa F5.")
 print("[HR DONUTS] Espera la cuenta atras. R repite; G oculta/muestra el dialogo; P devuelve la camara.")
 print("[HR DONUTS] Dialogo en pantalla como guia. Las voces se montan despues. Revisar el contacto de manos y los planos en la primera toma.")

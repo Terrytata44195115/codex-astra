@@ -1,50 +1,59 @@
-# Madre e hija: seis donuts y el ultimo picante
+# Madre e hija: susurro y penultimo donut picante
 
-## Version actual: 25 segundos
+## Version actual: 20 segundos
 
-El usuario descarta copiar la partida completa de 2:24. La historia actual usa seis donuts: la hija presume de comerselos todos, los cinco primeros pasan en un montaje rapido y el sexto es picante. La madre lo habia advertido y remata preguntando si quiere otro. Se conservan los personajes y el cliente de caras que ya funcionaban.
+Seis donuts. Madre e hija empiezan saltando, dando una vuelta y senalando la comida. La madre aparece sola en primer plano, lleva ambas manos junto a la boca y revela al espectador: «Hay uno que pica, pero mi hija no lo sabe». La hija come cuatro en un montaje rapido; el quinto, penultimo, es picante. La reaccion muestra dos saltos, cara roja, expresion enfadada y un primer plano frontal. Queda un donut intacto para el remate.
 
-**Si ya instalaste la historia de 18 donuts**, con Stop pega todo `04_RETO_6_DONUTS.txt` en Script > Comando. Debe terminar con `[HR DONUTS] RETO PICANTE INSTALADO: 6 donuts, madre e hija, 25 segundos y 14 planos frontales.` Guarda con Ctrl+S y pulsa F5. La cuenta atras dura tres segundos.
+**Sobre la escena ya instalada**, con Stop pegar todo `05_SUSURRO_PICANTE_Y_LUZ.txt` en Script > Comando. Debe terminar con `[HR DONUTS] SUSURRO INSTALADO: 20 segundos; salto, giro, susurro y penultimo donut picante.` Guardar con Ctrl+S y pulsar F5. La cuenta atras dura tres segundos. No hay que rehacer el decorado ni preparar otros personajes.
 
-**Si empiezas desde el decorado sin actores ni donuts**, instala 03 primero y despues 04. No hay que rehacer la sala ni importar comida del catalogo. La actualizacion 04 guarda los donuts anteriores y cambia los controladores existentes: no activa otra camara en paralelo.
+Para una copia que aun solo contiene el decorado, instalar 03 primero y despues 05. El archivo 04 se mantiene como alias de la actualizacion actual. No hace falta ejecutarlos ambos.
 
-- **R**: repetir con cuenta atras, reponiendo los seis donuts y el color de la hija.
+- **R**: repetir, reponiendo comida, poses, color y expresiones.
 - **G**: mostrar u ocultar dialogos y contador de referencia.
 - **P**: devolver la camara al jugador.
 - **Stop**: volver a edicion.
 
-## Acciones y encuadres
+## Guion y camara
 
-Seis donuts rosas con virutas, en dos filas de tres. Los cinco primeros se comen mediante jump cuts que representan un salto de tiempo; el sexto muestra el alcance, agarre, elevacion y mordisco completos. Al morder el ultimo, la hija se sonroja, aparece una nube de vapor anaranjado y da un salto. La escena es guionizada y repetible.
-
-La camara mantiene **una posicion y un eje frontal** calculados al empezar. Los 14 cambios son de zoom mediante FOV, conservando a madre e hija y la mesa. Se eliminan las camaras individuales, los cambios laterales, los detalles cenitales y el seguimiento de la mano del primer montaje. Un cambio de tamano de la ventana recalcula el ajuste para proteger el centro 9:16.
-
-El mordisco usa la misma geometria de soporte facial y las mismas coordenadas de boca del cliente instalado. El borde posterior elevado del donut toca el centro de la boca. El agarre usa el `RightGripAttachment` real de la mano; se conservan las longitudes de brazo y sus Motor6D. Durante la accion se fija el cuello al frente para evitar que la comida siga un giro hacia el otro personaje. La mesa se ajusta a la cintura de la hija para dejar visible el torso. Esta geometria aun requiere comprobar su aspecto en la captura real.
-
-## Guion y audio
-
-| Segundos | Accion o dialogo |
+| Tiempo | Accion y dialogo |
 | --- | --- |
-| 0-2,5 | Hija: «¡A que me como los seis!» |
-| 2,5-4,5 | Madre: «El ultimo no lo toques». |
-| 4,5-8,5 | Cinco bocados en montaje rapido; contador de seis a uno. |
-| 8,5-10,5 | Hija: «¡Solo queda uno!» |
-| 10,5-12,5 | Madre: «Te he dicho que ese no». |
-| 12,5-14,7 | Hija: «¡Pues tambien me lo como!» |
-| 14,7-17 | Hija, al morder el sexto: «¡Mama, esto pica!» |
-| 17-20 | Madre: «Ese era el mio. ¡Extra picante!» |
-| 20-22,5 | Hija: «¡Agua, agua!» |
-| 22,5-25 | Madre: «¿Te guardo otro?»; la hija niega. |
+| 0-2,4 | Ambas saltan, giran y senalan. Hija: «¡Mama, mira esos donuts!» |
+| 2,4-6,1 | Primer plano de madre sola, manos ahuecadas junto a la boca. «Hay uno que pica, pero mi hija no lo sabe». |
+| 6,1-7,6 | Hija: «¡Me los voy a comer!» |
+| 7,6-10,4 | Cuatro bocados en montaje rapido. |
+| 10,4-12,5 | Agarre y elevacion completos del quinto. Hija: «¡Que ricos!» |
+| 12,5-13,85 | Mordisco, vapor, cara roja y enfadada, dos saltos. «¡Mama, esto pica!» Plano medio con margen de salto. |
+| 13,85-15,3 | Primer plano de la hija enfadada. |
+| 15,3-17,6 | Madre en primer plano: «¿Te guardo el ultimo?» |
+| 17,6-20 | Hija: «¡Ni loca! ¡Agua!» Niega con la cabeza; vuelta al conjunto al final. |
 
-El dialogo de pantalla es una **guia sin audio**. `VOZ_MADRE.txt` y `VOZ_HIJA.txt` contienen las nuevas frases para generar las voces. `DIALOGOS_REFERENCIA.srt` y `GUION_DONUTS.json` reflejan los tiempos previstos, pendientes de alinear con las voces recibidas. Se descarta el audio de la referencia larga para esta nueva historia. Musica y sonidos de mordisco se montan en la edicion. El codigo no exporta un MP4 ni realiza sincronizacion labial.
+Se conservan los ejes frontales. Hay primeros planos intencionados para el susurro y las reacciones. En las individuales se oculta solo al otro actor, manteniendo la comida y el decorado. El cliente facial ya instalado sigue la visibilidad de cada cabeza. Los planos de la cara usan el volumen visible de cabeza y manos en lugar de incluir toda la trenza hasta la cintura. Los conjuntos son mas cercanos que en la version anterior.
 
-## Conservacion y pruebas
+Los margenes negros delimitan el centro 9:16 en una ventana horizontal. Son una guia de encuadre, no una exportacion de video: la grabacion aun debe recortarse y exportarse a 1080x1920 en el editor.
 
-04 escribe Configuracion, Donuts, BrazoDonut y los controladores existentes de servidor y camara. Conserva byte a byte los clientes de caras y el modulo Interpretacion. Guarda las fuentes anteriores y los donuts retirados en `ServerStorage.HR_DonutsAntesRetoPicante`. Repetirlo no acumula comida ni altera ese primer respaldo. `VOLVER_A_MARCOS.txt` conserva la restauracion de la historia anterior que habia antes de instalar donuts.
+## Iluminacion y colores
 
-Comprobaciones externas: compilacion Luau; 25 segundos y 14 planos contiguos; proyeccion del encuadre frontal dentro del centro 9:16; objetivos de agarre y mordisco sobre las medidas y articulaciones de ambos rigs extraidos de Base_Historias; longitudes y conexion de codos; contacto del borde del donut con el punto central de la boca dibujada; creacion de seis donuts; sustitucion de 18 por seis; actualizacion repetida sin duplicados ni nuevos cambios de altura; codigo facial sin cambios; restauracion; reversion ante 21 fallos de escritura inyectados.
+La captura del usuario estaba sobreexpuesta. La base conservaba Bloom y una iluminacion global intensa, y el primer ajuste habia anadido focos de techo y frontal excesivos. La actualizacion desactiva esos focos y los postefectos de Lighting, elimina la niebla interior, fija brillo 1 y exposicion -0,30, reduce los reflejos ambientales y aplica una paleta azul gris y madera mate tomada como referencia del clip. El techo deja de ser blanco puro y los donuts usan un glaseado rosa mas suave.
 
-**Pendiente en Studio:** comprobar la nueva captura con el proyecto actual del usuario, especialmente el agarre real, el mordisco, las intersecciones, el vapor y las dos repeticiones con R. La primera version no coincidia con el estilo de camara solicitado; estas pruebas geometricas no garantizan por si solas que el resultado visual sea identico al ejemplo.
+Se guardan los valores previos y referencias de cada objeto en `ServerStorage.HR_DonutsAspectoOriginal`. El color de piel original se conserva; solo se mezcla hacia rojo durante el picante. La revision visual de este nuevo perfil necesita la captura de Studio: la prueba externa no demuestra un ajuste de color identico al video de referencia.
+
+## Agarre y susurro
+
+Los brazos se resuelven sobre sus Motor6D existentes, usando el RightGripAttachment y LeftGripAttachment de las manos. El borde posterior elevado del donut llega al centro de la boca dibujada. La cabeza se mantiene frontal durante el mordisco. Para susurrar, ambas manos llegan a los lados de la boca; las comprobaciones geometricas mantienen sus cajas por debajo de los ojos. Se conserva el cliente de caras y el modulo de interpretacion original.
+
+El quinto donut se coloca en el sitio alcanzable junto a la hija. Los cuatro anteriores se resuelven con jump cuts intencionados. El sexto no se come. La mesa se ajusta a la altura de la cintura y los donuts previos se conservan en el respaldo.
+
+## Voces y edicion
+
+El dialogo en Roblox es una **guia sin audio**, no sincronizacion labial. `VOZ_MADRE.txt` y `VOZ_HIJA.txt` contienen las frases nuevas. La primera frase de madre se interpreta como susurro complice; la ultima en tono burlon normal. La hija pasa de entusiasmo a enfado comico. El SRT usa tiempos previstos, pendientes de alinear con las voces recibidas. Musica, sonidos de mordisco y efectos de edicion se montan despues.
+
+## Conservacion y comprobaciones
+
+05 actualiza Configuracion, Donuts, BrazoDonut y los controladores existentes de servidor y camara. No escribe el cliente de caras ni Interpretacion. Antes de escribir verifica los dos rigs y sus cadenas de mano. Las fuentes anteriores y los donuts retirados quedan en `ServerStorage.HR_DonutsAntesSusurro`. La copia de aspecto conserva sus primeros valores aunque se repita el instalador.
+
+Comprobaciones externas: compilacion Luau; 20 segundos y 14 planos; coherencia de quinto picante y sexto intacto; proyeccion del centro 9:16; agarre y mordisco en ambos rigs extraidos de Base_Historias; susurro con dos manos alcanzables y por debajo de los ojos; sustitucion de comida sin duplicados; perfil de luz sin Bloom ni focos locales; respaldo inicial estable; restauracion y rollback ante 21 fallos de escritura de fuentes y un fallo parcial de escritura de iluminacion.
+
+**Pendiente en Studio:** comprobar el resultado con la copia actual del usuario: exposicion y tonos, giro inicial, manos junto a la boca, aislamiento del primer plano, mordisco, rojo de la hija y dos repeticiones con R. Las pruebas geometricas y de instalacion no equivalen a ver la animacion renderizada.
 
 ## Preparacion del decorado
 

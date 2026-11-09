@@ -129,7 +129,7 @@ end
 staging:Destroy()
 decor.ModelStreamingMode=Enum.ModelStreamingMode.Persistent
 game:GetService("Selection"):Set({decor.RepartoDonuts})
-print("[HR DONUTS] HISTORIA INSTALADA: madre, hija, 6 donuts, 25 segundos y 14 planos frontales.")
+print("[HR DONUTS] HISTORIA INSTALADA: madre, hija, 6 donuts, 20 segundos y 14 planos.")
 print("[HR DONUTS] Caras conservadas; historia anterior respaldada. Guarda con Ctrl+S, cierra las pestanas de codigo y pulsa F5.")
 print("[HR DONUTS] Espera la cuenta atras. R repite; G oculta/muestra el dialogo; P devuelve la camara.")
 print("[HR DONUTS] Dialogo en pantalla como guia. Las voces se montan despues. Revisar el contacto de manos y los planos en la primera toma.")

@@ -1,0 +1,943 @@
+-- Ejecutar completo con Stop. Corrige la toma ya instalada; no crea otro director.
+assert(not game:GetService("RunService"):IsRunning(),"Primero pulsa Stop.")
+local Storage=game:GetService("ServerStorage")
+local RS=game:GetService("ReplicatedStorage")
+local SSS=game:GetService("ServerScriptService")
+local SPS=game:GetService("StarterPlayer").StarterPlayerScripts
+local editor=game:GetService("ScriptEditorService")
+local root=RS:FindFirstChild("HR_PruebaReparto")
+local decor=workspace:FindFirstChild("HR_RetoDonuts")
+assert(root and root:GetAttribute("HR_Owner")=="HR_PRUEBA_REPARTO_1" and decor and decor:GetAttribute("HR_Owner")=="HR_DONUTS_DECORADO_1","No se reconoce la historia de donuts.")
+local definitions={
+ {object=root:FindFirstChild("Configuracion"),class="ModuleScript",text=[====[
+local C={
+ Version="DONUTS_SUSURRO_20S_4",Duracion=20,Preparacion=3,FrenteSeguro=9/16,
+ CantidadDonuts=6,RetoPicante=true,MarcoVertical=true,
+ Sorpresa={Rol="Hija",Inicio=12.5,Salto=12.65},
+ Apertura={Fin=2.4,GiroInicio=.55,GiroFin=1.4,Senalar=1.5},
+ Saltos={{Inicio=12.65,Fin=13.2,Altura=.50},{Inicio=13.25,Fin=13.75,Altura=.35}},
+ MontajeInicio=7.6,
+ SubtitulosGuia=true,Nombres={Madre="Madre",Hija="Hija"},
+ Posiciones={Madre=Vector3.new(-2.4,0,-4.1),Hija=Vector3.new(1.8,0,-4.1)},
+ Interacciones={},
+}
+for i=1,4 do
+ local t=7.6+(i-1)*.7
+ table.insert(C.Interacciones,{Rol="Hija",Donut=string.format("Donut_%02d",i),Montaje=true,
+  Inicio=t,Agarre=t+.03,Alzar=t+.09,Boca=t+.16,Morder=t+.23,Retirar=t+.52,Fin=t+.64})
+end
+table.insert(C.Interacciones,{Rol="Hija",Donut="Donut_05",Inicio=10.4,Agarre=11.1,Alzar=11.45,Boca=12.3,Morder=12.5,Retirar=12.85,Fin=13.05})
+local function scene(a,b,voz,text,ma,hi,mf,hf,ml,hl)
+ return {Inicio=a,Fin=b,Voz=voz,Texto=text,Acciones={Madre=ma or "ESCUCHAR",Hija=hi or "ESCUCHAR"},
+  Caras={Madre=mf or "NEUTRA",Hija=hf or "NEUTRA"},Miradas={Madre=ml or "Hija",Hija=hl or "Madre"}}
+end
+C.Escenas={
+ scene(0,2.4,"Hija","¡Mamá, mira esos dónuts!","ILUSION","ILUSION","ALEGRE","ALEGRE","CAMARA","CAMARA"),
+ scene(2.4,6.1,"Madre","Hay uno que pica, pero mi hija no lo sabe.","SUSURRAR","ESCUCHAR","ALEGRE","ALEGRE","CAMARA","Donut_05"),
+ scene(6.1,7.6,"Hija","¡Me los voy a comer!","ESCUCHAR","ILUSION","ALEGRE","ALEGRE"),
+ scene(7.6,10.4,nil,"","INCOMODA","COMER","ALEGRE","ALEGRE","Hija","CAMARA"),
+ scene(10.4,12.5,"Hija","¡Qué ricos!","ESCUCHAR","COGER","ALEGRE","ALEGRE","Hija","Donut_05"),
+ scene(12.5,13.85,"Hija","¡Mamá, esto pica!","ILUSION","SUSTO","ALEGRE","ENFADADA","Hija","CAMARA"),
+ scene(13.85,15.3,nil,"","ESCUCHAR","ENFADO","ALEGRE","ENFADADA","Hija","CAMARA"),
+ scene(15.3,17.6,"Madre","¿Te guardo el último?","ILUSION","ENFADO","ALEGRE","ENFADADA","CAMARA","Madre"),
+ scene(17.6,20,"Hija","¡Ni loca! ¡Agua!","ILUSION","NEGAR","ALEGRE","ENFADADA","Hija","CAMARA"),
+}
+local function shot(a,b,kind,fov,roles)
+ return {Inicio=a,Fin=b,Roles=roles or {"Madre","Hija"},Tipo=kind,Angulo=0,Acercar=0,Fov=fov}
+end
+C.Planos={
+ shot(0,1.5,"GENERAL",56),
+ shot(1.5,2.4,"ZOOM",50),
+ shot(2.4,6.1,"SUSURRO",42,{"Madre"}),
+ shot(6.1,7.6,"ZOOM",50),
+ shot(7.6,8.3,"MONTAJE",50),
+ shot(8.3,9,"MONTAJE",54),
+ shot(9,9.7,"MONTAJE",50),
+ shot(9.7,10.4,"MONTAJE",54),
+ shot(10.4,12.5,"ZOOM",50),
+ shot(12.5,13.85,"REACCION",46,{"Hija"}),
+ shot(13.85,15.3,"CARA",42,{"Hija"}),
+ shot(15.3,17.6,"CARA",42,{"Madre"}),
+ shot(17.6,19,"CARA",42,{"Hija"}),
+ shot(19,20,"ZOOM",50),
+}
+function C.EncuadreFrontal(points,front,aspect,fov,margin,slope)
+ assert(#points>0,"No hay puntos para el encuadre frontal.")
+ local low=Vector3.new(math.huge,math.huge,math.huge);local high=-low
+ for _,p in ipairs(points) do low=low:Min(p);high=high:Max(p) end
+ local focus=(low+high)/2
+ local direction=(front+Vector3.yAxis*(slope or .20)).Unit
+ local axes=CFrame.lookAt(focus,focus-direction)
+ local tanV=math.tan(math.rad((fov or 50)/2))
+ local tanH=tanV*math.max(.05,math.min(C.FrenteSeguro,aspect))
+ local distance=1;margin=margin or 1.03
+ for _,p in ipairs(points) do
+  local q=axes:PointToObjectSpace(p)
+  distance=math.max(distance,q.Z+math.abs(q.X)*margin/tanH,q.Z+math.abs(q.Y)*margin/tanV,q.Z+.8)
+ end
+ return axes*CFrame.new(0,0,distance),focus
+end
+function C.EscenaEn(t)
+ for i,s in ipairs(C.Escenas) do if t<s.Fin then return s,i end end
+ return C.Escenas[#C.Escenas],#C.Escenas
+end
+function C.PlanoEn(t)
+ for i,s in ipairs(C.Planos) do if t<s.Fin then return s,i end end
+ return C.Planos[#C.Planos],#C.Planos
+end
+return C
+]====],key="Configuracion"},
+ {object=root:FindFirstChild("Donuts"),class="ModuleScript",text=[====[
+-- Geometria nativa sin assets ni scripts en los alimentos.
+local D={Owner="HR_DONUTS_HISTORIA_1",Segmentos=24}
+function D.Crear(nombre,parent,cf,seed)
+ local m=Instance.new("Model");m.Name=nombre;m:SetAttribute("HR_Owner",D.Owner)
+ local pivot=Instance.new("Part");pivot.Name="Centro";pivot.Size=Vector3.new(0.05,0.05,0.05)
+ pivot.Transparency=1;pivot.Anchored=true;pivot.CanCollide=false;pivot.CanTouch=false;pivot.CanQuery=false;pivot.CastShadow=false;pivot.Parent=m
+ m.PrimaryPart=pivot
+ local function piece(name,size,at,color,angle)
+  local p=Instance.new("Part");p.Name=name;p.Size=size;p.CFrame=at;p.Color=color;p.Material=Enum.Material.SmoothPlastic
+  p.Anchored=true;p.CanCollide=false;p.CanTouch=false;p.CanQuery=false;p.CastShadow=false
+  p.TopSurface=Enum.SurfaceType.Smooth;p.BottomSurface=Enum.SurfaceType.Smooth
+  if angle then p:SetAttribute("HR_Angulo",angle) end
+  p.Parent=m;return p
+ end
+ for i=0,D.Segmentos-1 do
+  local theta=i*math.pi*2/D.Segmentos
+  local x,z=math.cos(theta)*0.505,math.sin(theta)*0.505
+  local dough=piece("Masa_"..i,Vector3.new(0.43,0.36,0.43),CFrame.new(x,0,z),Color3.fromRGB(188,136,87),theta)
+  dough.Shape=Enum.PartType.Ball
+  local icing=piece("Glaseado_"..i,Vector3.new(0.425,0.125,0.425),CFrame.new(x,0.145,z),Color3.fromRGB(240,205,211),theta)
+  icing.Shape=Enum.PartType.Ball
+ end
+ local colors={Color3.fromRGB(255,235,109),Color3.fromRGB(104,211,244),Color3.fromRGB(255,255,246),Color3.fromRGB(182,132,234)}
+ for i=1,12 do
+  local theta=(i/12+seed*0.073)*math.pi*2
+  local radius=0.48+(i%3-1)*0.045
+  piece("Viruta_"..i,Vector3.new(0.11,0.025,0.035),CFrame.new(math.cos(theta)*radius,0.211,math.sin(theta)*radius)*CFrame.Angles(0,theta*1.7,0),colors[i%#colors+1],theta)
+ end
+ m:PivotTo(cf);m:SetAttribute("HR_Inicial",cf);m.Parent=parent
+ return m
+end
+function D.Mesa(parent,board)
+ local folder=Instance.new("Folder");folder.Name="Donuts";folder:SetAttribute("HR_Owner",D.Owner)
+ local index=0
+ for _,z in ipairs({2.0,-2.5}) do
+  for _,x in ipairs({-2.1,-.5,1.1}) do
+   index+=1
+   local label=index==5 and 6 or index==6 and 5 or index
+   local donut=D.Crear(string.format("Donut_%02d",label),folder,board.CFrame*CFrame.new(x,board.Size.Y/2+0.185,z),label)
+   donut:SetAttribute("HR_Picante",label==5)
+  end
+ end
+ folder.Parent=parent;return folder
+end
+function D.Estado(model,visible,mordido)
+ for _,p in ipairs(model:GetDescendants()) do
+  if p:IsA("BasePart") and p.Name~="Centro" then
+   local theta=p:GetAttribute("HR_Angulo")
+   local bite=mordido and theta and math.sin(theta)>.82
+   p.Transparency=visible and not bite and 0 or 1
+  end
+ end
+end
+return D
+]====],key="Donuts"},
+ {object=root:FindFirstChild("BrazoDonut"),class="ModuleScript",text=[====[
+-- IK analitica sobre los Motor6D existentes. No reconstruye el rig.
+local A={}
+function A.SoporteMano(hand)
+ local grip=hand:FindFirstChild(hand.Name=="LeftHand" and "LeftGripAttachment" or "RightGripAttachment")
+ return CFrame.new(grip and grip.Position or Vector3.new(0,-hand.Size.Y*.25,hand.Size.Z*.45))
+end
+-- Mismo soporte y UV de boca que el cliente facial que ya se ve correctamente.
+function A.PuntoBoca(head,cf)
+ local front=head:FindFirstChild("FaceFrontAttachment")
+ local hat=head:FindFirstChild("HatAttachment")
+ local mesh=head:FindFirstChildOfClass("SpecialMesh")
+ local radius=front and math.abs(front.Position.Z) or head.Size.Z*.6
+ local top=hat and math.abs(hat.Position.Y) or radius
+ local width=math.max(.5,math.min(head.Size.X,2*radius))
+ local height=math.max(.5,2*top)
+ local depth=math.max(radius,head.Size.Z/2*(mesh and math.max(1,mesh.Scale.Z) or 1))
+ local x=front and front.Position.X or 0
+ local y=(front and front.Position.Y or 0)-height*.20
+ return (cf or head.CFrame)*CFrame.new(x,y,-depth-width*.04-.035)
+end
+function A.Bocado(head,cf)
+ -- El borde posterior elevado de la rosca toca la boca, no su centro ni un lado.
+ return A.PuntoBoca(head,cf)*CFrame.Angles(math.rad(-68),0,0)*CFrame.new(0,0,-.72)
+end
+local function rotationFor(localAxis,worldAxis,reference)
+ local function basis(y,x)
+  y=y.Unit;x=x-y*x:Dot(y)
+  if x.Magnitude<0.001 then x=Vector3.zAxis-y*Vector3.zAxis:Dot(y) end
+  if x.Magnitude<0.001 then x=Vector3.xAxis-y*Vector3.xAxis:Dot(y) end
+  x=x.Unit
+  return CFrame.fromMatrix(Vector3.zero,x,y,x:Cross(y).Unit)
+ end
+ return basis(-worldAxis,reference)*basis(-localAxis,Vector3.xAxis):Inverse()
+end
+function A.Cadena(actor,side)
+ side=side or "Right"
+ local s,e,w=actor.joints[side.."Shoulder"],actor.joints[side.."Elbow"],actor.joints[side.."Wrist"]
+ assert(s and e and w,"Falta la cadena del brazo derecho de "..actor.model.Name)
+ local v1=e.base.Position-s.motor.C1.Position
+ local v2=w.base.Position-e.motor.C1.Position
+ assert(v1.Magnitude>0.05 and v2.Magnitude>0.05,"Longitudes de brazo no validas.")
+ return {s=s,e=e,w=w,v1=v1,v2=v2,l1=v1.Magnitude,l2=v2.Magnitude,sign=side=="Left" and -1 or 1}
+end
+function A.Marcos(actor)
+ local frames={[actor.root]=actor.root.CFrame}
+ local pending=true
+ while pending do
+  pending=false
+  for _,j in pairs(actor.joints) do
+   local m=j.motor
+   if m.Part0 and m.Part1 and frames[m.Part0] and not frames[m.Part1] then
+    frames[m.Part1]=frames[m.Part0]*m.C0*m.C1:Inverse();pending=true
+   end
+  end
+ end
+ return frames
+end
+function A.Resolver(actor,handTarget,weight,chain)
+ chain=chain or actor.arm
+ local s,e,w=chain.s,chain.e,chain.w
+ local frames=A.Marcos(actor)
+ local parent=frames[s.motor.Part0]
+ assert(parent,"No se pudo calcular el torso del actor.")
+ local shoulder=(parent*s.base).Position
+ local wrist=(handTarget*w.motor.C1).Position
+ local diff=wrist-shoulder
+ if diff.Magnitude<0.001 then diff=actor.root.CFrame.LookVector*0.001 end
+ local u=diff.Unit
+ local d=math.clamp(diff.Magnitude,math.abs(chain.l1-chain.l2)+0.002,chain.l1+chain.l2-0.002)
+ local pole=actor.root.CFrame.RightVector*(0.8*chain.sign)-Vector3.yAxis*0.4-actor.root.CFrame.LookVector*0.1
+ local bend=pole-u*pole:Dot(u)
+ if bend.Magnitude<0.001 then bend=u:Cross(Vector3.yAxis) end
+ if bend.Magnitude<0.001 then bend=u:Cross(Vector3.xAxis) end
+ bend=bend.Unit
+ local cosine=math.clamp((chain.l1^2+d^2-chain.l2^2)/(2*chain.l1*d),-1,1)
+ local elbow=shoulder+u*(cosine*chain.l1)+bend*(math.sqrt(math.max(0,1-cosine^2))*chain.l1)
+ local endPoint=shoulder+u*d
+ local upper=CFrame.new(shoulder)*rotationFor(chain.v1,elbow-shoulder,actor.root.CFrame.RightVector)*CFrame.new(-s.motor.C1.Position)
+ local lower=CFrame.new(elbow)*rotationFor(chain.v2,endPoint-elbow,actor.root.CFrame.RightVector)*CFrame.new(-e.motor.C1.Position)
+ local hand=CFrame.new(endPoint)*handTarget.Rotation*CFrame.new(-w.motor.C1.Position)
+ local goals={parent:ToObjectSpace(upper*s.motor.C1),upper:ToObjectSpace(lower*e.motor.C1),lower:ToObjectSpace(hand*w.motor.C1)}
+ for i,j in ipairs({s,e,w}) do j.motor.C0=j.motor.C0:Lerp(goals[i],weight) end
+ local final=A.Marcos(actor)[w.motor.Part1]
+ return final,math.max(0,diff.Magnitude-d)
+end
+function A.Susurrar(actor,weight)
+ local head=A.Marcos(actor)[actor.model.Head]
+ local mouth=A.PuntoBoca(actor.model.Head,head)
+ local errors={}
+ for i,side in ipairs({"Right","Left"}) do
+  local sign=side=="Right" and 1 or -1
+  local hand=actor.model[side.."Hand"]
+  local grip=mouth*CFrame.new(sign*.34,.03,-.16)*CFrame.Angles(math.rad(-68),0,math.rad(sign*18))
+  local _,excess=A.Resolver(actor,grip*A.SoporteMano(hand):Inverse(),weight,side=="Right" and actor.arm or actor.leftArm)
+  errors[i]=excess
+ end
+ return errors
+end
+return A
+]====],key="BrazoDonut"},
+ {object=SSS:FindFirstChild("HR_PruebaRepartoServidor"),class="Script",text=[====[
+local RS=game:GetService("ReplicatedStorage")
+local Storage=game:GetService("ServerStorage")
+local Run=game:GetService("RunService")
+local Players=game:GetService("Players")
+local folder=RS:WaitForChild("HR_PruebaReparto",15)
+assert(folder and folder:GetAttribute("HR_Owner")=="HR_PRUEBA_REPARTO_1","[HR DONUTS] Falta el sistema de historias.")
+local C=require(folder:WaitForChild("Configuracion",10))
+local B=require(folder:WaitForChild("Interpretacion",10))
+local D=require(folder:WaitForChild("Donuts",10))
+local A=require(folder:WaitForChild("BrazoDonut",10))
+local remote=folder:WaitForChild("Canal",10)
+local decor=workspace:WaitForChild("HR_RetoDonuts",15)
+local preview=decor and decor:FindFirstChild("RepartoDonuts")
+local food=decor and decor:FindFirstChild("Donuts")
+local floor=decor and decor:FindFirstChild("Sala") and decor.Sala:FindFirstChild("Suelo")
+assert(preview and food and floor,"[HR DONUTS] Faltan el reparto, los donuts o el suelo.")
+assert(not workspace:FindFirstChild("HR_PruebaActores"),"[HR DONUTS] Ya hay actores activos: revisa los controladores antes de duplicarlos.")
+folder:SetAttribute("ActoresListos",false)
+local stage=Instance.new("Folder");stage.Name="HR_PruebaActores";stage:SetAttribute("HR_Owner","HR_PRUEBA_REPARTO_1")
+local cast={};local states={}
+local function angles(x,y,z) return CFrame.Angles(math.rad(x or 0),math.rad(y or 0),math.rad(z or 0)) end
+local function smooth(x) x=math.clamp(x,0,1);return x*x*(3-2*x) end
+local origin=decor:GetAttribute("HR_Origen")
+assert(typeof(origin)=="CFrame","[HR DONUTS] Falta el origen del decorado.")
+folder:SetAttribute("Frente",origin.ZVector)
+folder:SetAttribute("Lado",origin.XVector)
+for _,role in ipairs({"Madre","Hija"}) do
+ local source=preview:FindFirstChild(role)
+ assert(source and source:IsA("Model"),"[HR DONUTS] Falta "..role)
+ local model=source:Clone();model.Name=role
+ local h=model:FindFirstChildOfClass("Humanoid")
+ local root=model:FindFirstChild("HumanoidRootPart")
+ assert(h and root and model:FindFirstChild("Head"),"[HR DONUTS] Rig incompleto: "..role)
+ local joints={}
+ for _,item in ipairs(model:GetDescendants()) do
+  assert(not item:IsA("AnimationConstraint"),"[HR DONUTS] El rig necesita sus Motor6D compatibles.")
+  if item:IsA("BaseScript") then item.Enabled=false end
+  if item:IsA("BillboardGui") then item.Enabled=false end
+  if item:IsA("BasePart") then item.Anchored=item==root;item.CanCollide=false end
+  if item:IsA("Motor6D") then
+   local key=item.Name:gsub("%s+","")
+   assert(not joints[key],"[HR DONUTS] Articulacion duplicada: "..key)
+   item.Transform=CFrame.identity;joints[key]={motor=item,base=item.C0}
+  end
+ end
+ h.AutomaticScalingEnabled=false;h.AutoRotate=false;h.DisplayDistanceType=Enum.HumanoidDisplayDistanceType.None
+ h.DisplayName=role;model.PrimaryPart=root;model.ModelStreamingMode=Enum.ModelStreamingMode.Persistent
+ local actor={model=model,root=root,joints=joints,baseCF=root.CFrame,offset=root.CFrame:ToObjectSpace(model:GetPivot())}
+ actor.arm=A.Cadena(actor)
+ actor.leftArm=A.Cadena(actor,"Left")
+ actor.hold=A.SoporteMano(model.RightHand)
+ B.Preparar(actor);B.Cara(actor,"NEUTRA")
+ model.Parent=stage;cast[role]=actor
+end
+stage.Parent=workspace
+local parked=Instance.new("Folder");parked.Name="HR_DonutsOriginalesDurantePlay";parked.Parent=Storage
+preview.Parent=parked
+for _,name in ipairs({"HR_RevisionReparto","chicaX","chicaB","cute girl","perroX","perroB"}) do
+ local old=workspace:FindFirstChild(name)
+ if old and old:IsA("Model") then old.Parent=parked end
+end
+for _,part in ipairs(decor.Marcas:GetChildren()) do if part:IsA("BasePart") then part.Transparency=1 end end
+for i=1,C.CantidadDonuts do
+ local m=food:FindFirstChild(string.format("Donut_%02d",i))
+ assert(m and m:IsA("Model") and m.PrimaryPart,"[HR DONUTS] Falta el donut "..i)
+ states[m.Name]={model=m,initial=m:GetPivot(),visible=true,bitten=false}
+end
+local fx=Instance.new("Part");fx.Name="HR_Picante";fx.Size=Vector3.new(.1,.1,.1);fx.Anchored=true;fx.Transparency=1
+fx.CanCollide=false;fx.CanTouch=false;fx.CanQuery=false;fx.CastShadow=false;fx.Parent=stage
+local emitter=Instance.new("ParticleEmitter");emitter.Name="Sorpresa"
+emitter.Texture="rbxasset://textures/particles/smoke_main.dds";emitter.Rate=0
+emitter.Lifetime=NumberRange.new(.4,.9);emitter.Speed=NumberRange.new(2,4)
+emitter.SpreadAngle=Vector2.new(35,35);emitter.Acceleration=Vector3.new(0,3,0)
+emitter.Rotation=NumberRange.new(-180,180);emitter.RotSpeed=NumberRange.new(-160,160)
+emitter.Size=NumberSequence.new({NumberSequenceKeypoint.new(0,.13),NumberSequenceKeypoint.new(.8,.13),NumberSequenceKeypoint.new(1,0)})
+emitter.Color=ColorSequence.new(Color3.fromRGB(255,161,82),Color3.fromRGB(255,228,189))
+emitter.LightEmission=.35;emitter.Parent=fx
+local function foodState(s,visible,bitten)
+ if s.visible~=visible or s.bitten~=bitten then
+  D.Estado(s.model,visible,bitten);s.visible=visible;s.bitten=bitten;s.model:SetAttribute("HR_Visible",visible)
+ end
+end
+local function interaction(role,t)
+ for _,item in ipairs(C.Interacciones) do if item.Rol==role and t>=item.Inicio and t<item.Fin then return item end end
+end
+local function pose(actor,targets,dt)
+ local alpha=1-math.exp(-dt*17)
+ for key,j in pairs(actor.joints) do j.motor.C0=j.motor.C0:Lerp(j.base*(targets[key] or CFrame.identity),alpha) end
+end
+local function donutPath(actor,item,t,frames)
+ local original=CFrame.new(states[item.Donut].initial.Position)*actor.root.CFrame.Rotation
+ local head=frames[actor.model.Head] or actor.model.Head.CFrame
+ local mouth=A.Bocado(actor.model.Head,head)
+ if item.Montaje then return mouth end
+ local chest=CFrame.new(original.Position+Vector3.yAxis*.8)*original.Rotation
+ if t<item.Alzar then return original:Lerp(chest,smooth((t-item.Agarre)/(item.Alzar-item.Agarre))) end
+ return chest:Lerp(mouth,smooth((t-item.Alzar)/(item.Boca-item.Alzar)))
+end
+local startTime,director,finished,previousScene
+local lastReplay=-math.huge
+local confetti=false
+local function reset()
+ finished=false;previousScene=nil;confetti=false;emitter:Clear()
+ for _,actor in pairs(cast) do
+  actor.reachWarned=false
+  actor.model:PivotTo(actor.baseCF*actor.offset)
+  for _,j in pairs(actor.joints) do j.motor.C0=j.base;j.motor.Transform=CFrame.identity end
+  B.Cara(actor,"NEUTRA")
+  for _,entry in ipairs(actor.skin) do entry.part.Color=entry.color end
+ end
+ for _,s in pairs(states) do s.model:PivotTo(s.initial);D.Estado(s.model,true,false);s.visible=true;s.bitten=false;s.model:SetAttribute("HR_Visible",true) end
+ startTime=workspace:GetServerTimeNow()+C.Preparacion
+ folder:SetAttribute("Inicio",startTime);remote:FireAllClients("START",startTime)
+end
+remote.OnServerEvent:Connect(function(player,message)
+ if not player:IsDescendantOf(Players) then return end
+ if message=="READY" then
+  if not startTime then director=player;reset() end
+  remote:FireClient(player,"START",startTime)
+ elseif message=="REPLAY" and player==director and os.clock()-lastReplay>=1 then lastReplay=os.clock();reset() end
+end)
+Run.Heartbeat:Connect(function(dt)
+ if not startTime or finished then return end
+ local raw=workspace:GetServerTimeNow()-startTime
+ if raw<0 then return end
+ local t=math.min(raw,C.Duracion);local scene,index=C.EscenaEn(t);local lt=t-scene.Inicio
+ if previousScene~=index then
+  previousScene=index
+  print(string.format("[HR DONUTS] %.2f-%.2f | %s: %s",scene.Inicio,scene.Fin,scene.Voz or "Accion",scene.Texto))
+ end
+ for role,actor in pairs(cast) do
+  local item=interaction(role,t)
+  local approach=0
+  if item and not item.Montaje then approach=smooth((t-item.Inicio)/.55)*(1-smooth((t-item.Alzar)/(item.Boca-item.Alzar))) end
+  local jump=0
+  if role==C.Sorpresa.Rol then
+   for _,hop in ipairs(C.Saltos) do jump+=hop.Altura*math.sin(math.pi*math.clamp((t-hop.Inicio)/(hop.Fin-hop.Inicio),0,1)) end
+  end
+  local opening=t<C.Apertura.Fin
+  local phase=t-(role=="Hija" and .10 or 0)
+  local spin=opening and smooth((phase-C.Apertura.GiroInicio)/(C.Apertura.GiroFin-C.Apertura.GiroInicio))*math.pi*2 or 0
+  if opening then jump+=.42*math.sin(math.pi*math.clamp(phase/.65,0,1)) end
+  local cf=actor.baseCF+origin.ZVector*(approach*.40)+Vector3.yAxis*jump
+  cf=cf*CFrame.Angles(0,spin,0)
+  actor.model:PivotTo(cf*actor.offset)
+  local targets=B.Pose(scene.Acciones[role],lt)
+  if item then
+   targets.Waist=angles(-30*approach)
+   targets.LeftElbow=angles(25)
+  end
+  if opening and t>=C.Apertura.Senalar then targets=B.Pose("SENALAR",.4) end
+  if jump>.02 then
+   targets.RightHip=angles(-10);targets.LeftHip=angles(-8)
+   targets.RightKnee=angles(20);targets.LeftKnee=angles(20)
+  end
+  if scene.Acciones[role]=="ENFADO" then
+   targets.RightShoulder=angles(12,0,-18);targets.LeftShoulder=angles(12,0,18)
+   targets.RightElbow=angles(70);targets.LeftElbow=angles(70)
+   targets.Neck=angles(0,math.sin(lt*9)*5)
+  end
+  local targetKey=scene.Miradas[role]
+  local other=cast[targetKey]
+  local target=other and other.model.Head.Position or states[targetKey] and states[targetKey].model:GetPivot().Position
+  if target then
+   local d=actor.root.CFrame:VectorToObjectSpace(target-actor.model.Head.Position)
+   local yaw=math.clamp(math.deg(math.atan2(-d.X,-d.Z)),-32,32)
+   targets.Neck=(targets.Neck or CFrame.identity)*angles(0,yaw)
+  end
+  if scene.Voz==role then targets.Neck=(targets.Neck or CFrame.identity)*angles(math.sin(lt*7)*1.5) end
+  -- Durante el agarre/mordisco no se gira la cabeza hacia el otro personaje.
+  local whisper=scene.Acciones[role]=="SUSURRAR"
+  if item or opening or whisper then targets.Neck=CFrame.identity end
+  pose(actor,targets,dt)
+  if item or whisper then actor.joints.Neck.motor.C0=actor.joints.Neck.base end
+  if whisper then A.Susurrar(actor,smooth(lt/.22)) end
+  if opening and t>=C.Apertura.Senalar then
+   local chosen=states[role=="Madre" and "Donut_04" or "Donut_05"].initial.Position
+   local desired=CFrame.new(chosen+Vector3.yAxis*.45)*actor.root.CFrame.Rotation
+   A.Resolver(actor,desired*actor.hold:Inverse(),smooth((t-C.Apertura.Senalar)/.2)*.80)
+  end
+  B.Cara(actor,scene.Caras[role])
+  local heat=role==C.Sorpresa.Rol and smooth((t-C.Sorpresa.Inicio)/.3)*.65 or 0
+  for _,entry in ipairs(actor.skin) do entry.part.Color=entry.color:Lerp(Color3.fromRGB(255,87,74),heat) end
+  if item then
+   local s=states[item.Donut]
+   local frames=A.Marcos(actor)
+   local wanted=donutPath(actor,item,t,frames)
+   local weight=smooth((t-item.Inicio)/(item.Agarre-item.Inicio))*(1-smooth((t-item.Retirar)/(item.Fin-item.Retirar)))
+   local hand,excess=A.Resolver(actor,wanted*actor.hold:Inverse(),weight)
+   if t>=item.Agarre then
+    s.model:PivotTo(hand*actor.hold)
+    foodState(s,t<item.Retirar,t>=item.Morder)
+   end
+   if t>=item.Agarre and t<item.Alzar and excess>.22 and not actor.reachWarned then
+    actor.reachWarned=true
+    warn(string.format("[HR DONUTS] Revisar alcance de %s: objetivo %.2f studs fuera del brazo; la mano y el donut permanecen unidos.",role,excess))
+   end
+  end
+ end
+ for _,item in ipairs(C.Interacciones) do if t>=item.Retirar then foodState(states[item.Donut],false,true) end end
+ if t>=C.Sorpresa.Inicio and not confetti then
+  confetti=true;fx.CFrame=CFrame.new(cast[C.Sorpresa.Rol].model.Head.Position+Vector3.yAxis*.7);emitter:Emit(18)
+ end
+ if raw>=C.Duracion then finished=true;remote:FireAllClients("FIN");print("[HR DONUTS] FIN: 20 segundos. Queda un donut sin comer. R repite; P devuelve la camara; Stop termina.") end
+end)
+folder:SetAttribute("ActoresListos",true)
+print("[HR DONUTS] Madre, hija y 6 donuts preparados. Esperando la camara...")
+local lighting=game:GetService("Lighting")
+print(string.format("[HR DONUTS] Luz en Play: brillo %.2f; exposicion %.2f.",lighting.Brightness,lighting.ExposureCompensation))
+]====],key="Servidor"},
+ {object=SPS:FindFirstChild("HR_PruebaRepartoCamara"),class="LocalScript",text=[====[
+local Players=game:GetService("Players")
+local RS=game:GetService("ReplicatedStorage")
+local Run=game:GetService("RunService")
+local Input=game:GetService("UserInputService")
+local StarterGui=game:GetService("StarterGui")
+local folder=RS:WaitForChild("HR_PruebaReparto",15)
+assert(folder,"[HR CAMARA DONUTS] Falta el sistema.")
+local C=require(folder:WaitForChild("Configuracion",10))
+local remote=folder:WaitForChild("Canal",10)
+local player=Players.LocalPlayer
+local stage=workspace:WaitForChild("HR_PruebaActores",20)
+local decor=workspace:WaitForChild("HR_RetoDonuts",20)
+assert(stage and decor,"[HR CAMARA DONUTS] Faltan los actores o el decorado.")
+local actors={}
+for _,role in ipairs({"Madre","Hija"}) do
+ local model=stage:WaitForChild(role,15)
+ assert(model and model:WaitForChild("Head",10) and model:WaitForChild("HumanoidRootPart",10),"[HR CAMARA DONUTS] Falta "..role)
+ actors[role]=model
+end
+local food=decor:WaitForChild("Donuts",15)
+assert(food,"[HR CAMARA DONUTS] Faltan los donuts.")
+for i=1,C.CantidadDonuts do assert(food:WaitForChild(string.format("Donut_%02d",i),15),"[HR CAMARA DONUTS] No ha llegado el donut "..i) end
+local deadline=os.clock()+20
+while not folder:GetAttribute("ActoresListos") and os.clock()<deadline do task.wait(.1) end
+assert(folder:GetAttribute("ActoresListos"),"[HR CAMARA DONUTS] El servidor no termino de preparar la escena.")
+local camera=workspace.CurrentCamera
+while not camera do Run.RenderStepped:Wait();camera=workspace.CurrentCamera end
+local saved={kind=camera.CameraType,subject=camera.CameraSubject,fov=camera.FieldOfView,cf=camera.CFrame}
+local cameraEffects={}
+for _,effect in ipairs(camera:GetChildren()) do
+ if effect:IsA("PostEffect") then cameraEffects[effect]=effect.Enabled;effect.Enabled=false end
+end
+local active=true;local connections={};local hidden={};local core={}
+for _,kind in ipairs(Enum.CoreGuiType:GetEnumItems()) do
+ if kind~=Enum.CoreGuiType.All then
+  local ok,value=pcall(function() return StarterGui:GetCoreGuiEnabled(kind) end)
+  if ok then core[kind]=value;pcall(function() StarterGui:SetCoreGuiEnabled(kind,false) end) end
+ end
+end
+local function hideCharacter(model)
+ local function hide(part)
+  if part:IsA("BasePart") then
+   if not hidden[part] then hidden[part]=part.LocalTransparencyModifier end
+   part.LocalTransparencyModifier=1
+  end
+ end
+ for _,part in ipairs(model:GetDescendants()) do hide(part) end
+ table.insert(connections,model.DescendantAdded:Connect(function(part) if active then hide(part) end end))
+end
+if player.Character then hideCharacter(player.Character) end
+table.insert(connections,player.CharacterAdded:Connect(function(model) if active then hideCharacter(model) end end))
+local gui=Instance.new("ScreenGui");gui.Name="HR_DonutsRodaje";gui.IgnoreGuiInset=true;gui.ResetOnSpawn=false;gui.Parent=player:WaitForChild("PlayerGui")
+local countdown=Instance.new("TextLabel");countdown.Size=UDim2.fromScale(1,1)
+countdown.BackgroundColor3=Color3.new(0,0,0);countdown.BackgroundTransparency=.15
+countdown.TextColor3=Color3.new(1,1,1);countdown.Font=Enum.Font.GothamBold;countdown.TextSize=72;countdown.Text="Preparando...";countdown.Parent=gui
+local caption=Instance.new("TextLabel");caption.AnchorPoint=Vector2.new(.5,.5);caption.Position=UDim2.fromScale(.5,.78)
+caption.Size=UDim2.fromScale(.3,.15);caption.BackgroundTransparency=1;caption.TextColor3=Color3.new(1,1,1)
+caption.TextStrokeTransparency=0;caption.Font=Enum.Font.GothamBold;caption.TextScaled=true;caption.TextWrapped=true;caption.Parent=gui
+local maximum=Instance.new("UITextSizeConstraint");maximum.MaxTextSize=38;maximum.MinTextSize=12;maximum.Parent=caption
+local counter=Instance.new("TextLabel");counter.AnchorPoint=Vector2.new(.5,.5);counter.Position=UDim2.fromScale(.5,.65)
+counter.Size=UDim2.fromScale(.3,.06);counter.BackgroundTransparency=1;counter.TextColor3=Color3.fromRGB(255,229,99)
+counter.TextStrokeTransparency=0;counter.Font=Enum.Font.GothamBold;counter.TextSize=28;counter.Parent=gui
+local leftMask=Instance.new("Frame");leftMask.Name="MargenIzquierdo";leftMask.BackgroundColor3=Color3.new(0,0,0);leftMask.BorderSizePixel=0;leftMask.ZIndex=5;leftMask.Parent=gui
+local rightMask=leftMask:Clone();rightMask.Name="MargenDerecho";rightMask.Parent=gui
+countdown.ZIndex=20;caption.ZIndex=10;counter.ZIndex=10
+local guide=C.SubtitulosGuia
+local binding="HR_PruebaReparto_Camara"
+local startTime,priorShot,fixedFrame,fixedFocus,fittedAspect,solo
+local actorVisibility={}
+for role,model in pairs(actors) do
+ actorVisibility[role]={}
+ for _,p in ipairs(model:GetDescendants()) do
+  if p:IsA("BasePart") then table.insert(actorVisibility[role],{part=p,value=p.LocalTransparencyModifier}) end
+ end
+end
+local function showRoles(roles)
+ local visible={}
+ for _,role in ipairs(roles) do visible[role]=true end
+ for role,list in pairs(actorVisibility) do
+  for _,e in ipairs(list) do if e.part.Parent then e.part.LocalTransparencyModifier=visible[role] and e.value or 1 end end
+ end
+end
+local function restore()
+ if not active then return end
+ active=false;Run:UnbindFromRenderStep(binding)
+ for _,c in ipairs(connections) do c:Disconnect() end
+ for p,value in pairs(hidden) do if p.Parent then p.LocalTransparencyModifier=value end end
+ showRoles({"Madre","Hija"})
+ for kind,value in pairs(core) do pcall(function() StarterGui:SetCoreGuiEnabled(kind,value) end) end
+ for effect,value in pairs(cameraEffects) do if effect.Parent then effect.Enabled=value end end
+ camera.CameraType=saved.kind;camera.CameraSubject=saved.subject or (player.Character and player.Character:FindFirstChildOfClass("Humanoid"))
+ camera.FieldOfView=saved.fov;camera.CFrame=saved.cf;gui:Destroy()
+ print("[HR CAMARA DONUTS] Camara del jugador restaurada. Stop termina la prueba.")
+end
+table.insert(connections,Input.InputBegan:Connect(function(input,processed)
+ if processed or not active then return end
+ if input.KeyCode==Enum.KeyCode.P then restore()
+ elseif input.KeyCode==Enum.KeyCode.R then remote:FireServer("REPLAY")
+ elseif input.KeyCode==Enum.KeyCode.G then guide=not guide end
+end))
+table.insert(connections,remote.OnClientEvent:Connect(function(message,value)
+ if message=="START" and type(value)=="number" and startTime~=value then startTime=value;priorShot=nil;solo=nil end
+end))
+local function box(points,cf,half)
+ for _,x in ipairs({-1,1}) do for _,y in ipairs({-1,1}) do for _,z in ipairs({-1,1}) do
+  table.insert(points,cf:PointToWorldSpace(half*Vector3.new(x,y,z)))
+ end end end
+end
+local function pointsForBase()
+ local points={}
+ for _,role in ipairs({"Madre","Hija"}) do
+  local model=actors[role]
+  local head=model.Head
+  box(points,CFrame.new(head.Position+Vector3.yAxis*.05),Vector3.new(.82,1.0,.65))
+  table.insert(points,model.HumanoidRootPart.Position-Vector3.yAxis*.6)
+ end
+ -- La mesa ocupa el primer termino; los dos actores quedan juntos al fondo.
+ for _,name in ipairs({"Donut_01","Donut_03","Donut_04","Donut_06"}) do
+  table.insert(points,food[name]:GetPivot().Position)
+ end
+ return points
+end
+local basePoints=pointsForBase()
+local function prepareSolo(shot,aspect)
+ local actor=actors[shot.Roles[1]]
+ local points={};local head=actor.Head
+ if shot.Tipo=="REACCION" then
+  box(points,CFrame.new(head.Position+Vector3.yAxis*.2),Vector3.new(1.45,1.30,.65))
+  table.insert(points,actor.HumanoidRootPart.Position-Vector3.yAxis*.7)
+ else
+  box(points,CFrame.new(head.Position-Vector3.yAxis*.08),Vector3.new(.75,1.1,.60))
+ end
+ local cf,focus=C.EncuadreFrontal(points,folder:GetAttribute("Frente"),aspect,shot.Fov,1.06,.04)
+ local root=actor.HumanoidRootPart
+ return {anchor=root,relative=root.CFrame:ToObjectSpace(cf),relativeFocus=root.CFrame:PointToObjectSpace(focus),fixed=shot.Tipo=="REACCION",cf=cf,focus=focus}
+end
+Run:BindToRenderStep(binding,Enum.RenderPriority.Camera.Value+10,function()
+ if not active then return end
+ local raw=startTime and workspace:GetServerTimeNow()-startTime or -C.Preparacion
+ local t=math.clamp(raw,0,C.Duracion)
+ countdown.Visible=raw<0;countdown.Text=startTime and tostring(math.max(1,math.ceil(-raw))) or "Preparando..."
+ local shot,index=C.PlanoEn(t)
+ local aspect=camera.ViewportSize.X/math.max(1,camera.ViewportSize.Y)
+ if not fixedFrame or fittedAspect~=aspect then
+  fixedFrame,fixedFocus=C.EncuadreFrontal(basePoints,folder:GetAttribute("Frente"),aspect,50,1.03,.20)
+  fittedAspect=aspect
+  priorShot=nil
+ end
+ if priorShot~=index then
+  priorShot=index
+  showRoles(shot.Roles)
+  solo=#shot.Roles==1 and prepareSolo(shot,aspect) or nil
+  print("[HR CAMARA DONUTS] Plano "..index.." / "..shot.Tipo)
+ end
+ -- Los conjuntos usan un unico eje; los primeros planos tambien son frontales.
+ camera.CameraType=Enum.CameraType.Scriptable;camera.FieldOfView=shot.Fov
+ if solo then
+  local cf=solo.fixed and solo.cf or solo.anchor.CFrame*solo.relative
+  local focus=solo.fixed and solo.focus or solo.anchor.CFrame:PointToWorldSpace(solo.relativeFocus)
+  camera.CFrame=cf;camera.Focus=CFrame.new(focus)
+ else camera.CFrame=fixedFrame;camera.Focus=CFrame.new(fixedFocus) end
+ local side=math.max(0,(1-C.FrenteSeguro/aspect)/2)
+ leftMask.Size=UDim2.fromScale(side,1);rightMask.Size=UDim2.fromScale(side,1);rightMask.Position=UDim2.fromScale(1-side,0)
+ leftMask.Visible=C.MarcoVertical;rightMask.Visible=C.MarcoVertical
+ local scene=C.EscenaEn(t)
+ counter.Visible=guide and raw>=C.MontajeInicio and raw<15.3
+ if counter.Visible then
+  local remaining=0
+  for _,m in ipairs(food:GetChildren()) do if m:IsA("Model") and m:GetAttribute("HR_Visible")~=false then remaining+=1 end end
+  counter.Text=raw>=C.Sorpresa.Inicio and "¡PICANTE!" or tostring(remaining)..(remaining==1 and " dónut" or " dónuts")
+ end
+ caption.Visible=guide and raw>=0 and raw<C.Duracion and scene.Voz~=nil
+ if caption.Visible then
+  caption.Text=C.Nombres[scene.Voz]..": "..scene.Texto
+  local aspect=camera.ViewportSize.X/math.max(1,camera.ViewportSize.Y)
+  caption.Size=UDim2.fromScale(math.min(.9,.85*C.FrenteSeguro/aspect),.14)
+ end
+end)
+script.Destroying:Connect(restore)
+task.spawn(function()
+ local deadlineReady=os.clock()+20
+ while active and not startTime and os.clock()<deadlineReady do remote:FireServer("READY");task.wait(.4) end
+ if active and not startTime then warn("[HR CAMARA DONUTS] No llego el inicio del servidor.");restore() end
+end)
+print("[HR CAMARA DONUTS] Lista. R repite; G muestra/oculta el dialogo; P devuelve la camara.")
+]====],key="Camara"},
+}
+for _,e in ipairs(definitions) do
+ assert(e.object and e.object:IsA(e.class) and e.object:GetAttribute("HR_Owner")=="HR_PRUEBA_REPARTO_1","Falta un controlador reconocido: "..e.key)
+ e.before=editor:GetEditorSource(e.object)
+ if e.object:IsA("BaseScript") then e.enabled=e.object.Enabled end
+end
+assert(definitions[1].before:find("DONUTS_",1,true),"La configuracion activa no es de donuts.")
+local P=(function()
+local P={}
+function P.Verificar(model)
+ assert(model and model:IsA("Model"),"Falta un modelo del reparto.")
+ local h=model:FindFirstChildOfClass("Humanoid")
+ assert(h and h.RigType==Enum.HumanoidRigType.R15,"Se necesita el rig R15 que ya funcionaba: "..model.Name)
+ assert(model:FindFirstChild("HumanoidRootPart") and model:FindFirstChild("Head") and model:FindFirstChild("LeftFoot") and model:FindFirstChild("RightHand") and model:FindFirstChild("LeftHand"),"Rig incompleto: "..model.Name)
+ local joints={}
+ for _,item in ipairs(model:GetDescendants()) do
+  assert(not item:IsA("AnimationConstraint"),"Rig incompatible: "..model.Name)
+  if item:IsA("Motor6D") then
+   local key=item.Name:gsub("%s+","")
+   assert(not joints[key],"Articulacion duplicada: "..key)
+   assert(item.Part0 and item.Part1,"Articulacion desconectada: "..key)
+   joints[key]=item
+  end
+ end
+ for _,key in ipairs({"Root","Waist","Neck","RightShoulder","RightElbow","RightWrist","LeftShoulder","LeftElbow","LeftWrist"}) do
+  assert(joints[key],"Falta "..key.." en "..model.Name)
+ end
+ local s,e,w=joints.RightShoulder,joints.RightElbow,joints.RightWrist
+ assert(s.Part1==e.Part0 and e.Part1==w.Part0 and w.Part1==model.RightHand,"Cadena del brazo incompatible.")
+end
+function P.Crear(parent,roles,decor,C)
+ local origin=decor:GetAttribute("HR_Origen")
+ assert(typeof(origin)=="CFrame","Falta HR_Origen en la sala.")
+ local floor=decor.Sala.Suelo
+ local ground=floor.Position.Y+floor.Size.Y/2
+ local preview=Instance.new("Model");preview.Name="RepartoDonuts";preview:SetAttribute("HR_Owner","HR_DONUTS_HISTORIA_1")
+ preview.Parent=parent
+ for _,role in ipairs({"Madre","Hija"}) do
+  local m=roles[role].Value:Clone();m.Name=role;m.Parent=preview
+  P.Verificar(m)
+  local root=m.HumanoidRootPart;local foot=m.LeftFoot
+  local rootHeight=root.Position.Y-(foot.Position.Y-foot.Size.Y/2)
+  for _,item in ipairs(m:GetDescendants()) do
+   if item:IsA("BaseScript") then item.Enabled=false end
+   if item:IsA("BillboardGui") then item.Enabled=false end
+   if item:IsA("BasePart") then item.Anchored=item==root;item.CanCollide=false end
+  end
+  m.PrimaryPart=root;m.ModelStreamingMode=Enum.ModelStreamingMode.Persistent
+  local h=m:FindFirstChildOfClass("Humanoid")
+  h.AutomaticScalingEnabled=false;h.AutoRotate=false;h.DisplayDistanceType=Enum.HumanoidDisplayDistanceType.None
+  local localPosition=C.Posiciones[role]
+  local p=origin:PointToWorldSpace(localPosition);p=Vector3.new(p.X,ground+rootHeight,p.Z)
+  m:PivotTo(CFrame.lookAt(p,p+origin.ZVector))
+ end
+ return preview
+end
+return P
+
+end)()
+local preview=decor:FindFirstChild("RepartoDonuts")
+assert(preview,"Falta el reparto instalado.")
+for _,role in ipairs({"Madre","Hija"}) do P.Verificar(preview:FindFirstChild(role)) end
+local M=(function()
+-- Ajuste local de proporciones para ver el torso sobre la mesa, como en la referencia.
+local M={}
+function M.Preparar(decor)
+ local mesa=decor:FindFirstChild("Mesa")
+ local actors=decor:FindFirstChild("RepartoDonuts")
+ local food=decor:FindFirstChild("Donuts")
+ local floor=decor:FindFirstChild("Sala") and decor.Sala:FindFirstChild("Suelo")
+ local board=mesa and mesa:FindFirstChild("Tablero")
+ assert(actors and food and floor and board,"Faltan mesa, reparto, donuts o suelo.")
+ local ground=floor.Position.Y+floor.Size.Y/2
+ local waist=math.huge
+ for _,role in ipairs({"Madre","Hija"}) do
+  local model=actors:FindFirstChild(role)
+  local hips=model and model:FindFirstChild("LowerTorso")
+  assert(hips,"Falta LowerTorso de "..role)
+  waist=math.min(waist,hips.Position.Y+hips.Size.Y/2)
+ end
+ local top=math.max(ground+1.1,waist+.05)
+ local delta=top-(board.Position.Y+board.Size.Y/2)
+ local height=top-board.Size.Y-ground
+ assert(height>.2,"No se puede ajustar la altura de las patas.")
+ local parts,donuts={},{}
+ for _,p in ipairs(mesa:GetDescendants()) do
+  if p:IsA("BasePart") then table.insert(parts,{part=p,cf=p.CFrame,size=p.Size}) end
+ end
+ for _,m in ipairs(food:GetChildren()) do
+  if m:IsA("Model") then
+   assert(m.PrimaryPart,"Falta el pivote de "..m.Name)
+   table.insert(donuts,{model=m,cf=m:GetPivot(),initial=m:GetAttribute("HR_Inicial")})
+  end
+ end
+ assert(#donuts>=6,"Faltan donuts de la historia anterior.")
+ local plan={Delta=delta}
+ function plan:Aplicar()
+  for _,e in ipairs(parts) do
+   local p=e.part
+   if p.Name:match("^Pata_") then
+    p.Size=Vector3.new(e.size.X,height,e.size.Z)
+    p.CFrame=e.cf+Vector3.new(0,ground+height/2-e.cf.Position.Y,0)
+   elseif p.Name:match("^Travesano_") then
+    p.CFrame=e.cf+Vector3.new(0,ground+math.min(.65,height*.35)-e.cf.Position.Y,0)
+   else p.CFrame=e.cf+Vector3.new(0,delta,0) end
+  end
+  for _,e in ipairs(donuts) do
+   local cf=e.cf+Vector3.new(0,delta,0)
+   e.model:PivotTo(cf);e.model:SetAttribute("HR_Inicial",cf)
+  end
+ end
+ function plan:Revertir()
+  for _,e in ipairs(parts) do e.part.Size=e.size;e.part.CFrame=e.cf end
+  for _,e in ipairs(donuts) do e.model:PivotTo(e.cf);e.model:SetAttribute("HR_Inicial",e.initial) end
+ end
+ return plan
+end
+return M
+
+end)()
+local layout=M.Preparar(decor)
+local V=(function()
+-- Perfil mate de interior. Cambios respaldados, sin luces extra ni filtros nuevos.
+local P={Owner="HR_DONUTS_ASPECTO_4"}
+function P.Preparar(decor,lighting,storage)
+ local existing=storage:FindFirstChild("HR_DonutsAspectoOriginal")
+ if existing then assert(existing:GetAttribute("HR_Owner")==P.Owner,"Existe otro respaldo de aspecto.") end
+ local edits={}
+ local function edit(object,values)
+  local before={}
+  for key in pairs(values) do before[key]=object[key] end
+  table.insert(edits,{object=object,before=before,after=values})
+ end
+ edit(lighting,{
+  Brightness=1.0,ExposureCompensation=-.30,ClockTime=13.5,
+  Ambient=Color3.fromRGB(92,98,104),OutdoorAmbient=Color3.fromRGB(92,98,104),
+  EnvironmentDiffuseScale=.25,EnvironmentSpecularScale=.10,GlobalShadows=false,
+  ColorShift_Top=Color3.fromRGB(0,0,0),ColorShift_Bottom=Color3.fromRGB(0,0,0),
+  FogStart=0,FogEnd=100000,
+ })
+ for _,effect in ipairs(lighting:GetChildren()) do
+  if effect:IsA("PostEffect") then edit(effect,{Enabled=false})
+  elseif effect:IsA("Atmosphere") then edit(effect,{Density=0,Haze=0,Glare=0}) end
+ end
+ local room=decor:FindFirstChild("Sala")
+ local mesa=decor:FindFirstChild("Mesa")
+ assert(room and mesa,"Falta la sala o la mesa.")
+ for _,part in ipairs(room:GetDescendants()) do
+  if part:IsA("Light") then edit(part,{Enabled=false,Brightness=0})
+  elseif part:IsA("BasePart") then
+   local name=part.Name;local color
+   if name=="Suelo" then color=Color3.fromRGB(166,142,90)
+   elseif name=="Techo" then color=Color3.fromRGB(192,202,212)
+   elseif name:find("Pared") or name:find("Fondo") or name:find("Ventana") and (name=="BajoVentana" or name=="SobreVentana") or name=="SobrePuerta" then color=Color3.fromRGB(106,143,162)
+   elseif name:find("Rodapie") then color=Color3.fromRGB(185,194,197)
+   elseif name:find("Marco") then color=Color3.fromRGB(49,60,69)
+   elseif name=="VistaCielo" then color=Color3.fromRGB(42,171,203)
+   elseif name=="VistaCesped" then color=Color3.fromRGB(99,141,68) end
+   if color then edit(part,{Color=color,Reflectance=0}) end
+  end
+ end
+ for _,part in ipairs(mesa:GetDescendants()) do
+  if part:IsA("BasePart") then
+   local color=part.Name=="Tablero" and Color3.fromRGB(166,145,103) or part.Name:find("UnionTablas") and Color3.fromRGB(109,90,62) or Color3.fromRGB(139,116,75)
+   edit(part,{Color=color,Reflectance=0})
+  end
+ end
+ local backup=existing;local created=false
+ local plan={}
+ function plan:Aplicar()
+  if not backup then
+   backup=Instance.new("Folder");backup.Name="HR_DonutsAspectoOriginal";backup:SetAttribute("HR_Owner",P.Owner);created=true
+   for i,e in ipairs(edits) do
+    local ref=Instance.new("ObjectValue");ref.Name=string.format("Ajuste_%03d",i);ref.Value=e.object
+    for key,value in pairs(e.before) do ref:SetAttribute(key,value) end
+    ref.Parent=backup
+   end
+   backup.Parent=storage
+  end
+  for _,e in ipairs(edits) do for key,value in pairs(e.after) do e.object[key]=value end end
+ end
+ function plan:Revertir()
+  for _,e in ipairs(edits) do for key,value in pairs(e.before) do e.object[key]=value end end
+  if created and backup then backup:Destroy() end
+ end
+ return plan
+end
+return P
+
+end)()
+local visual=V.Preparar(decor,game:GetService("Lighting"),Storage)
+local backup=Storage:FindFirstChild("HR_DonutsAntesSusurro")
+if backup then assert(backup:GetAttribute("HR_Owner")=="HR_DONUTS_SUSURRO_4","Existe otro respaldo de correccion.") end
+local createdBackup=false
+local staging=Instance.new("Folder")
+local oldFood=decor.Donuts
+local oldName=oldFood.Name
+local freshFood
+local ok,err=pcall(function()
+ local D=(function()
+-- Geometria nativa sin assets ni scripts en los alimentos.
+local D={Owner="HR_DONUTS_HISTORIA_1",Segmentos=24}
+function D.Crear(nombre,parent,cf,seed)
+ local m=Instance.new("Model");m.Name=nombre;m:SetAttribute("HR_Owner",D.Owner)
+ local pivot=Instance.new("Part");pivot.Name="Centro";pivot.Size=Vector3.new(0.05,0.05,0.05)
+ pivot.Transparency=1;pivot.Anchored=true;pivot.CanCollide=false;pivot.CanTouch=false;pivot.CanQuery=false;pivot.CastShadow=false;pivot.Parent=m
+ m.PrimaryPart=pivot
+ local function piece(name,size,at,color,angle)
+  local p=Instance.new("Part");p.Name=name;p.Size=size;p.CFrame=at;p.Color=color;p.Material=Enum.Material.SmoothPlastic
+  p.Anchored=true;p.CanCollide=false;p.CanTouch=false;p.CanQuery=false;p.CastShadow=false
+  p.TopSurface=Enum.SurfaceType.Smooth;p.BottomSurface=Enum.SurfaceType.Smooth
+  if angle then p:SetAttribute("HR_Angulo",angle) end
+  p.Parent=m;return p
+ end
+ for i=0,D.Segmentos-1 do
+  local theta=i*math.pi*2/D.Segmentos
+  local x,z=math.cos(theta)*0.505,math.sin(theta)*0.505
+  local dough=piece("Masa_"..i,Vector3.new(0.43,0.36,0.43),CFrame.new(x,0,z),Color3.fromRGB(188,136,87),theta)
+  dough.Shape=Enum.PartType.Ball
+  local icing=piece("Glaseado_"..i,Vector3.new(0.425,0.125,0.425),CFrame.new(x,0.145,z),Color3.fromRGB(240,205,211),theta)
+  icing.Shape=Enum.PartType.Ball
+ end
+ local colors={Color3.fromRGB(255,235,109),Color3.fromRGB(104,211,244),Color3.fromRGB(255,255,246),Color3.fromRGB(182,132,234)}
+ for i=1,12 do
+  local theta=(i/12+seed*0.073)*math.pi*2
+  local radius=0.48+(i%3-1)*0.045
+  piece("Viruta_"..i,Vector3.new(0.11,0.025,0.035),CFrame.new(math.cos(theta)*radius,0.211,math.sin(theta)*radius)*CFrame.Angles(0,theta*1.7,0),colors[i%#colors+1],theta)
+ end
+ m:PivotTo(cf);m:SetAttribute("HR_Inicial",cf);m.Parent=parent
+ return m
+end
+function D.Mesa(parent,board)
+ local folder=Instance.new("Folder");folder.Name="Donuts";folder:SetAttribute("HR_Owner",D.Owner)
+ local index=0
+ for _,z in ipairs({2.0,-2.5}) do
+  for _,x in ipairs({-2.1,-.5,1.1}) do
+   index+=1
+   local label=index==5 and 6 or index==6 and 5 or index
+   local donut=D.Crear(string.format("Donut_%02d",label),folder,board.CFrame*CFrame.new(x,board.Size.Y/2+0.185,z),label)
+   donut:SetAttribute("HR_Picante",label==5)
+  end
+ end
+ folder.Parent=parent;return folder
+end
+function D.Estado(model,visible,mordido)
+ for _,p in ipairs(model:GetDescendants()) do
+  if p:IsA("BasePart") and p.Name~="Centro" then
+   local theta=p:GetAttribute("HR_Angulo")
+   local bite=mordido and theta and math.sin(theta)>.82
+   p.Transparency=visible and not bite and 0 or 1
+  end
+ end
+end
+return D
+
+ end)()
+ local board=decor.Mesa.Tablero
+ freshFood=D.Mesa(staging,{CFrame=board.CFrame+Vector3.new(0,layout.Delta,0),Size=board.Size})
+ if not backup then
+  backup=Instance.new("Folder");backup.Name="HR_DonutsAntesSusurro";backup:SetAttribute("HR_Owner","HR_DONUTS_SUSURRO_4");createdBackup=true
+  for _,e in ipairs(definitions) do
+   local value=Instance.new("StringValue");value.Name=e.key;value.Value=e.before
+   if e.enabled~=nil then value:SetAttribute("EstabaActivo",e.enabled) end
+   value.Parent=backup
+  end
+  backup.Parent=Storage
+ end
+ for _,e in ipairs(definitions) do
+  if e.object:IsA("BaseScript") then e.object.Enabled=false end
+  local text=e.text
+  editor:UpdateSourceAsync(e.object,function() return text end)
+  assert(editor:GetEditorSource(e.object)==text,"No se sincronizo "..e.key)
+ end
+ layout:Aplicar()
+ if not backup:FindFirstChild("DonutsAnteriores") then
+  oldFood.Name="DonutsAnteriores";oldFood.Parent=backup
+ else oldFood.Parent=staging end
+ freshFood.Parent=decor
+ visual:Aplicar()
+ for _,e in ipairs(definitions) do if e.object:IsA("BaseScript") then e.object.Enabled=true end end
+end)
+if not ok then
+ for _,e in ipairs(definitions) do
+  pcall(function() editor:UpdateSourceAsync(e.object,function() return e.before end) end)
+  if e.object:IsA("BaseScript") then e.object.Enabled=e.enabled end
+ end
+ if freshFood then freshFood:Destroy() end
+ oldFood.Name=oldName;oldFood.Parent=decor
+ pcall(function() layout:Revertir() end)
+ pcall(function() visual:Revertir() end)
+ staging:Destroy()
+ if createdBackup and backup then backup:Destroy() end
+ error("[HR DONUTS] Correccion detenida y revertida: "..tostring(err))
+end
+staging:Destroy()
+game:GetService("Selection"):Set({decor.RepartoDonuts})
+print("[HR DONUTS] SUSURRO INSTALADO: 20 segundos; salto, giro, susurro y penultimo donut picante.")
+print("[HR DONUTS] Luz suave sin resplandor ni focos intensos. Madre en primer plano; hija roja y enfadada de cerca.")
+print("[HR DONUTS] Guarda con Ctrl+S y pulsa F5. R repite; G muestra/oculta el texto. Las caras conservan su codigo.")

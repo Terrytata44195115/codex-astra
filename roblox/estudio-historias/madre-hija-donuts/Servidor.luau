@@ -47,6 +47,7 @@ for _,role in ipairs({"Madre","Hija"}) do
  h.DisplayName=role;model.PrimaryPart=root;model.ModelStreamingMode=Enum.ModelStreamingMode.Persistent
  local actor={model=model,root=root,joints=joints,baseCF=root.CFrame,offset=root.CFrame:ToObjectSpace(model:GetPivot())}
  actor.arm=A.Cadena(actor)
+ actor.leftArm=A.Cadena(actor,"Left")
  actor.hold=A.SoporteMano(model.RightHand)
  B.Preparar(actor);B.Cara(actor,"NEUTRA")
  model.Parent=stage;cast[role]=actor
@@ -105,6 +106,7 @@ local function reset()
   actor.model:PivotTo(actor.baseCF*actor.offset)
   for _,j in pairs(actor.joints) do j.motor.C0=j.base;j.motor.Transform=CFrame.identity end
   B.Cara(actor,"NEUTRA")
+  for _,entry in ipairs(actor.skin) do entry.part.Color=entry.color end
  end
  for _,s in pairs(states) do s.model:PivotTo(s.initial);D.Estado(s.model,true,false);s.visible=true;s.bitten=false;s.model:SetAttribute("HR_Visible",true) end
  startTime=workspace:GetServerTimeNow()+C.Preparacion
@@ -130,13 +132,31 @@ Run.Heartbeat:Connect(function(dt)
   local item=interaction(role,t)
   local approach=0
   if item and not item.Montaje then approach=smooth((t-item.Inicio)/.55)*(1-smooth((t-item.Alzar)/(item.Boca-item.Alzar))) end
-  local jump=role==C.Sorpresa.Rol and .50*math.sin(math.pi*math.clamp((t-C.Sorpresa.Salto)/.65,0,1)) or 0
+  local jump=0
+  if role==C.Sorpresa.Rol then
+   for _,hop in ipairs(C.Saltos) do jump+=hop.Altura*math.sin(math.pi*math.clamp((t-hop.Inicio)/(hop.Fin-hop.Inicio),0,1)) end
+  end
+  local opening=t<C.Apertura.Fin
+  local phase=t-(role=="Hija" and .10 or 0)
+  local spin=opening and smooth((phase-C.Apertura.GiroInicio)/(C.Apertura.GiroFin-C.Apertura.GiroInicio))*math.pi*2 or 0
+  if opening then jump+=.42*math.sin(math.pi*math.clamp(phase/.65,0,1)) end
   local cf=actor.baseCF+origin.ZVector*(approach*.40)+Vector3.yAxis*jump
+  cf=cf*CFrame.Angles(0,spin,0)
   actor.model:PivotTo(cf*actor.offset)
   local targets=B.Pose(scene.Acciones[role],lt)
   if item then
    targets.Waist=angles(-30*approach)
    targets.LeftElbow=angles(25)
+  end
+  if opening and t>=C.Apertura.Senalar then targets=B.Pose("SENALAR",.4) end
+  if jump>.02 then
+   targets.RightHip=angles(-10);targets.LeftHip=angles(-8)
+   targets.RightKnee=angles(20);targets.LeftKnee=angles(20)
+  end
+  if scene.Acciones[role]=="ENFADO" then
+   targets.RightShoulder=angles(12,0,-18);targets.LeftShoulder=angles(12,0,18)
+   targets.RightElbow=angles(70);targets.LeftElbow=angles(70)
+   targets.Neck=angles(0,math.sin(lt*9)*5)
   end
   local targetKey=scene.Miradas[role]
   local other=cast[targetKey]
@@ -148,12 +168,19 @@ Run.Heartbeat:Connect(function(dt)
   end
   if scene.Voz==role then targets.Neck=(targets.Neck or CFrame.identity)*angles(math.sin(lt*7)*1.5) end
   -- Durante el agarre/mordisco no se gira la cabeza hacia el otro personaje.
-  if item then targets.Neck=CFrame.identity end
+  local whisper=scene.Acciones[role]=="SUSURRAR"
+  if item or opening or whisper then targets.Neck=CFrame.identity end
   pose(actor,targets,dt)
-  if item then actor.joints.Neck.motor.C0=actor.joints.Neck.base end
+  if item or whisper then actor.joints.Neck.motor.C0=actor.joints.Neck.base end
+  if whisper then A.Susurrar(actor,smooth(lt/.22)) end
+  if opening and t>=C.Apertura.Senalar then
+   local chosen=states[role=="Madre" and "Donut_04" or "Donut_05"].initial.Position
+   local desired=CFrame.new(chosen+Vector3.yAxis*.45)*actor.root.CFrame.Rotation
+   A.Resolver(actor,desired*actor.hold:Inverse(),smooth((t-C.Apertura.Senalar)/.2)*.80)
+  end
   B.Cara(actor,scene.Caras[role])
-  local heat=role==C.Sorpresa.Rol and smooth((t-C.Sorpresa.Inicio)/.4)*.42 or 0
-  for _,entry in ipairs(actor.skin) do entry.part.Color=entry.color:Lerp(Color3.fromRGB(255,128,104),heat) end
+  local heat=role==C.Sorpresa.Rol and smooth((t-C.Sorpresa.Inicio)/.3)*.65 or 0
+  for _,entry in ipairs(actor.skin) do entry.part.Color=entry.color:Lerp(Color3.fromRGB(255,87,74),heat) end
   if item then
    local s=states[item.Donut]
    local frames=A.Marcos(actor)
@@ -174,7 +201,9 @@ Run.Heartbeat:Connect(function(dt)
  if t>=C.Sorpresa.Inicio and not confetti then
   confetti=true;fx.CFrame=CFrame.new(cast[C.Sorpresa.Rol].model.Head.Position+Vector3.yAxis*.7);emitter:Emit(18)
  end
- if raw>=C.Duracion then finished=true;remote:FireAllClients("FIN");print("[HR DONUTS] FIN: 25 segundos. R repite; P devuelve la camara; Stop termina.") end
+ if raw>=C.Duracion then finished=true;remote:FireAllClients("FIN");print("[HR DONUTS] FIN: 20 segundos. Queda un donut sin comer. R repite; P devuelve la camara; Stop termina.") end
 end)
 folder:SetAttribute("ActoresListos",true)
 print("[HR DONUTS] Madre, hija y 6 donuts preparados. Esperando la camara...")
+local lighting=game:GetService("Lighting")
+print(string.format("[HR DONUTS] Luz en Play: brillo %.2f; exposicion %.2f.",lighting.Brightness,lighting.ExposureCompensation))

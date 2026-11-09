@@ -1,7 +1,7 @@
 -- IK analitica sobre los Motor6D existentes. No reconstruye el rig.
 local A={}
 function A.SoporteMano(hand)
- local grip=hand:FindFirstChild("RightGripAttachment")
+ local grip=hand:FindFirstChild(hand.Name=="LeftHand" and "LeftGripAttachment" or "RightGripAttachment")
  return CFrame.new(grip and grip.Position or Vector3.new(0,-hand.Size.Y*.25,hand.Size.Z*.45))
 end
 -- Mismo soporte y UV de boca que el cliente facial que ya se ve correctamente.
@@ -32,13 +32,14 @@ local function rotationFor(localAxis,worldAxis,reference)
  end
  return basis(-worldAxis,reference)*basis(-localAxis,Vector3.xAxis):Inverse()
 end
-function A.Cadena(actor)
- local s,e,w=actor.joints.RightShoulder,actor.joints.RightElbow,actor.joints.RightWrist
+function A.Cadena(actor,side)
+ side=side or "Right"
+ local s,e,w=actor.joints[side.."Shoulder"],actor.joints[side.."Elbow"],actor.joints[side.."Wrist"]
  assert(s and e and w,"Falta la cadena del brazo derecho de "..actor.model.Name)
  local v1=e.base.Position-s.motor.C1.Position
  local v2=w.base.Position-e.motor.C1.Position
  assert(v1.Magnitude>0.05 and v2.Magnitude>0.05,"Longitudes de brazo no validas.")
- return {s=s,e=e,w=w,v1=v1,v2=v2,l1=v1.Magnitude,l2=v2.Magnitude}
+ return {s=s,e=e,w=w,v1=v1,v2=v2,l1=v1.Magnitude,l2=v2.Magnitude,sign=side=="Left" and -1 or 1}
 end
 function A.Marcos(actor)
  local frames={[actor.root]=actor.root.CFrame}
@@ -54,8 +55,8 @@ function A.Marcos(actor)
  end
  return frames
 end
-function A.Resolver(actor,handTarget,weight)
- local chain=actor.arm
+function A.Resolver(actor,handTarget,weight,chain)
+ chain=chain or actor.arm
  local s,e,w=chain.s,chain.e,chain.w
  local frames=A.Marcos(actor)
  local parent=frames[s.motor.Part0]
@@ -66,7 +67,7 @@ function A.Resolver(actor,handTarget,weight)
  if diff.Magnitude<0.001 then diff=actor.root.CFrame.LookVector*0.001 end
  local u=diff.Unit
  local d=math.clamp(diff.Magnitude,math.abs(chain.l1-chain.l2)+0.002,chain.l1+chain.l2-0.002)
- local pole=actor.root.CFrame.RightVector*0.8-Vector3.yAxis*0.4-actor.root.CFrame.LookVector*0.1
+ local pole=actor.root.CFrame.RightVector*(0.8*chain.sign)-Vector3.yAxis*0.4-actor.root.CFrame.LookVector*0.1
  local bend=pole-u*pole:Dot(u)
  if bend.Magnitude<0.001 then bend=u:Cross(Vector3.yAxis) end
  if bend.Magnitude<0.001 then bend=u:Cross(Vector3.xAxis) end
@@ -81,5 +82,18 @@ function A.Resolver(actor,handTarget,weight)
  for i,j in ipairs({s,e,w}) do j.motor.C0=j.motor.C0:Lerp(goals[i],weight) end
  local final=A.Marcos(actor)[w.motor.Part1]
  return final,math.max(0,diff.Magnitude-d)
+end
+function A.Susurrar(actor,weight)
+ local head=A.Marcos(actor)[actor.model.Head]
+ local mouth=A.PuntoBoca(actor.model.Head,head)
+ local errors={}
+ for i,side in ipairs({"Right","Left"}) do
+  local sign=side=="Right" and 1 or -1
+  local hand=actor.model[side.."Hand"]
+  local grip=mouth*CFrame.new(sign*.34,.03,-.16)*CFrame.Angles(math.rad(-68),0,math.rad(sign*18))
+  local _,excess=A.Resolver(actor,grip*A.SoporteMano(hand):Inverse(),weight,side=="Right" and actor.arm or actor.leftArm)
+  errors[i]=excess
+ end
+ return errors
 end
 return A

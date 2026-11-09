@@ -21,12 +21,22 @@ for _,e in ipairs(definitions) do
  if e.object:IsA("BaseScript") then e.enabled=e.object.Enabled end
 end
 assert(definitions[1].before:find("DONUTS_",1,true),"La configuracion activa no es de donuts.")
+local P=(function()
+__PREVIEW_CODE__
+end)()
+local preview=decor:FindFirstChild("RepartoDonuts")
+assert(preview,"Falta el reparto instalado.")
+for _,role in ipairs({"Madre","Hija"}) do P.Verificar(preview:FindFirstChild(role)) end
 local M=(function()
 __TABLE_CODE__
 end)()
 local layout=M.Preparar(decor)
-local backup=Storage:FindFirstChild("HR_DonutsAntesRetoPicante")
-if backup then assert(backup:GetAttribute("HR_Owner")=="HR_DONUTS_PICANTE_3","Existe otro respaldo de correccion.") end
+local V=(function()
+__ASPECT_CODE__
+end)()
+local visual=V.Preparar(decor,game:GetService("Lighting"),Storage)
+local backup=Storage:FindFirstChild("HR_DonutsAntesSusurro")
+if backup then assert(backup:GetAttribute("HR_Owner")=="HR_DONUTS_SUSURRO_4","Existe otro respaldo de correccion.") end
 local createdBackup=false
 local staging=Instance.new("Folder")
 local oldFood=decor.Donuts
@@ -39,7 +49,7 @@ __DONUT_CODE__
  local board=decor.Mesa.Tablero
  freshFood=D.Mesa(staging,{CFrame=board.CFrame+Vector3.new(0,layout.Delta,0),Size=board.Size})
  if not backup then
-  backup=Instance.new("Folder");backup.Name="HR_DonutsAntesRetoPicante";backup:SetAttribute("HR_Owner","HR_DONUTS_PICANTE_3");createdBackup=true
+  backup=Instance.new("Folder");backup.Name="HR_DonutsAntesSusurro";backup:SetAttribute("HR_Owner","HR_DONUTS_SUSURRO_4");createdBackup=true
   for _,e in ipairs(definitions) do
    local value=Instance.new("StringValue");value.Name=e.key;value.Value=e.before
    if e.enabled~=nil then value:SetAttribute("EstabaActivo",e.enabled) end
@@ -58,6 +68,7 @@ __DONUT_CODE__
   oldFood.Name="DonutsAnteriores";oldFood.Parent=backup
  else oldFood.Parent=staging end
  freshFood.Parent=decor
+ visual:Aplicar()
  for _,e in ipairs(definitions) do if e.object:IsA("BaseScript") then e.object.Enabled=true end end
 end)
 if not ok then
@@ -68,12 +79,13 @@ if not ok then
  if freshFood then freshFood:Destroy() end
  oldFood.Name=oldName;oldFood.Parent=decor
  pcall(function() layout:Revertir() end)
+ pcall(function() visual:Revertir() end)
  staging:Destroy()
  if createdBackup and backup then backup:Destroy() end
  error("[HR DONUTS] Correccion detenida y revertida: "..tostring(err))
 end
 staging:Destroy()
 game:GetService("Selection"):Set({decor.RepartoDonuts})
-print("[HR DONUTS] RETO PICANTE INSTALADO: 6 donuts, madre e hija, 25 segundos y 14 planos frontales.")
-print("[HR DONUTS] Cinco bocados en montaje rapido; sexto picante. Mordisco alineado a la boca y mesa ajustada a la cintura.")
+print("[HR DONUTS] SUSURRO INSTALADO: 20 segundos; salto, giro, susurro y penultimo donut picante.")
+print("[HR DONUTS] Luz suave sin resplandor ni focos intensos. Madre en primer plano; hija roja y enfadada de cerca.")
 print("[HR DONUTS] Guarda con Ctrl+S y pulsa F5. R repite; G muestra/oculta el texto. Las caras conservan su codigo.")

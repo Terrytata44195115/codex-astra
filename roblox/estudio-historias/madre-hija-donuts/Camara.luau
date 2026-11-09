@@ -26,6 +26,10 @@ assert(folder:GetAttribute("ActoresListos"),"[HR CAMARA DONUTS] El servidor no t
 local camera=workspace.CurrentCamera
 while not camera do Run.RenderStepped:Wait();camera=workspace.CurrentCamera end
 local saved={kind=camera.CameraType,subject=camera.CameraSubject,fov=camera.FieldOfView,cf=camera.CFrame}
+local cameraEffects={}
+for _,effect in ipairs(camera:GetChildren()) do
+ if effect:IsA("PostEffect") then cameraEffects[effect]=effect.Enabled;effect.Enabled=false end
+end
 local active=true;local connections={};local hidden={};local core={}
 for _,kind in ipairs(Enum.CoreGuiType:GetEnumItems()) do
  if kind~=Enum.CoreGuiType.All then
@@ -56,15 +60,34 @@ local maximum=Instance.new("UITextSizeConstraint");maximum.MaxTextSize=38;maximu
 local counter=Instance.new("TextLabel");counter.AnchorPoint=Vector2.new(.5,.5);counter.Position=UDim2.fromScale(.5,.65)
 counter.Size=UDim2.fromScale(.3,.06);counter.BackgroundTransparency=1;counter.TextColor3=Color3.fromRGB(255,229,99)
 counter.TextStrokeTransparency=0;counter.Font=Enum.Font.GothamBold;counter.TextSize=28;counter.Parent=gui
+local leftMask=Instance.new("Frame");leftMask.Name="MargenIzquierdo";leftMask.BackgroundColor3=Color3.new(0,0,0);leftMask.BorderSizePixel=0;leftMask.ZIndex=5;leftMask.Parent=gui
+local rightMask=leftMask:Clone();rightMask.Name="MargenDerecho";rightMask.Parent=gui
+countdown.ZIndex=20;caption.ZIndex=10;counter.ZIndex=10
 local guide=C.SubtitulosGuia
 local binding="HR_PruebaReparto_Camara"
-local startTime,priorShot,fixedFrame,fixedFocus,fittedAspect
+local startTime,priorShot,fixedFrame,fixedFocus,fittedAspect,solo
+local actorVisibility={}
+for role,model in pairs(actors) do
+ actorVisibility[role]={}
+ for _,p in ipairs(model:GetDescendants()) do
+  if p:IsA("BasePart") then table.insert(actorVisibility[role],{part=p,value=p.LocalTransparencyModifier}) end
+ end
+end
+local function showRoles(roles)
+ local visible={}
+ for _,role in ipairs(roles) do visible[role]=true end
+ for role,list in pairs(actorVisibility) do
+  for _,e in ipairs(list) do if e.part.Parent then e.part.LocalTransparencyModifier=visible[role] and e.value or 1 end end
+ end
+end
 local function restore()
  if not active then return end
  active=false;Run:UnbindFromRenderStep(binding)
  for _,c in ipairs(connections) do c:Disconnect() end
  for p,value in pairs(hidden) do if p.Parent then p.LocalTransparencyModifier=value end end
+ showRoles({"Madre","Hija"})
  for kind,value in pairs(core) do pcall(function() StarterGui:SetCoreGuiEnabled(kind,value) end) end
+ for effect,value in pairs(cameraEffects) do if effect.Parent then effect.Enabled=value end end
  camera.CameraType=saved.kind;camera.CameraSubject=saved.subject or (player.Character and player.Character:FindFirstChildOfClass("Humanoid"))
  camera.FieldOfView=saved.fov;camera.CFrame=saved.cf;gui:Destroy()
  print("[HR CAMARA DONUTS] Camara del jugador restaurada. Stop termina la prueba.")
@@ -76,7 +99,7 @@ table.insert(connections,Input.InputBegan:Connect(function(input,processed)
  elseif input.KeyCode==Enum.KeyCode.G then guide=not guide end
 end))
 table.insert(connections,remote.OnClientEvent:Connect(function(message,value)
- if message=="START" and type(value)=="number" and startTime~=value then startTime=value;priorShot=nil end
+ if message=="START" and type(value)=="number" and startTime~=value then startTime=value;priorShot=nil;solo=nil end
 end))
 local function box(points,cf,half)
  for _,x in ipairs({-1,1}) do for _,y in ipairs({-1,1}) do for _,z in ipairs({-1,1}) do
@@ -87,21 +110,30 @@ local function pointsForBase()
  local points={}
  for _,role in ipairs({"Madre","Hija"}) do
   local model=actors[role]
-  for _,part in ipairs(model:GetDescendants()) do
-   if part:IsA("BasePart") and part.Name~="HumanoidRootPart" then
-    local n=part.Name
-    local accessory=part.Parent:IsA("Accessory")
-    if n=="Head" or n:find("Torso") or accessory then box(points,part.CFrame,part.Size/2) end
-   end
-  end
+  local head=model.Head
+  box(points,CFrame.new(head.Position+Vector3.yAxis*.05),Vector3.new(.82,1.0,.65))
+  table.insert(points,model.HumanoidRootPart.Position-Vector3.yAxis*.6)
  end
  -- La mesa ocupa el primer termino; los dos actores quedan juntos al fondo.
  for _,name in ipairs({"Donut_01","Donut_03","Donut_04","Donut_06"}) do
-  box(points,food[name]:GetPivot(),Vector3.new(.8,.25,.8))
+  table.insert(points,food[name]:GetPivot().Position)
  end
  return points
 end
 local basePoints=pointsForBase()
+local function prepareSolo(shot,aspect)
+ local actor=actors[shot.Roles[1]]
+ local points={};local head=actor.Head
+ if shot.Tipo=="REACCION" then
+  box(points,CFrame.new(head.Position+Vector3.yAxis*.2),Vector3.new(1.45,1.30,.65))
+  table.insert(points,actor.HumanoidRootPart.Position-Vector3.yAxis*.7)
+ else
+  box(points,CFrame.new(head.Position-Vector3.yAxis*.08),Vector3.new(.75,1.1,.60))
+ end
+ local cf,focus=C.EncuadreFrontal(points,folder:GetAttribute("Frente"),aspect,shot.Fov,1.06,.04)
+ local root=actor.HumanoidRootPart
+ return {anchor=root,relative=root.CFrame:ToObjectSpace(cf),relativeFocus=root.CFrame:PointToObjectSpace(focus),fixed=shot.Tipo=="REACCION",cf=cf,focus=focus}
+end
 Run:BindToRenderStep(binding,Enum.RenderPriority.Camera.Value+10,function()
  if not active then return end
  local raw=startTime and workspace:GetServerTimeNow()-startTime or -C.Preparacion
@@ -110,22 +142,32 @@ Run:BindToRenderStep(binding,Enum.RenderPriority.Camera.Value+10,function()
  local shot,index=C.PlanoEn(t)
  local aspect=camera.ViewportSize.X/math.max(1,camera.ViewportSize.Y)
  if not fixedFrame or fittedAspect~=aspect then
-  fixedFrame,fixedFocus=C.EncuadreFrontal(basePoints,folder:GetAttribute("Frente"),aspect)
+  fixedFrame,fixedFocus=C.EncuadreFrontal(basePoints,folder:GetAttribute("Frente"),aspect,50,1.03,.20)
   fittedAspect=aspect
+  priorShot=nil
  end
  if priorShot~=index then
   priorShot=index
+  showRoles(shot.Roles)
+  solo=#shot.Roles==1 and prepareSolo(shot,aspect) or nil
   print("[HR CAMARA DONUTS] Plano "..index.." / "..shot.Tipo)
  end
- -- Una sola posicion y un solo eje durante toda la toma. El zoom solo cambia el FOV.
+ -- Los conjuntos usan un unico eje; los primeros planos tambien son frontales.
  camera.CameraType=Enum.CameraType.Scriptable;camera.FieldOfView=shot.Fov
- camera.CFrame=fixedFrame;camera.Focus=CFrame.new(fixedFocus)
+ if solo then
+  local cf=solo.fixed and solo.cf or solo.anchor.CFrame*solo.relative
+  local focus=solo.fixed and solo.focus or solo.anchor.CFrame:PointToWorldSpace(solo.relativeFocus)
+  camera.CFrame=cf;camera.Focus=CFrame.new(focus)
+ else camera.CFrame=fixedFrame;camera.Focus=CFrame.new(fixedFocus) end
+ local side=math.max(0,(1-C.FrenteSeguro/aspect)/2)
+ leftMask.Size=UDim2.fromScale(side,1);rightMask.Size=UDim2.fromScale(side,1);rightMask.Position=UDim2.fromScale(1-side,0)
+ leftMask.Visible=C.MarcoVertical;rightMask.Visible=C.MarcoVertical
  local scene=C.EscenaEn(t)
- counter.Visible=guide and raw>=4.5 and raw<17
+ counter.Visible=guide and raw>=C.MontajeInicio and raw<15.3
  if counter.Visible then
   local remaining=0
   for _,m in ipairs(food:GetChildren()) do if m:IsA("Model") and m:GetAttribute("HR_Visible")~=false then remaining+=1 end end
-  counter.Text=raw>=C.Sorpresa.Inicio and "¡PICANTE!" or tostring(remaining).." dónuts"
+  counter.Text=raw>=C.Sorpresa.Inicio and "¡PICANTE!" or tostring(remaining)..(remaining==1 and " dónut" or " dónuts")
  end
  caption.Visible=guide and raw>=0 and raw<C.Duracion and scene.Voz~=nil
  if caption.Visible then

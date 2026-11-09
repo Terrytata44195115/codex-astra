@@ -15,9 +15,9 @@ function D.Crear(nombre,parent,cf,seed)
  for i=0,D.Segmentos-1 do
   local theta=i*math.pi*2/D.Segmentos
   local x,z=math.cos(theta)*0.505,math.sin(theta)*0.505
-  local dough=piece("Masa_"..i,Vector3.new(0.43,0.36,0.43),CFrame.new(x,0,z),Color3.fromRGB(210,145,82),theta)
+  local dough=piece("Masa_"..i,Vector3.new(0.43,0.36,0.43),CFrame.new(x,0,z),Color3.fromRGB(188,136,87),theta)
   dough.Shape=Enum.PartType.Ball
-  local icing=piece("Glaseado_"..i,Vector3.new(0.425,0.125,0.425),CFrame.new(x,0.145,z),Color3.fromRGB(255,151,191),theta)
+  local icing=piece("Glaseado_"..i,Vector3.new(0.425,0.125,0.425),CFrame.new(x,0.145,z),Color3.fromRGB(240,205,211),theta)
   icing.Shape=Enum.PartType.Ball
  end
  local colors={Color3.fromRGB(255,235,109),Color3.fromRGB(104,211,244),Color3.fromRGB(255,255,246),Color3.fromRGB(182,132,234)}
@@ -35,8 +35,9 @@ function D.Mesa(parent,board)
  for _,z in ipairs({2.0,-2.5}) do
   for _,x in ipairs({-2.1,-.5,1.1}) do
    index+=1
-   local donut=D.Crear(string.format("Donut_%02d",index),folder,board.CFrame*CFrame.new(x,board.Size.Y/2+0.185,z),index)
-   donut:SetAttribute("HR_Picante",index==6)
+   local label=index==5 and 6 or index==6 and 5 or index
+   local donut=D.Crear(string.format("Donut_%02d",label),folder,board.CFrame*CFrame.new(x,board.Size.Y/2+0.185,z),label)
+   donut:SetAttribute("HR_Picante",label==5)
   end
  end
  folder.Parent=parent;return folder

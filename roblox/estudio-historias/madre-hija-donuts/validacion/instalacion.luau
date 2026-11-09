@@ -11,13 +11,14 @@ mt.__index=function(a,k)
  for _,x in ipairs(a.children) do if x.Name==k then return x end end
 end
 mt.__newindex=function(a,k,v)
+ if a.data.rejectOnce and a.data.rejectProperty==k then a.data.rejectOnce=false;error("injected visual property write failure") end
  if k=="Parent" then detach(a);a.data.Parent=v;if v then table.insert(v.children,a) end else a.data[k]=v end
 end
 Instance={new=function(class)
- return setmetatable({data={Name=class,ClassName=class,Source="",Enabled=true,CFrame=CFrame.identity,Size=Vector3.new(1,1,1)},children={},attrs={}},mt)
+ return setmetatable({data={Name=class,ClassName=class,Source="",Enabled=true,CFrame=CFrame.identity,Size=Vector3.new(1,1,1),Color=Color3 and Color3.fromRGB(163,163,163),Reflectance=0},children={},attrs={}},mt)
 end}
 function methods:IsA(class)
- return self.ClassName==class or class=="BaseScript" and (self.ClassName=="Script" or self.ClassName=="LocalScript") or class=="BasePart" and (self.ClassName=="Part" or self.ClassName=="MeshPart")
+ return self.ClassName==class or class=="BaseScript" and (self.ClassName=="Script" or self.ClassName=="LocalScript") or class=="BasePart" and (self.ClassName=="Part" or self.ClassName=="MeshPart") or class=="Light" and (self.ClassName=="PointLight" or self.ClassName=="SurfaceLight") or class=="PostEffect" and (self.ClassName=="BloomEffect" or self.ClassName=="ColorCorrectionEffect")
 end
 function methods:FindFirstChild(name) for _,x in ipairs(self.children) do if x.Name==name then return x end end end
 function methods:FindFirstChildOfClass(name) for _,x in ipairs(self.children) do if x:IsA(name) then return x end end end
@@ -62,7 +63,15 @@ local OWNER="HR_PRUEBA_REPARTO_1"
 local function setup(failAt)
  workspace=make("Model","Workspace")
  local svc={RunService={IsRunning=function() return false end},Selection={Set=function() end}}
- for _,name in ipairs({"ServerStorage","ReplicatedStorage","ServerScriptService","StarterPlayer"}) do svc[name]=make("Folder",name) end
+ for _,name in ipairs({"ServerStorage","ReplicatedStorage","ServerScriptService","StarterPlayer","Lighting"}) do svc[name]=make("Folder",name) end
+ local lighting=svc.Lighting
+ lighting.Brightness=3;lighting.ExposureCompensation=1;lighting.ClockTime=14.5
+ lighting.Ambient=Color3.fromRGB(70,70,70);lighting.OutdoorAmbient=lighting.Ambient
+ lighting.EnvironmentDiffuseScale=1;lighting.EnvironmentSpecularScale=1;lighting.GlobalShadows=true
+ lighting.ColorShift_Top=Color3.fromRGB(20,15,20);lighting.ColorShift_Bottom=lighting.ColorShift_Top
+ lighting.FogStart=0;lighting.FogEnd=100000
+ make("BloomEffect","Bloom",lighting).Enabled=true
+ local atmosphere=make("Atmosphere","Atmosphere",lighting);atmosphere.Density=.3;atmosphere.Haze=1;atmosphere.Glare=.7
  local sps=make("Folder","StarterPlayerScripts",svc.StarterPlayer)
  local root=make("Folder","HR_PruebaReparto",svc.ReplicatedStorage,OWNER)
  make("ModuleScript","Interpretacion",root).Source="preserve poses"
@@ -79,10 +88,10 @@ local function setup(failAt)
  for _,role in ipairs({"Madre","Hija"}) do
   local m=make("Model",role,templates)
   local h=make("Humanoid","Humanoid",m);h.RigType=1
-  for _,n in ipairs({"HumanoidRootPart","Head","LeftFoot","RightHand","LowerTorso","UpperTorso","RightUpperArm","RightLowerArm","LeftUpperArm","LeftLowerArm"}) do
+  for _,n in ipairs({"HumanoidRootPart","Head","LeftFoot","RightHand","LeftHand","LowerTorso","UpperTorso","RightUpperArm","RightLowerArm","LeftUpperArm","LeftLowerArm"}) do
    local p=make("Part",n,m);p.CFrame=CFrame.new(0,n=="LeftFoot" and .5 or 3,0)
   end
-  for _,j in ipairs({{"Root","HumanoidRootPart","LowerTorso"},{"Waist","LowerTorso","UpperTorso"},{"Neck","UpperTorso","Head"},{"RightShoulder","UpperTorso","RightUpperArm"},{"RightElbow","RightUpperArm","RightLowerArm"},{"RightWrist","RightLowerArm","RightHand"},{"LeftShoulder","UpperTorso","LeftUpperArm"},{"LeftElbow","LeftUpperArm","LeftLowerArm"}}) do
+  for _,j in ipairs({{"Root","HumanoidRootPart","LowerTorso"},{"Waist","LowerTorso","UpperTorso"},{"Neck","UpperTorso","Head"},{"RightShoulder","UpperTorso","RightUpperArm"},{"RightElbow","RightUpperArm","RightLowerArm"},{"RightWrist","RightLowerArm","RightHand"},{"LeftShoulder","UpperTorso","LeftUpperArm"},{"LeftElbow","LeftUpperArm","LeftLowerArm"},{"LeftWrist","LeftLowerArm","LeftHand"}}) do
    local motor=make("Motor6D",j[1],m[j[3]]);motor.Part0=m[j[2]];motor.Part1=m[j[3]]
   end
   local link=make("ObjectValue",role,roles);link.Value=m
@@ -90,6 +99,9 @@ local function setup(failAt)
  local decor=make("Model","HR_RetoDonuts",workspace,"HR_DONUTS_DECORADO_1")
  decor:SetAttribute("HR_SueloLuzAjustados",true);decor:SetAttribute("HR_Origen",CFrame.new(65,2,0))
  local room=make("Model","Sala",decor);local floor=make("Part","Suelo",room);floor.Position=Vector3.new(65,1.85,0);floor.Size=Vector3.new(28,.3,24)
+ local ceiling=make("Part","Techo",room)
+ local overhead=make("SurfaceLight","HR_LuzTecho",ceiling);overhead.Brightness=2.2
+ local fill=make("Part","HR_RellenoFrontal",room);local frontLight=make("PointLight","HR_LuzFrontal",fill);frontLight.Brightness=1.4
  local mesa=make("Model","Mesa",decor);local board=make("Part","Tablero",mesa);board.Size=Vector3.new(14,.45,7);board.CFrame=CFrame.new(65,5,0)
  make("Folder","Marcas",decor)
  local calls=0
@@ -160,13 +172,19 @@ do
  local face=f.faces.Source;local poses=f.root.Interpretacion.Source
  patch()
  assert(#f.decor.Donuts.children==6)
- local archive=f.svc.ServerStorage.HR_DonutsAntesRetoPicante
+ local archive=f.svc.ServerStorage.HR_DonutsAntesSusurro
  assert(archive and #archive.DonutsAnteriores.children==18)
  assert(f.faces.Source==face and f.root.Interpretacion.Source==poses)
- assert(f.decor.Donuts.Donut_06:GetAttribute("HR_Picante"))
+ assert(f.decor.Donuts.Donut_05:GetAttribute("HR_Picante") and not f.decor.Donuts.Donut_06:GetAttribute("HR_Picante"))
+ assert(not f.svc.Lighting.Bloom.Enabled and f.svc.Lighting.ExposureCompensation<0)
+ assert(not f.decor.Sala.Techo.HR_LuzTecho.Enabled and not f.decor.Sala.HR_RellenoFrontal.HR_LuzFrontal.Enabled)
+ assert(f.svc.Lighting.Atmosphere.Density==0)
+ local appearance=f.svc.ServerStorage.HR_DonutsAspectoOriginal
+ assert(appearance and appearance:GetAttribute("HR_Owner")=="HR_DONUTS_ASPECTO_4")
  local saved=archive.DonutsAnteriores;local height=f.decor.Mesa.Tablero.Position.Y
  patch()
- assert(f.svc.ServerStorage.HR_DonutsAntesRetoPicante.DonutsAnteriores==saved)
+ assert(f.svc.ServerStorage.HR_DonutsAntesSusurro.DonutsAnteriores==saved)
+ assert(f.svc.ServerStorage.HR_DonutsAspectoOriginal==appearance)
  assert(#f.decor.Donuts.children==6 and math.abs(f.decor.Mesa.Tablero.Position.Y-height)<.00001)
 end
 for n=1,5 do
@@ -177,6 +195,17 @@ for n=1,5 do
  assert(f.config.Source==before[1] and f.root.Donuts.Source==before[2] and f.root.BrazoDonut.Source==before[3] and f.server.Source==before[4] and f.camera.Source==before[5])
  assert(f.server.Enabled and f.camera.Enabled and f.decor.Donuts==food and #food.children==6)
  assert(f.faces.Source==face and math.abs(f.decor.Mesa.Tablero.Position.Y-height)<.00001)
- assert(not f.svc.ServerStorage.HR_DonutsAntesRetoPicante)
+ assert(not f.svc.ServerStorage.HR_DonutsAntesSusurro and not f.svc.ServerStorage.HR_DonutsAspectoOriginal)
+ assert(f.svc.Lighting.ExposureCompensation==1 and f.svc.Lighting.Bloom.Enabled)
 end
-return "PASS: 6 static donuts, two actors, face source preserved, repeat without duplicates, restoration, foreign face rejection; 18-to-6 update and waist-height calibration idempotent; all 21 injected source-write failures rolled back."
+do
+ local f=setup();install()
+ local food=f.decor.Donuts;local face=f.faces.Source;local source=f.server.Source
+ f.svc.Lighting.rejectProperty="ExposureCompensation";f.svc.Lighting.rejectOnce=true
+ assert(not pcall(patch))
+ assert(f.server.Source==source and f.faces.Source==face and f.decor.Donuts==food)
+ assert(f.svc.Lighting.Brightness==3 and f.svc.Lighting.ExposureCompensation==1 and f.svc.Lighting.Bloom.Enabled)
+ assert(f.decor.Sala.Techo.HR_LuzTecho.Enabled)
+ assert(not f.svc.ServerStorage.HR_DonutsAspectoOriginal and not f.svc.ServerStorage.HR_DonutsAntesSusurro)
+end
+return "PASS: 6 donuts, spicy fifth, face source preserved, repeat/restore; exposure reduced, bloom and both local lights disabled with first-state backup; all 21 source-write failures plus a partial lighting-write failure rolled back."

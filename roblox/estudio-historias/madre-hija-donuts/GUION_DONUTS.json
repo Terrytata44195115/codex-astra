@@ -1,66 +1,61 @@
 {
-  "duracion": 25,
+  "duracion": 20,
   "donuts": 6,
+  "picante": 5,
   "escenas": [
     {
       "inicio": 0.0,
-      "fin": 2.5,
+      "fin": 2.4,
       "voz": "Hija",
-      "texto": "¡A que me como los seis!"
+      "texto": "¡Mamá, mira esos dónuts!"
     },
     {
-      "inicio": 2.5,
-      "fin": 4.5,
+      "inicio": 2.4,
+      "fin": 6.1,
       "voz": "Madre",
-      "texto": "El último no lo toques."
+      "texto": "Hay uno que pica, pero mi hija no lo sabe."
     },
     {
-      "inicio": 4.5,
-      "fin": 8.5,
+      "inicio": 6.1,
+      "fin": 7.6,
+      "voz": "Hija",
+      "texto": "¡Me los voy a comer!"
+    },
+    {
+      "inicio": 7.6,
+      "fin": 10.4,
       "voz": null,
       "texto": ""
     },
     {
-      "inicio": 8.5,
-      "fin": 10.5,
-      "voz": "Hija",
-      "texto": "¡Solo queda uno!"
-    },
-    {
-      "inicio": 10.5,
+      "inicio": 10.4,
       "fin": 12.5,
-      "voz": "Madre",
-      "texto": "Te he dicho que ese no."
+      "voz": "Hija",
+      "texto": "¡Qué ricos!"
     },
     {
       "inicio": 12.5,
-      "fin": 14.7,
-      "voz": "Hija",
-      "texto": "¡Pues también me lo como!"
-    },
-    {
-      "inicio": 14.7,
-      "fin": 17.0,
+      "fin": 13.85,
       "voz": "Hija",
       "texto": "¡Mamá, esto pica!"
     },
     {
-      "inicio": 17.0,
+      "inicio": 13.85,
+      "fin": 15.3,
+      "voz": null,
+      "texto": ""
+    },
+    {
+      "inicio": 15.3,
+      "fin": 17.6,
+      "voz": "Madre",
+      "texto": "¿Te guardo el último?"
+    },
+    {
+      "inicio": 17.6,
       "fin": 20.0,
-      "voz": "Madre",
-      "texto": "Ese era el mío. ¡Extra picante!"
-    },
-    {
-      "inicio": 20.0,
-      "fin": 22.5,
       "voz": "Hija",
-      "texto": "¡Agua, agua!"
-    },
-    {
-      "inicio": 22.5,
-      "fin": 25.0,
-      "voz": "Madre",
-      "texto": "¿Te guardo otro?"
+      "texto": "¡Ni loca! ¡Agua!"
     }
   ]
 }
